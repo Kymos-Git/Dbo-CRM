@@ -1,0 +1,116 @@
+/* Sidebar container */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 70vw;
+  max-width: 300px;
+  height: var(--app-height);
+  background: var(--bg);
+  color: var(--text);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+  z-index: 1000;
+  padding-top: 2.5rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(10px);
+  border-right: 1px solid rgba(0,0,0,0.05);
+}
+
+/* Sidebar open */
+.sidebar.open {
+  transform: translateX(0);
+}
+
+/* Toggle button */
+.button {
+  position: fixed;
+  top: 5%;
+  left: 100%;
+  transform: translateY(-50%);
+  z-index: 1001;
+  height: 40px;
+  width: 28px;
+  background: var(--primary);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+  font-size: 1.4rem;
+  user-select: none;
+  box-shadow: 0 4px 8px rgba(74, 144, 226, 0.4);
+  transition: background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.button:hover,
+.button:focus {
+  background: var(--primary);
+  box-shadow: 0 6px 12px rgba(53, 122, 189, 0.6);
+  outline: none;
+  color: white;
+}
+
+/* Navigation links container */
+.nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1rem 2rem;
+}
+
+/* Each link */
+.link {
+  text-decoration: none;
+  color: var(--text);
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.7rem 1.25rem;
+  border-radius: 12px;
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    transform 0.2s ease;
+  user-select: none;
+  font-weight: 500;
+}
+
+.link:hover,
+.link:focus {
+  background-color: #e8f0fe;
+  color: var(--primary);
+  transform: scale(1.05);
+  outline: none;
+}
+
+/* Active link styling */
+.link.active {
+  background-color: var(--primary);
+  color: var(--bg-alt);
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(42, 86, 198, 0.4);
+  transform: scale(1.07);
+}
+
+/* Icon inside links */
+.icon {
+  font-size: 1.4rem;
+  user-select: none;
+  color: var(--primary);
+  transition: color 0.25s ease;
+}
+
+.link.active .icon {
+  color: var(--bg-alt);
+}
+
+.sb-account{
+  position: absolute;
+  bottom: 2%;
+  right: 2%;
+}

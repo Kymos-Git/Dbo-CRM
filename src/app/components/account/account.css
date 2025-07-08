@@ -1,0 +1,5 @@
+.ac-wrapper{
+    background-color: var(--bg-alt);
+    color: var(--text);
+    border: 1px solid var(--primary);
+}
