@@ -1,0 +1,21 @@
+.cd-page {
+    background-color: var(--bg);
+    color: var(--text);
+}
+.cd-card {
+    background-color: var(--bg);
+    border: 1px solid var(--border);
+}
+.cd-title {
+    color: var(--primary-dark);
+}
+.cd-fields {
+    color: var(--text);
+}
+.cd-field-row {}
+.cd-field-label {}
+.cd-field-link:hover {
+    color: var(--primary);
+    text-decoration: underline;
+}
+.cd-field-value {}

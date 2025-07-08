@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+
+:root { 
+  --bg: #FFFFFF ;
+  --bg-alt: #f2f3f4;
+  --primary:#0cc6ff ;
+  --primary-dark: #1077BC;
+  --primary-hover: #189AB4;
+  --text: #1A1A1A;
+  --text-muted: #A1CDE8;
+  --border: #42BCE1;
+  --opposite: #1A1A1A;  
+  --pulse-dark: #1077BC;
+  --pulse: #58A0D3;
+
+  --font-family: Verdana, sans-serif;
+}
+
+.dark {
+  --bg: #191919;
+  --bg-alt: #383838;
+  --primary:#ffd700;
+  --primary-dark:#fcd600;
+  --text: #F0F0F0;
+  --text-muted: #7FB3D5;
+  --border: #ffd700;
+  --opposite: #FFFFFF;
+  --pulse-dark: #ffd700;
+  --pulse: #ffd700;
+}
+
+body,
+html {
+  height: 100svh;
+  width: 100vw;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+
+  background-color: var(--bg);
+}
+
+
+/* Rende invisibile la scrollbar */
+::-webkit-scrollbar {
+  width: 1px;
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}

@@ -1,0 +1,31 @@
+.ex-wrapper {
+    
+}
+
+.ex-label {
+    color: var(--primary);
+    border: var(--primary);
+}
+.ex-input {
+    background-color: var(--bg-alt);
+    color: var(--text);
+}
+.ex-backdrop {}
+
+.ex-modal {
+    background-color: var(--bg);
+    border: 1px solid var(--primary);
+}
+
+.ex-modal-label {}
+
+.ex-textarea {
+    background-color: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--primary);
+}
+
+.ex-expanded-input {
+    border: 1px solid var(--primary);
+}
+

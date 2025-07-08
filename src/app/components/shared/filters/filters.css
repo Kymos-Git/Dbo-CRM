@@ -1,0 +1,35 @@
+.ft-container {
+    
+}
+
+.ft-form {
+}
+
+.ft-filter-wrapper {
+
+    
+}
+
+.ft-label-text {
+    color: var(--primary);
+}
+
+.ft-input {
+    color: var(--text);
+}
+.ft-input:focus{
+    border: 1px solid var(--primary);
+}
+
+.ft-select {
+    fill: var(--bg-alt);
+    color: var(--text);
+}
+.ft-select:focus{
+    border: 1px solid var(--primary);
+}
+
+.ft-select option{
+    background-color: var(--bg);
+    color: var(--text);
+}

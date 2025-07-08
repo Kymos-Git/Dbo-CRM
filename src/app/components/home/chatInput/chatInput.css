@@ -1,0 +1,43 @@
+.ct-container {
+    background-color: transparent;
+}
+
+.ct-wrapper {
+    background-color: var(--bg);
+}
+
+.ct-inputWrapper {
+
+}
+
+.ct-textarea {
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+.ct-placeholder {
+    
+}
+
+.ct-button-icon {
+    color: var(--text);
+    background-color: var(--bg-alt);
+}
+
+.ct-tipsWrapper {
+    
+}
+
+.ct-dropdown {
+    background-color: var(--bg-alt);
+    color: var(--text);
+}
+
+.ct-dropdown-item {
+   
+}
+
+.ct-button-secondary {
+
+}
+
