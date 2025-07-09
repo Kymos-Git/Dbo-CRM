@@ -9,13 +9,14 @@
 
 "use client";
 
-import styles from "@/app/components/login/login.module.css";
+
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { LoadingComponent } from "../loading/loading";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/authContext";
 import { useTheme } from "next-themes";
+import "./login.css"
 
 export function Login() {
   // Stato per username inserito dall’utente
@@ -99,7 +100,7 @@ export function Login() {
 
   return (
     <form
-      className={`${styles.container} ${loading ? styles.loading : ""}`}
+      className={`container ${loading ? 'loading' : ""}`}
       onSubmit={handleSubmit} // Gestisce submit del form
     >
       {/* Logo dinamico in base al tema */}
@@ -109,13 +110,13 @@ export function Login() {
         width={150}
         height={80}
         style={{ borderRadius: 25 }}
-        className={styles.icon}
+        className='icon'
         priority
       />
-      <h1 className={styles.title}>Login</h1>
+      <h1 className='title'>Login</h1>
 
       {/* Input username */}
-      <div className={styles.username}>
+      <div className='username'>
         <h3>username</h3>
         <input
           type="text"
@@ -126,7 +127,7 @@ export function Login() {
       </div>
 
       {/* Input password */}
-      <div className={styles.password}>
+      <div className='password'>
         <h3>password</h3>
         <input
           type="password"
@@ -138,11 +139,11 @@ export function Login() {
 
       {/* Se è in caricamento mostra componente Loading, altrimenti il pulsante submit */}
       {loading ? (
-        <div className={styles.loadingComp}>
+        <div className='loadingComp'>
           <LoadingComponent />
         </div>
       ) : (
-        <button type="submit" className={styles.btnAccedi}>
+        <button type="submit" className='btnAccedi'>
           Accedi
         </button>
       )}

@@ -10,7 +10,7 @@ import { ReactNode, useEffect } from "react";
 import Sidebar from "../components/sidebar/sidebar";
 import { RouteLoadingProvider } from "../context/routeContext";
 import RouteLoader from "../components/routeLoader/routeLoader";
-import { AuthProvider } from "../context/authContext";
+
 
   
 
