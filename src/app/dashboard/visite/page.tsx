@@ -22,7 +22,6 @@ import GenericFilters, {
 import { useEffect, useState } from "react";
 import { FixedSizeGrid as Grid, GridChildComponentProps } from "react-window";
 import { Visita } from "@/app/interfaces/interfaces";
-import "./visite.css";
 import { getVisite } from "@/app/services/api";
 import { LoadingComponent } from "@/app/components/loading/loading";
 import { useAuth } from "@/app/context/authContext";

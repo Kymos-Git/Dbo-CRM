@@ -18,7 +18,6 @@ import { Mail, Phone, Building } from "lucide-react";
 import { useEffect, useState } from "react";
 import { FixedSizeGrid as Grid, GridChildComponentProps } from "react-window";
 import { ProtectedRoute } from "@/app/auth/ProtectedRoute";
-import "./contatti.css";
 import { Contatto } from "@/app/interfaces/interfaces";
 import { getContatti } from "@/app/services/api";
 import { LoadingComponent } from "@/app/components/loading/loading";
@@ -34,8 +33,8 @@ const ContattiVirtualGrid = () => {
   const [error, setError] = useState<string | null>(null);
 
   const { fetchWithAuth } = useAuth();
-  const searchParams = useSearchParams();
-  const initialRagSoc = searchParams.get("ragSoc") || "";
+    const searchParams = useSearchParams();
+    const initialRagSoc = searchParams.get("ragSoc") || "";
 
   const [filtersValues, setFiltersValues] = useState<Record<string, string>>({
     "Rag.Soc.": initialRagSoc,
@@ -137,7 +136,7 @@ const ContattiVirtualGrid = () => {
       <GenericFilters
         filters={filtersConfig}
         onChange={handleFiltersChange}
-        initialValues={{ "Rag.Soc.": initialRagSoc }}
+        initialValues={{ "nome": initialRagSoc }}
       />
 
       {loading && <LoadingComponent />}
@@ -166,6 +165,5 @@ const ContattiVirtualGrid = () => {
 export default ContattiVirtualGrid;
 
 const filtersConfig: FilterConfig[] = [
-  { type: "text", label: "Rag. Soc.", name: "Rag.Soc." },
-  { type: "text", label: "Nome", name: "nome", placeholder: "Cerca nome..." },
+  { type: "text", label: "Nome/Rag.Soc", name: "nome", placeholder: "Cerca nome..." },
 ];

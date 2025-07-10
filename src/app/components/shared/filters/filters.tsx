@@ -65,7 +65,7 @@ export default function GenericFilters({
           >
             <label
               htmlFor={filter.name}
-              className="ft-label font-semibold mb-1 text-xs leading-tight"
+              className="ft-label font-semibold mb-1 text-m leading-tight"
               style={{ flexShrink: 0 }}
             >
               <span className="ft-label-text">{filter.label}</span>
@@ -78,7 +78,7 @@ export default function GenericFilters({
                 placeholder={filter.placeholder}
                 value={values[filter.name]}
                 onChange={(e) => handleChange(filter.name, e.target.value)}
-                className="ft-input w-full p-2 rounded-md border text-xs leading-snug focus:outline-none focus:shadow-md"
+                className="ft-input w-full p-2  border-b-1 border-b-gray-400 text-s leading-snug focus:outline-none focus:shadow-md "
                 style={{ minHeight: 32 }}
               />
             )}
@@ -89,7 +89,7 @@ export default function GenericFilters({
                 type="date"
                 value={values[filter.name]}
                 onChange={(e) => handleChange(filter.name, e.target.value)}
-                className="ft-input w-full p-2 rounded-md border text-xs leading-snug focus:outline-none focus:border-blue-600 focus:shadow-md"
+                className="ft-input w-full p-2 border-b-1  border-b-gray-400 text-s leading-snug focus:outline-none  focus:shadow-md"
                 style={{ minHeight: 32 }}
               />
             )}
@@ -99,7 +99,7 @@ export default function GenericFilters({
                 id={filter.name}
                 value={values[filter.name]}
                 onChange={(e) => handleChange(filter.name, e.target.value)}
-                className="ft-select w-full p-2 rounded-md border text-xs leading-snug focus:outline-none focus:border-blue-600 focus:shadow-md"
+                className="ft-select w-full p-2 border-b-1 border-b-gray-400 text-s leading-snug focus:outline-nonefocus:shadow-md"
                 style={{ minHeight: 32 }}
               >
                 <option value="">Seleziona</option>

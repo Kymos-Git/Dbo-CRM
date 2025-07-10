@@ -1,14 +1,3 @@
-.cl-zoom{
+.gr{
     background-color: var(--bg);
-    border: 1px solid var(--primary);
-}
-
-.cl-btn{
-    color: var(--primary);
-}
-.cl-btnCnt{
-    color: var(--text);
-    border: 1px solid var(--primary-dark);
-    background-color: var(--bg);
-    
 }

@@ -25,11 +25,10 @@ const ClientiVirtualGrid = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { fetchWithAuth,isReady } = useAuth();
+  const { fetchWithAuth, isReady } = useAuth();
 
   useEffect(() => {
-
-    if(!isReady) return;
+    if (!isReady) return;
 
     async function fetchClienti() {
       try {
@@ -124,8 +123,12 @@ const ClientiVirtualGrid = () => {
     const encoded = encodeURIComponent(address);
     return `https://www.google.com/maps/search/?api=1&query=${encoded}`;
   }
-
   function mapRawToCliente(raw: any): Cliente {
+    let note = "";
+    if (raw.NoteAmn && typeof raw.NoteAmn === "string") {
+      note = raw.NoteAmn.replace(/\n/g, " \n");
+    }
+
     return {
       idCliente: raw.IdCliente,
       ragSocCompleta: raw.RagSoc,
@@ -137,7 +140,7 @@ const ClientiVirtualGrid = () => {
       idPaese: raw.IdPaese,
       tel: raw.Tel,
       email: raw.EMail,
-      noteCliente: raw.NoteAmn,
+      noteCliente: note,
       Sem1: raw.Sem1 || 0,
       Sem2: raw.Sem2 || 0,
       Sem3: raw.Sem3 || 0,
@@ -154,17 +157,20 @@ const ClientiVirtualGrid = () => {
       {!loading && !error && clientiCRM.length === 0 && (
         <p>Nessun cliente trovato.</p>
       )}
+
       {!loading && !error && clientiCRM.length > 0 && (
-        <Grid
-          height={windowHeight * 0.8}
-          width={windowWidth}
-          columnCount={columnCount}
-          columnWidth={CARD_WIDTH}
-          rowCount={rowCount}
-          rowHeight={CARD_HEIGHT}
-        >
-          {Cell}
-        </Grid>
+        <div className="gr">
+          <Grid
+            height={windowHeight * 0.8}
+            width={windowWidth * 0.92}
+            columnCount={columnCount}
+            columnWidth={CARD_WIDTH}
+            rowCount={rowCount}
+            rowHeight={CARD_HEIGHT}
+          >
+            {Cell}
+          </Grid>
+        </div>
       )}
     </ProtectedRoute>
   );

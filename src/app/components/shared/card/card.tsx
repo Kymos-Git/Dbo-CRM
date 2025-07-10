@@ -9,10 +9,11 @@
 "use client";
 
 import Link from "next/link";
-import React, { useState } from "react";
+import React, {  useEffect, useState } from "react";
 import "./card.css"; // Import CSS per la card
 import Detail from "../detail/detail";
 import { Cliente, Contatto, Visita } from "@/app/interfaces/interfaces";
+import { useAnimation,motion } from "framer-motion";
 
 // Definizione del tipo per ogni campo della card
 type CardField = {
@@ -26,11 +27,11 @@ type GenericCardProps = {
   title: string;
   fields: CardField[];
   dato: Cliente | Visita | Contatto;
-  onNavigateDetail?: () => void;
 };
 
 export default function GenericCard({ title, fields, dato }: GenericCardProps) {
   const [showDetail, setShowDetail] = useState(false);
+  const controls=useAnimation();
 
   function onCloseDetail() {
     setShowDetail(false);
@@ -52,7 +53,7 @@ export default function GenericCard({ title, fields, dato }: GenericCardProps) {
 
   if (isCliente(dato)) {
     detailFields = [
-      { title: "Ragione Sociale", value: dato.ragSocCompleta, type: "text" },
+      { title: "Rag.Soc.", value: dato.ragSocCompleta, type: "text" },
       { title: "Telefono", value: dato.tel, type: "text" },
       { title: "Email", value: dato.email, type: "text" },
       { title: "Indirizzo", value: dato.indirizzo, type: "text" },
@@ -114,6 +115,16 @@ export default function GenericCard({ title, fields, dato }: GenericCardProps) {
     return color;
   }
 
+  const handleAnimation=async ()=>{
+    await controls.start({
+      rotate:[0,360],
+      transition:{duration:1}
+    })
+    setShowDetail(true);
+  }
+
+
+
   return (
     // Container principale che centra la card nella pagina con flexbox
     <div className="cd-page flex h-full w-full font-sans text-base justify-center items-center m-0 p-0 cursor-default">
@@ -158,20 +169,10 @@ export default function GenericCard({ title, fields, dato }: GenericCardProps) {
           ))}
         </div>
 
-        <div
-          className="cd-cube-grid w-[1.3rem] h-[1.3rem] cursor-pointer absolute bottom-4 right-4"
-          onClick={() => {
-            const cube=document.querySelector('.cd-cube-grid') as HTMLElement
-            if(cube){
-              cube.classList.remove('rotate');
-              void cube.offsetWidth
-              cube.classList.add('rotate')
-            }
-            setTimeout(() => {
-              setShowDetail(true);
-              cube.classList.remove('rotate')
-            }, 1000);
-          }}
+        <motion.div
+          className={`cd-cube-grid w-[1.3rem] h-[1.3rem] cursor-pointer absolute bottom-4 right-4 `}
+          onClick={handleAnimation}
+          animate={controls}
         >
           <div
             className="cd-cube"
@@ -189,9 +190,12 @@ export default function GenericCard({ title, fields, dato }: GenericCardProps) {
             className="cd-cube"
             style={{ backgroundColor: getColor(dato.Sem4) }}
           ></div>
-        </div>
+        </motion.div>
 
-        {showDetail && detailFields && (
+        
+      </div>
+
+      {showDetail && detailFields && (
           <Detail
             title={title}
             fields={detailFields}
@@ -200,7 +204,8 @@ export default function GenericCard({ title, fields, dato }: GenericCardProps) {
             flgCliente={isCliente(dato as Cliente)}
           />
         )}
-      </div>
     </div>
+
+    
   );
 }

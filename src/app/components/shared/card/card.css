@@ -4,7 +4,7 @@
 }
 .cd-card {
     background-color: var(--bg);
-    border: 1px solid var(--bg-alt);
+    border: 2px solid var(--bg-alt);
 }
 .cd-title {
     color: var(--primary);
@@ -18,17 +18,6 @@
     text-decoration: underline;
 }
 
-.rotate{
-    animation: rotate 1s linear infinite;
-}
-@keyframes rotate{
-from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
 
 .cd-cube{
     width: 42%;

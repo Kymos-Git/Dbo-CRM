@@ -2,8 +2,8 @@
 
 
 :root { 
-  --bg: #FFFFFF ;
-  --bg-alt:#dcdcdc;
+  --bg: #f0eded ;
+  --bg-alt:#cbc9c9;
   --primary:#027bff;
   --text: #383838;
 
@@ -52,3 +52,4 @@ html {
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+

@@ -11,5 +11,9 @@
 .dt-field.large-field {
   grid-column: span 2; 
   grid-row: span 2;
-  grid-row: auto;
+}
+
+.cd-zoom-container{
+  background-color: var(--bg);
+  border: 1px solid var(--primary);
 }

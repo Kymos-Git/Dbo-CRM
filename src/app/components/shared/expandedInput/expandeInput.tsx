@@ -77,11 +77,11 @@ const ExpandableInput = ({
           value={value}
           readOnly
           className="ex-input
-            w-full border rounded-lg px-3 py-2
-            text-sm sm:text-base placeholder:text-[#a1cde8]
-            focus:outline-none transition-shadow shadow-sm
+            w-full  px-3
+            text-sm sm:text-base
+            focus:outline-none 
             hover:shadow-md cursor-pointer select-text
-            truncate min-h-[44px] mt-2"
+            truncate min-h-[44px] border-t-0 border-l-0 border-b-1 border-r-0 border-gray-400"
           onFocus={() => setIsOpen(true)} // apre modal al focus
         />
       </div>

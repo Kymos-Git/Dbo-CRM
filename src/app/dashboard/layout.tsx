@@ -10,7 +10,7 @@ import { ReactNode, useEffect } from "react";
 import Sidebar from "../components/sidebar/sidebar";
 import { RouteLoadingProvider } from "../context/routeContext";
 import RouteLoader from "../components/routeLoader/routeLoader";
-
+import "./dashboard.css"
 
   
 
@@ -37,7 +37,7 @@ export default function DashBoardLayout({ children }: { children: ReactNode }) {
   return (
     // Contenitore flex per affiancare Sidebar e area contenuti
     <RouteLoadingProvider>
-      <div className="flex h-screen w-full"  style={{ height: 'var(--app-height)' }}>
+      <div className="flex h-screen w-screen"  style={{ height: 'var(--app-height)' }}>
         {/* Sidebar fissa sulla sinistra */}
         <Sidebar />
 
