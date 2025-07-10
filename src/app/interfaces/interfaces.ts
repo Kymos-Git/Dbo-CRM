@@ -10,6 +10,10 @@ export interface Cliente {
   tel: string;
   email: string;
   noteCliente?: string;
+   Sem1:number         
+  Sem2:number         
+  Sem3:number         
+  Sem4:number 
 }
 
 export interface Visita {
@@ -17,7 +21,11 @@ export interface Visita {
   DescAttivita: string;       
   NoteAttivita: string;       
   DataAttivita: string;               
-  RagSoc: string;            
+  RagSoc: string;   
+  Sem1:number         
+  Sem2:number         
+  Sem3:number         
+  Sem4:number         
 }
 
 
@@ -33,4 +41,8 @@ export interface Contatto {
   telefonoElaborato: string;
   cittaClienteFornitore: string;
   paeseClienteFornitore: string;
+   Sem1:number         
+  Sem2:number         
+  Sem3:number         
+  Sem4:number 
 }

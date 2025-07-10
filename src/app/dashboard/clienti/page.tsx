@@ -8,12 +8,10 @@ import { MapPin, Mail, Phone } from "lucide-react";
 import { useEffect, useState } from "react";
 import { FixedSizeGrid as Grid, GridChildComponentProps } from "react-window";
 import { ProtectedRoute } from "@/app/auth/ProtectedRoute";
-import Detail from "@/app/components/shared/detail/detail";
 import { Cliente } from "@/app/interfaces/interfaces";
 import { getClienti } from "@/app/services/api";
 import { LoadingComponent } from "@/app/components/loading/loading";
 import { useAuth } from "@/app/context/authContext";
-import { useRouter } from "next/navigation";
 
 import "./clienti.css";
 
@@ -23,15 +21,16 @@ const ClientiVirtualGrid = () => {
   );
   const [windowHeight, setWindowHeight] = useState(0);
   const [windowWidth, setWindowWidth] = useState(0);
-  const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
   const [clientiCRM, setClientiCRM] = useState<Cliente[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { fetchWithAuth } = useAuth();
-  const router = useRouter();
+  const { fetchWithAuth,isReady } = useAuth();
 
   useEffect(() => {
+
+    if(!isReady) return;
+
     async function fetchClienti() {
       try {
         const data = await getClienti(fetchWithAuth);
@@ -45,7 +44,7 @@ const ClientiVirtualGrid = () => {
       }
     }
     fetchClienti();
-  }, []);
+  }, [isReady]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -77,10 +76,7 @@ const ClientiVirtualGrid = () => {
     const cliente = clientiCRM[index];
 
     return (
-      <div
-        style={{ ...style, margin: 0, padding: 0, cursor: "pointer" }}
-        onClick={() => setSelectedCliente(cliente)}
-      >
+      <div style={{ ...style, margin: 0, padding: 0 }}>
         <GenericCard
           title={cliente.ragSocCompleta}
           fields={[
@@ -105,6 +101,7 @@ const ClientiVirtualGrid = () => {
               href: `tel:${cliente.tel}`,
             },
           ]}
+          dato={cliente}
         />
       </div>
     );
@@ -128,41 +125,6 @@ const ClientiVirtualGrid = () => {
     return `https://www.google.com/maps/search/?api=1&query=${encoded}`;
   }
 
-  const detailFieldsCliente =
-    selectedCliente === null
-      ? []
-      : [
-          {
-            title: "Ragione Sociale",
-            value: selectedCliente.ragSocCompleta,
-            type: "text",
-          },
-          { title: "Telefono", value: selectedCliente.tel, type: "text" },
-          { title: "Email", value: selectedCliente.email, type: "text" },
-          {
-            title: "Indirizzo",
-            value: selectedCliente.indirizzo,
-            type: "text",
-          },
-          { title: "Città", value: selectedCliente.citta, type: "text" },
-          { title: "CAP", value: selectedCliente.cap, type: "text" },
-          {
-            title: "Provincia",
-            value: selectedCliente.provincia || "",
-            type: "text",
-          },
-          selectedCliente.noteCliente
-            ? {
-                title: "Note",
-                value: selectedCliente.noteCliente,
-                type: "text",
-              }
-            : null,
-        ].filter(
-          (field): field is { title: string; value: string; type: string } =>
-            field !== null
-        );
-
   function mapRawToCliente(raw: any): Cliente {
     return {
       idCliente: raw.IdCliente,
@@ -175,7 +137,11 @@ const ClientiVirtualGrid = () => {
       idPaese: raw.IdPaese,
       tel: raw.Tel,
       email: raw.EMail,
-      noteCliente: raw.Note,
+      noteCliente: raw.NoteAmn,
+      Sem1: raw.Sem1 || 0,
+      Sem2: raw.Sem2 || 0,
+      Sem3: raw.Sem3 || 0,
+      Sem4: raw.Sem4 || 0,
     };
   }
 
@@ -200,22 +166,6 @@ const ClientiVirtualGrid = () => {
           {Cell}
         </Grid>
       )}
-
-      {/* Dettaglio cliente con animazione */}
-      <Detail
-        title={selectedCliente?.ragSocCompleta || ""}
-        fields={detailFieldsCliente}
-        visible={!!selectedCliente}
-        onClose={() => setSelectedCliente(null)}
-        flgCliente={true}
-        onNavigate={() =>
-          router.push(
-            `./contatti?ragSoc=${encodeURIComponent(
-              selectedCliente?.ragSocCompleta || ""
-            )}`
-          )
-        }
-      />
     </ProtectedRoute>
   );
 };
@@ -225,14 +175,8 @@ export default ClientiVirtualGrid;
 const filtersConfig: FilterConfig[] = [
   {
     type: "text",
-    label: "Nome",
+    label: "Nome/Rag.Soc",
     name: "ragioneSociale",
     placeholder: "Cerca...",
-  },
-  {
-    type: "text",
-    label: "Città",
-    name: "citta",
-    placeholder: "Filtra città...",
   },
 ];

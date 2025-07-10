@@ -72,7 +72,7 @@ export default function Detail({
                 grid 
                 grid-cols-1
                 sm:grid-cols-1
-                md:grid-cols-2
+                md:grid-cols-
                 gap-x-6 
                 gap-y-5
                 auto-rows-min

@@ -12,10 +12,10 @@
   transition: transform 0.3s ease-in-out;
   z-index: 1000;
   padding-top: 2.5rem;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   box-shadow: 2px 0 15px rgba(0, 0, 0, 0.08);
   backdrop-filter: blur(10px);
-  border-right: 1px solid rgba(0,0,0,0.05);
+  border-right: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 /* Sidebar open */
@@ -30,8 +30,8 @@
   left: 100%;
   transform: translateY(-50%);
   z-index: 1001;
-  height: 40px;
-  width: 28px;
+  height: 4vh;
+  width: 3vh;
   background: var(--primary);
   color: white;
   cursor: pointer;
@@ -72,10 +72,7 @@
   gap: 1rem;
   padding: 0.7rem 1.25rem;
   border-radius: 12px;
-  transition:
-    background-color 0.25s ease,
-    color 0.25s ease,
-    transform 0.2s ease;
+  transition: background-color 0.25s ease, color 0.25s ease, transform 0.2s ease;
   user-select: none;
   font-weight: 500;
 }
@@ -91,7 +88,7 @@
 /* Active link styling */
 .link.active {
   background-color: var(--primary);
-  color: var(--bg-alt);
+  color: var(--bg);
   font-weight: 600;
   box-shadow: 0 4px 12px rgba(42, 86, 198, 0.4);
   transform: scale(1.07);
@@ -99,7 +96,6 @@
 
 /* Icon inside links */
 .icon {
-  font-size: 1.4rem;
   user-select: none;
   color: var(--primary);
   transition: color 0.25s ease;
@@ -109,7 +105,7 @@
   color: var(--bg-alt);
 }
 
-.sb-account{
+.sb-account {
   position: absolute;
   bottom: 2%;
   right: 2%;

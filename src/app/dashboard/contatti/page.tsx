@@ -10,7 +10,6 @@
 
 "use client";
 
-
 import GenericCard from "@/app/components/shared/card/card";
 import GenericFilters, {
   FilterConfig,
@@ -19,21 +18,17 @@ import { Mail, Phone, Building } from "lucide-react";
 import { useEffect, useState } from "react";
 import { FixedSizeGrid as Grid, GridChildComponentProps } from "react-window";
 import { ProtectedRoute } from "@/app/auth/ProtectedRoute";
-import Detail from "@/app/components/shared/detail/detail";
 import "./contatti.css";
 import { Contatto } from "@/app/interfaces/interfaces";
 import { getContatti } from "@/app/services/api";
 import { LoadingComponent } from "@/app/components/loading/loading";
 import { useAuth } from "@/app/context/authContext";
 import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/navigation";
 
 const ContattiVirtualGrid = () => {
   const [windowHeight, setWindowHeight] = useState(0);
   const [windowWidth, setWindowWidth] = useState(0);
-  const [selectedContatto, setSelectedContatto] = useState<Contatto | null>(
-    null
-  );
+
   const [contattiCRM, setContattiCRM] = useState<Contatto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +36,6 @@ const ContattiVirtualGrid = () => {
   const { fetchWithAuth } = useAuth();
   const searchParams = useSearchParams();
   const initialRagSoc = searchParams.get("ragSoc") || "";
-  const router = useRouter();
 
   const [filtersValues, setFiltersValues] = useState<Record<string, string>>({
     "Rag.Soc.": initialRagSoc,
@@ -93,10 +87,7 @@ const ContattiVirtualGrid = () => {
     const contatto = contattiCRM[index];
 
     return (
-      <div
-        style={{ ...style, margin: 0, padding: 0, cursor: "pointer" }}
-        onClick={() => setSelectedContatto(contatto)}
-      >
+      <div style={{ ...style, margin: 0, padding: 0, cursor: "pointer" }}>
         <GenericCard
           title={`${contatto.nome} ${contatto.cognome}`}
           fields={[
@@ -115,56 +106,11 @@ const ContattiVirtualGrid = () => {
               href: `tel:${contatto.telefonoElaborato}`,
             },
           ]}
+          dato={contatto}
         />
       </div>
     );
   };
-
-  // Calcolo variabili solo se il dettaglio è visibile
-const isDetailVisible = !!selectedContatto;
-
-  const detailFields =
-    isDetailVisible
-      ? [
-          { title: "Nome", value: selectedContatto.nome, type: "text" },
-          { title: "Cognome", value: selectedContatto.cognome, type: "text" },
-          {
-            title: "Azienda",
-            value: selectedContatto.ragioneSociale,
-            type: "text",
-          },
-          {
-            title: "Cellulare",
-            value: selectedContatto.cellulare,
-            type: "text",
-          },
-          { title: "Email", value: selectedContatto.email, type: "text" },
-          {
-            title: "Telefono",
-            value: selectedContatto.telefonoElaborato,
-            type: "text",
-          },
-          {
-            title: "Città",
-            value: selectedContatto.cittaClienteFornitore,
-            type: "text",
-          },
-          {
-            title: "Paese",
-            value: selectedContatto.paeseClienteFornitore,
-            type: "text",
-          },
-          {
-            title: "Tipo Contatto",
-            value: selectedContatto.tipoContatto,
-            type: "text",
-          },
-        ]
-        :[];
-
-        const detailTitle = isDetailVisible
-  ? `${selectedContatto.nome} ${selectedContatto.cognome}`
-  : "";
 
   function mapRawToContatto(raw: any): Contatto {
     return {
@@ -179,6 +125,10 @@ const isDetailVisible = !!selectedContatto;
       telefonoElaborato: raw.TelElab,
       cittaClienteFornitore: "", // oppure raw.CittaClienteFornitore se presente
       paeseClienteFornitore: raw.PaeseElab,
+      Sem1: raw.Sem1 || 0,
+      Sem2: raw.Sem2 || 0,
+      Sem3: raw.Sem3 || 0,
+      Sem4: raw.Sem4 || 0,
     };
   }
 
@@ -209,14 +159,6 @@ const isDetailVisible = !!selectedContatto;
           {Cell}
         </Grid>
       )}
-
-      <Detail
-        visible={isDetailVisible}
-        onClose={() => setSelectedContatto(null)}
-        fields={detailFields}
-        title={detailTitle}
-        flgCliente={false}
-      />
     </ProtectedRoute>
   );
 };
