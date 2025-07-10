@@ -1,65 +1,99 @@
-/**
- * Detail.tsx
- *
- * Componente per mostrare una sezione dettagliata con titolo e campi editabili.
- * Ogni campo è rappresentato da un componente `ExpandableInput` che mostra un input espandibile.
- *
- */
-
 "use client";
 
-import ExpandableInput from "../expandedInput/expandeInput"; // Componente input espandibile personalizzato
-import "./detail.css"; // Stili CSS specifici per Detail
+import { motion, AnimatePresence } from "framer-motion";
+import ExpandableInput from "../expandedInput/expandeInput";
+import "./detail.css";
 
-// Definizione tipo per ogni campo da mostrare
 type Field = {
-  title: string; // Titolo del campo
-  value: string; // Valore del campo
-  type: string; // Tipo di input (es. "text", "password", ecc)
+  title: string;
+  value: string;
+  type: string;
 };
 
-// Props del componente Detail
 type DetailProps = {
-  title: string; // Titolo principale della sezione
-  fields: Field[]; // Array di campi da mostrare nella griglia
+  title: string;
+  fields: Field[];
+  onClose: () => void;
+  onNavigate?: () => void;
+  visible: boolean;
+  flgCliente:boolean;
 };
 
-export default function Detail({ title, fields }: DetailProps) {
+export default function Detail({
+  title,
+  fields,
+  onClose,
+  onNavigate,
+  visible,
+  flgCliente
+}: DetailProps) {
   return (
-    <>
-      {/* Titolo della sezione con stile responsivo e margini */}
-      <h3 className="dt-title text-xl sm:text-2xl md:text-3xl font-extrabold mb-6 sm:mb-8 tracking-wide">
-        {title}
-      </h3>
-
-      {/* Form con griglia responsive:
-          - 2 colonne su mobile e sm
-          - 3 colonne su md e superiori
-          - Spaziatura orizzontale e verticale definita */}
-      <form
-        className="
-          dt-form
-          grid 
-          grid-cols-2
-          sm:grid-cols-2 
-          md:grid-cols-3 
-          gap-x-6 
-          gap-y-5
-          auto-rows-min
-        "
-      >
-        {/* Mappa dei campi per creare ogni input */}
-        {fields.map(({ title, value, type }, i) => (
-          <div
-            key={i}
-            className={`dt-field mb-4 ${
-              (title.toLowerCase() === "note" || title.toLowerCase()==='descrizione') ? "large-field" : ""
-            }`}
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          className="fixed inset-0 flex items-center justify-center backdrop-blur-xs z-50 p-4"
+          onClick={onClose}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <motion.div
+            className="cl-zoom relative rounded-xl max-w-4xl w-full h-[80vh] overflow-auto p-6 sm:p-8 bg-white"
+            onClick={(e) => e.stopPropagation()}
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            transition={{ duration: 0.5 }}
           >
-            <ExpandableInput label={title} value={value} type={type} />
-          </div>
-        ))}
-      </form>
-    </>
+            <button
+              onClick={onClose}
+              className="cl-btn absolute top-4 right-4 transition font-bold text-lg rounded cursor-pointer"
+              aria-label="Chiudi dettaglio"
+            >
+              ✕
+            </button>
+            
+            {flgCliente  &&(<button
+              onClick={onNavigate}
+              className="cl-btnCnt absolute right-12 top-4 rounded-2xl transition h-10 w-28 text-xs cursor-pointer md:hover:scale-105"
+            >
+              Vai ai contatti
+            </button>)}
+            
+
+            <h3 className="dt-title text-xl sm:text-2xl md:text-3xl font-extrabold mb-6 sm:mb-8 tracking-wide">
+              {title}
+            </h3>
+
+            <form
+              className="
+                dt-form
+                grid 
+                grid-cols-1
+                sm:grid-cols-1
+                md:grid-cols-2
+                gap-x-6 
+                gap-y-5
+                auto-rows-min
+              "
+            >
+              {fields.map(({ title, value, type }, i) => (
+                <div
+                  key={i}
+                  className={`dt-field mb-4 ${
+                    ["note", "descrizione"].includes(title.toLowerCase())
+                      ? "large-field"
+                      : ""
+                  }`}
+                >
+                  <ExpandableInput label={title} value={value} type={type} />
+                </div>
+              ))}
+            </form>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

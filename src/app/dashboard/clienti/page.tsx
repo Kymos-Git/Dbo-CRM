@@ -9,13 +9,13 @@ import { useEffect, useState } from "react";
 import { FixedSizeGrid as Grid, GridChildComponentProps } from "react-window";
 import { ProtectedRoute } from "@/app/auth/ProtectedRoute";
 import Detail from "@/app/components/shared/detail/detail";
-import { motion, AnimatePresence } from "framer-motion";
 import { Cliente } from "@/app/interfaces/interfaces";
 import { getClienti } from "@/app/services/api";
 import { LoadingComponent } from "@/app/components/loading/loading";
 import { useAuth } from "@/app/context/authContext";
-import "./clienti.css"
 import { useRouter } from "next/navigation";
+
+import "./clienti.css";
 
 const ClientiVirtualGrid = () => {
   const [filtersValues, setFiltersValues] = useState<Record<string, string>>(
@@ -29,7 +29,7 @@ const ClientiVirtualGrid = () => {
   const [error, setError] = useState<string | null>(null);
 
   const { fetchWithAuth } = useAuth();
-  const router=useRouter();
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchClienti() {
@@ -60,7 +60,9 @@ const ClientiVirtualGrid = () => {
   const CARD_COUNT = windowHeight < 600 ? 2 : windowHeight < 800 ? 3 : 4;
   const isMobile = windowWidth < 768;
   const columnCount = isMobile ? 1 : 3;
-  const CARD_WIDTH = isMobile? Math.floor((windowWidth-30) / columnCount): Math.floor(windowWidth/columnCount);
+  const CARD_WIDTH = isMobile
+    ? Math.floor((windowWidth - 30) / columnCount)
+    : Math.floor(windowWidth / columnCount);
   const CARD_HEIGHT = Math.floor((windowHeight * 0.8) / CARD_COUNT);
   const rowCount = Math.ceil(clientiCRM.length / columnCount);
 
@@ -186,58 +188,34 @@ const ClientiVirtualGrid = () => {
       {!loading && !error && clientiCRM.length === 0 && (
         <p>Nessun cliente trovato.</p>
       )}
-
       {!loading && !error && clientiCRM.length > 0 && (
         <Grid
-          columnCount={columnCount}
-          rowCount={rowCount}
-          columnWidth={CARD_WIDTH}
-          rowHeight={CARD_HEIGHT}
-          height={windowHeight}
+          height={windowHeight * 0.8}
           width={windowWidth}
+          columnCount={columnCount}
+          columnWidth={CARD_WIDTH}
+          rowCount={rowCount}
+          rowHeight={CARD_HEIGHT}
         >
           {Cell}
         </Grid>
       )}
 
-      <AnimatePresence>
-        {selectedCliente && (
-          <motion.div
-            className="fixed inset-0 flex items-center justify-center backdrop-blur-xs z-50 p-4"
-            onClick={() => setSelectedCliente(null)}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <motion.div
-              className="cl-zoom relative rounded-xl max-w-4xl w-full h-[80vh] overflow-auto p-6 sm:p-8"
-              onClick={(e) => e.stopPropagation()}
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <button
-                onClick={() => setSelectedCliente(null)}
-                className="cl-btn absolute top-4 right-4 transition font-bold text-lg rounded cursor-pointer"
-                aria-label="Chiudi dettaglio Cliente"
-              >
-                ✕
-              </button>
-
-              
-              <Detail
-                title={selectedCliente.ragSocCompleta}
-                fields={detailFieldsCliente}
-              />
-              <button className="cl-btnCnt absolute bottom-4 right-4 rounded-2xl transition h-10 w-25 text-xs cursor-pointer md:hover:scale-105" onClick={()=>router.push(`./contatti?ragSoc=${encodeURIComponent(selectedCliente?.ragSocCompleta || "")}`)}>
-                Vai ai contatti
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Dettaglio cliente con animazione */}
+      <Detail
+        title={selectedCliente?.ragSocCompleta || ""}
+        fields={detailFieldsCliente}
+        visible={!!selectedCliente}
+        onClose={() => setSelectedCliente(null)}
+        flgCliente={true}
+        onNavigate={() =>
+          router.push(
+            `./contatti?ragSoc=${encodeURIComponent(
+              selectedCliente?.ragSocCompleta || ""
+            )}`
+          )
+        }
+      />
     </ProtectedRoute>
   );
 };
@@ -257,5 +235,4 @@ const filtersConfig: FilterConfig[] = [
     name: "citta",
     placeholder: "Filtra città...",
   },
-
 ];

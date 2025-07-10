@@ -61,9 +61,9 @@ export default function Sidebar() {
       </div>
 
       {/* Navigazione link */}
+        <ThemeToggle />
       <nav className="nav-links">
         {/* Componente per cambiare tema (light/dark) */}
-        <ThemeToggle />
 
         {/* Mappatura dei link, con evidenziazione se attivi */}
         {links.map(({ href, label, icon }) => {

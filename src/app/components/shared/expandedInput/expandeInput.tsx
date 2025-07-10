@@ -67,7 +67,7 @@ const ExpandableInput = ({
       >
         <label
           htmlFor={label}
-          className="ex-label mb-2 text-xs sm:text-sm md:text-sm font-semibold text-[#1077bc] uppercase tracking-widest"
+          className="ex-label text-m sm:text-sm md:text-sm font-semibold text-[#1077bc] uppercase tracking-widest "
         >
           {label}
         </label>
@@ -81,7 +81,7 @@ const ExpandableInput = ({
             text-sm sm:text-base placeholder:text-[#a1cde8]
             focus:outline-none transition-shadow shadow-sm
             hover:shadow-md cursor-pointer select-text
-            truncate min-h-[44px]"
+            truncate min-h-[44px] mt-2"
           onFocus={() => setIsOpen(true)} // apre modal al focus
         />
       </div>

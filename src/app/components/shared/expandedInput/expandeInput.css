@@ -7,7 +7,7 @@
     border: var(--primary);
 }
 .ex-input {
-    background-color: var(--bg-alt);
+    background-color: var(--bg);
     color: var(--text);
 }
 .ex-backdrop {}

@@ -180,53 +180,13 @@ const VisiteVirtualGrid = () => {
       )}
 
       {/* Popup dettaglio visita con animazioni ingresso/uscita */}
-      <AnimatePresence>
-        {selectedVisita && (
-          <motion.div
-            className="
-              fixed inset-0 flex items-center justify-center
-              backdrop-blur-xs
-              z-50
-              p-4
-            "
-            onClick={() => setSelectedVisita(null)} // chiude popup cliccando fuori
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <motion.div
-              className="vt-zoom
-                relative rounded-xl max-w-4xl w-full h-[80vh] overflow-auto
-                p-6 sm:p-8
-              "
-              onClick={(e) => e.stopPropagation()} // previene chiusura cliccando dentro
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              {/* Bottone chiusura */}
-              <button
-                onClick={() => setSelectedVisita(null)}
-                className="vt-button
-                  absolute top-4 right-4 transition
-                  font-bold text-lg rounded cursor-pointer
-                "
-                aria-label="Chiudi dettaglio cliente"
-              >
-                ✕
-              </button>
-
-              {/* Dettaglio visita */}
-              <Detail
-                title={`${selectedVisita.RagSoc}`}
-                fields={detailFields}
-              />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <Detail
+        title={selectedVisita?.RagSoc || ""}
+        fields={detailFields}
+        onClose={() => setSelectedVisita(null)}
+        visible={selectedVisita !== null}
+        flgCliente={false}
+      />
     </ProtectedRoute>
   );
 };
