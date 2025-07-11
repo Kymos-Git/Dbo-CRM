@@ -9,11 +9,11 @@
 "use client";
 
 import Link from "next/link";
-import React, {  useEffect, useState } from "react";
+import React, {  useState } from "react";
 import "./card.css"; // Import CSS per la card
 import Detail from "../detail/detail";
 import { Cliente, Contatto, Visita } from "@/app/interfaces/interfaces";
-import { useAnimation,motion } from "framer-motion";
+import { useAnimation, motion } from "framer-motion";
 
 // Definizione del tipo per ogni campo della card
 type CardField = {
@@ -31,7 +31,7 @@ type GenericCardProps = {
 
 export default function GenericCard({ title, fields, dato }: GenericCardProps) {
   const [showDetail, setShowDetail] = useState(false);
-  const controls=useAnimation();
+  const controls = useAnimation();
 
   function onCloseDetail() {
     setShowDetail(false);
@@ -85,49 +85,56 @@ export default function GenericCard({ title, fields, dato }: GenericCardProps) {
     ];
   }
 
-  function getColor(value: number) {
-    let color: string = "#dcdcdc";
+  const numericColors: number[] = [dato.Sem1, dato.Sem2, dato.Sem3, dato.Sem4];
+  const colors = getColors(numericColors);
 
-    switch (value) {
-      case 1:
-        color = "#32CD32";
-        break; //verde
-      case 2:
-        color = "#F3A83B";
-        break; //arancio
-      case 3:
-        color = "#EB443A";
-        break; //rosso
-      case 4:
-        color = "#3E94F7";
-        break; //blu
-      case 5:
-        color = "#FF76C0";
-        break; //fucsia
-      case 6:
-        color = "#bdb76b";
-        break; //darkkhaki
-      default:
-        color = "#dcdcdc";
-        break; //grigio
-    }
+  function getColors(values: number[]): string[] {
+    const colors: string[] = [];
 
-    return color;
+    values.forEach((c) => {
+      switch (c) {
+        case 1:
+          colors.push("#32CD32"); // verde
+          break;
+        case 2:
+          colors.push("#F3A83B"); // arancio
+          break;
+        case 3:
+          colors.push("#EB443A"); // rosso
+          break;
+        case 4:
+          colors.push("#3E94F7"); // blu
+          break;
+        case 5:
+          colors.push("#FF76C0"); // fucsia
+          break;
+        case 6:
+          colors.push("#bdb76b"); // darkkhaki
+          break;
+        default:
+          colors.push("#dcdcdc"); // grigio
+          break;
+      }
+    });
+
+    return colors;
   }
 
-  const handleAnimation=async ()=>{
+  const handleAnimation = async () => {
     await controls.start({
-      rotate:[0,360],
-      transition:{duration:1}
-    })
+      rotate: [0, 360],
+      transition: { duration: 1 },
+    });
     setShowDetail(true);
-  }
-
-
+    const grid = document.querySelector(".gr");
+    grid?.classList.add("hidden");
+    const main = document.getElementsByTagName("main")[0] as HTMLElement;
+    main.style.filter = "blur(5px)";
+  };
 
   return (
     // Container principale che centra la card nella pagina con flexbox
-    <div className="cd-page flex h-full w-full font-sans text-base justify-center items-center m-0 p-0 cursor-default">
+    <div className="cd-page flex h-full w-full font-sans text-base justify-center items-center m-0 p-0 cursor-default visible">
       {/* Card vera e propria con larghezza e altezza massima, bordi arrotondati, padding e ombre */}
       <div
         className="cd-card w-[75%] max-h-[90vh] rounded-lg
@@ -174,38 +181,23 @@ export default function GenericCard({ title, fields, dato }: GenericCardProps) {
           onClick={handleAnimation}
           animate={controls}
         >
-          <div
-            className="cd-cube"
-            style={{ backgroundColor: getColor(dato.Sem1) }}
-          ></div>
-          <div
-            className="cd-cube"
-            style={{ backgroundColor: getColor(dato.Sem2) }}
-          ></div>
-          <div
-            className="cd-cube"
-            style={{ backgroundColor: getColor(dato.Sem3) }}
-          ></div>
-          <div
-            className="cd-cube"
-            style={{ backgroundColor: getColor(dato.Sem4) }}
-          ></div>
+          <div className="cd-cube" style={{ backgroundColor: colors[0] }}></div>
+          <div className="cd-cube" style={{ backgroundColor: colors[1] }}></div>
+          <div className="cd-cube" style={{ backgroundColor: colors[2] }}></div>
+          <div className="cd-cube" style={{ backgroundColor: colors[3] }}></div>
         </motion.div>
-
-        
       </div>
 
       {showDetail && detailFields && (
-          <Detail
-            title={title}
-            fields={detailFields}
-            visible={showDetail}
-            onClose={onCloseDetail}
-            flgCliente={isCliente(dato as Cliente)}
-          />
-        )}
+        <Detail
+          title={title}
+          fields={detailFields}
+          visible={showDetail}
+          onClose={onCloseDetail}
+          flgCliente={isCliente(dato as Cliente)}
+          colors={colors}
+        />
+      )}
     </div>
-
-    
   );
 }

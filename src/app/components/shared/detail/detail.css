@@ -17,3 +17,7 @@
   background-color: var(--bg);
   border: 1px solid var(--primary);
 }
+
+.dt-note-label{
+  color: var(--primary);
+}

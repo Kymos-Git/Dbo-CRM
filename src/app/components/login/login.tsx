@@ -1,14 +1,13 @@
 /**
  * Login.tsx
- * 
+ *
  * Componente per la pagina di login.
  * Gestisce l'inserimento di username e password, l'autenticazione tramite hook custom useAuth,
  * la gestione dello stato di caricamento, degli errori e il redirect alla dashboard dopo login riuscito.
- * 
+ *
  */
 
 "use client";
-
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -16,7 +15,7 @@ import { LoadingComponent } from "../loading/loading";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/authContext";
 import { useTheme } from "next-themes";
-import "./login.css"
+import "./login.css";
 
 export function Login() {
   // Stato per username inserito dall’utente
@@ -38,7 +37,7 @@ export function Login() {
   const router = useRouter();
 
   // Hook custom per l’autenticazione, espone la funzione login
-  const { login,isReady } = useAuth();
+  const { login, isReady } = useAuth();
 
   // Hook per gestire il tema corrente (chiaro/scuro)
   const { theme } = useTheme();
@@ -55,9 +54,9 @@ export function Login() {
   // Funzione async che gestisce l’invio del form di login
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault(); // Previene il comportamento di submit di default (ricarica pagina)
-    if(!isReady){
-       setErrorMsg("Configurazione non ancora pronta, riprova.");
-    return;
+    if (!isReady) {
+      setErrorMsg("Configurazione non ancora pronta, riprova.");
+      return;
     }
     setLoading(true); // Attiva lo stato di loading
     setErrorMsg(""); // Pulisce eventuali errori precedenti
@@ -66,16 +65,12 @@ export function Login() {
       // Chiama la funzione login fornita da useAuth con username e password
       await login(username, password);
 
-
-
+      // Redirect alla pagina /dashboard
+      router.push("/dashboard");
 
       // Resetto i campi input
       setUsername("");
       setPassword("");
-
-      // Redirect alla pagina /dashboard
-      router.push("/dashboard");
-
     } catch (error: unknown) {
       // In caso di errore creo delay di 2 secondi prima di mostrare il messaggio
       const delay = new Promise((resolve) => setTimeout(resolve, 2000));
@@ -100,7 +95,7 @@ export function Login() {
 
   return (
     <form
-      className={`container ${loading ? 'loading' : ""}`}
+      className={`login ${loading ? "loading" : ""}`}
       onSubmit={handleSubmit} // Gestisce submit del form
     >
       {/* Logo dinamico in base al tema */}
@@ -110,13 +105,12 @@ export function Login() {
         width={150}
         height={80}
         style={{ borderRadius: 25 }}
-        className='icon'
+        className="icon"
         priority
       />
-      <h1 className='title'>Login</h1>
 
       {/* Input username */}
-      <div className='username'>
+      <div className="username">
         <h3>username</h3>
         <input
           type="text"
@@ -127,7 +121,7 @@ export function Login() {
       </div>
 
       {/* Input password */}
-      <div className='password'>
+      <div className="password">
         <h3>password</h3>
         <input
           type="password"
@@ -139,12 +133,12 @@ export function Login() {
 
       {/* Se è in caricamento mostra componente Loading, altrimenti il pulsante submit */}
       {loading ? (
-        <div className='loadingComp'>
+        <div className="loadingComp">
           <LoadingComponent />
         </div>
       ) : (
-        <button type="submit" className='btnAccedi'>
-          Accedi
+        <button type="submit" className="btnLogin">
+          Login
         </button>
       )}
     </form>

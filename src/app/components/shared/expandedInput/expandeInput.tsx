@@ -77,7 +77,7 @@ const ExpandableInput = ({
           value={value}
           readOnly
           className="ex-input
-            w-full  px-3
+            w-full px-1
             text-sm sm:text-base
             focus:outline-none 
             hover:shadow-md cursor-pointer select-text

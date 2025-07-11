@@ -1,3 +1,6 @@
-.gr{
+.cl-gr{
     background-color: var(--bg);
+}
+.hidden{
+    visibility: hidden;
 }

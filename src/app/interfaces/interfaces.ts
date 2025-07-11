@@ -14,6 +14,12 @@ export interface Cliente {
   Sem2:number         
   Sem3:number         
   Sem4:number 
+  // NoteCliFat:string
+  // NoteCliLst:string
+  // NoteCliOff:string
+  // NoteCliOrd:string
+  // NoteCliente:string
+  // NoteCrmElab:string
 }
 
 export interface Visita {
