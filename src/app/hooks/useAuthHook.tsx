@@ -1,3 +1,5 @@
+
+
 "use client";
 
 import { useCallback, useEffect, useState, useRef } from "react";
@@ -153,18 +155,22 @@ export function useAuthHook() {
       const token = accessTokenRef.current;
 
       if (token) {
-        await fetch("/api/revoke", {
+        const response = await fetch("/api/revoke", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-        }).catch((err) => {
-          console.warn("[logout] Errore durante revoke:", err);
-          // Ignora errori di revoca per continuare il logout
         });
+
+        if (!response.ok) {
+          throw new Error(
+            `Logout revoke failed with status ${response.status}`
+          );
+        }
       }
 
+      // Se arriviamo qui, revoke è andato bene (o token non c'era)
       updateAccessToken(null);
       setUsername(null);
 
@@ -175,10 +181,16 @@ export function useAuthHook() {
       triedRefresh.current = false;
 
       router.push("/");
+    } catch (error) {
+      console.warn("[logout] Errore durante revoke:", error);
+      // Non faccio logout, oppure potresti gestire in altro modo l'errore
     } finally {
       setLoading(false);
     }
   }, [router]);
+
+
+
 
   async function fetchWithAuth(
     input: RequestInfo,

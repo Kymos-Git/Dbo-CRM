@@ -60,7 +60,7 @@ const ClientiVirtualGrid = () => {
   const columnCount = isMobile ? 1 : 3;
   const CARD_WIDTH = isMobile
     ? Math.floor((windowWidth - 30) / columnCount)
-    : Math.floor(windowWidth / columnCount);
+    : Math.floor(windowWidth*0.98 / columnCount);
   const CARD_HEIGHT = Math.floor((windowHeight * 0.8) / CARD_COUNT);
   const rowCount = Math.ceil(clientiCRM.length / columnCount);
 
