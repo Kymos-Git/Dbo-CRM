@@ -16,7 +16,7 @@
   display: flex;
   align-items: center;
   flex-direction: column;
-  padding: 6%;
+  padding: 4%;
 
   transition: box-shadow 0.5s ease;
 
@@ -24,10 +24,18 @@
 
   font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
+.main{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: 80%;
+  height: 100%;
+}
 
 .icon {
   height: 30%;
-  width: 28%;
+  width: 30%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -53,7 +61,6 @@
 .password input {
   width: 85%;
   padding: 1%;
-  border-radius: 8px;
   color: var(--text);
   border:none ;
   border-bottom: 1px solid var(--bg-alt);
@@ -122,6 +129,17 @@
   .login {
     width: 20vw;
     height: 25vh;
-    padding: 2%;
+    padding: 1%;
+    flex-direction: row;
   }
+  .icon{
+    width: 50%;
+    height: 40%;
+    margin-right: 8%;
+  }
+  
+.username,
+.password{
+
+}
 }

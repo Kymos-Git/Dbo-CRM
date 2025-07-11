@@ -123,12 +123,28 @@ const ClientiVirtualGrid = () => {
     const encoded = encodeURIComponent(address);
     return `https://www.google.com/maps/search/?api=1&query=${encoded}`;
   }
-  function mapRawToCliente(raw: any): Cliente {
-    let note = "";
-    if (raw.NoteAmn && typeof raw.NoteAmn === "string") {
-      note = raw.NoteAmn.replace(/\n/g, " \n");
-    }
 
+  function htmlToPlainText(html: string): string {
+    if (!html) return "";
+
+    // Sostituisci i <br> con \n
+    let text = html.replace(/<br\s*\/?>/gi, "\n");
+
+    // Sostituisci i <p> e </p> con \n\n per separare paragrafi
+    text = text.replace(/<\/p>/gi, "\n\n");
+    text = text.replace(/<p[^>]*>/gi, "");
+
+    // Rimuovi eventuali altri tag HTML rimanenti
+    text = text.replace(/<[^>]+>/g, "");
+
+    // Rimuovi spazi vuoti multipli o linee vuote extra se vuoi
+    text = text.replace(/\n\s*\n/g, "\n\n"); // doppio a capo consistente
+
+    // Trim per rimuovere spazi inutili a inizio e fine
+    return text.trim();
+  }
+
+  function mapRawToCliente(raw: any): Cliente {
     return {
       idCliente: raw.IdCliente,
       ragSocCompleta: raw.RagSoc,
@@ -140,7 +156,7 @@ const ClientiVirtualGrid = () => {
       idPaese: raw.IdPaese,
       tel: raw.Tel,
       email: raw.EMail,
-      noteCliente: note,
+      noteCliente: htmlToPlainText(raw.NoteCrmElab),
       Sem1: raw.Sem1 || 0,
       Sem2: raw.Sem2 || 0,
       Sem3: raw.Sem3 || 0,
@@ -162,7 +178,7 @@ const ClientiVirtualGrid = () => {
         <div className="gr">
           <Grid
             height={windowHeight * 0.8}
-            width={windowWidth * 0.92}
+             width={isMobile?windowWidth*0.92:windowWidth}
             columnCount={columnCount}
             columnWidth={CARD_WIDTH}
             rowCount={rowCount}

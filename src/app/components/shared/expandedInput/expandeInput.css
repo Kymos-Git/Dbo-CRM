@@ -10,19 +10,25 @@
     background-color: var(--bg);
     color: var(--text);
 }
-.ex-backdrop {}
+.ex-copy{
+    color: var(--text);
+}
 
 .ex-modal {
     background-color: var(--bg);
     border: 1px solid var(--primary);
 }
 
-.ex-modal-label {}
+.ex-modal-label {
+    color: var(--primary);
+}
 
 .ex-textarea {
     background-color: var(--bg);
     color: var(--text);
-    border: 1px solid var(--primary);
+    border: none;
+    border-bottom: 1px solid var(--bg-alt);
+    
 }
 
 .ex-expanded-input {

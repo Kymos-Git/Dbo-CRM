@@ -108,39 +108,40 @@ export function Login() {
         className="icon"
         priority
       />
-
-      {/* Input username */}
-      <div className="username">
-        <h3>username</h3>
-        <input
-          type="text"
-          value={username} // valore controllato dallo stato username
-          onChange={(e) => setUsername(e.target.value)} // aggiorna stato onChange
-          autoComplete="off"
-        />
-      </div>
-
-      {/* Input password */}
-      <div className="password">
-        <h3>password</h3>
-        <input
-          type="password"
-          value={password} // valore controllato dallo stato password
-          onChange={(e) => setPassword(e.target.value)} // aggiorna stato onChange
-          autoComplete="off"
-        />
-      </div>
-
-      {/* Se è in caricamento mostra componente Loading, altrimenti il pulsante submit */}
-      {loading ? (
-        <div className="loadingComp">
-          <LoadingComponent />
+      <div className="main">
+        {/* Input username */}
+        <div className="username">
+          <h3>username</h3>
+          <input
+            type="text"
+            value={username} // valore controllato dallo stato username
+            onChange={(e) => setUsername(e.target.value)} // aggiorna stato onChange
+            autoComplete="off"
+          />
         </div>
-      ) : (
-        <button type="submit" className="btnLogin">
-          Login
-        </button>
-      )}
+
+        {/* Input password */}
+        <div className="password">
+          <h3>password</h3>
+          <input
+            type="password"
+            value={password} // valore controllato dallo stato password
+            onChange={(e) => setPassword(e.target.value)} // aggiorna stato onChange
+            autoComplete="off"
+          />
+        </div>
+
+        {/* Se è in caricamento mostra componente Loading, altrimenti il pulsante submit */}
+        {loading ? (
+          <div className="loadingComp">
+            <LoadingComponent />
+          </div>
+        ) : (
+          <button type="submit" className="btnLogin">
+            Login
+          </button>
+        )}
+      </div>
     </form>
   );
 }

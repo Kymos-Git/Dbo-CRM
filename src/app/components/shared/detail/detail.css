@@ -13,7 +13,7 @@
   grid-row: span 2;
 }
 
-.cd-zoom-container{
+.dt-container{
   background-color: var(--bg);
   border: 1px solid var(--primary);
 }

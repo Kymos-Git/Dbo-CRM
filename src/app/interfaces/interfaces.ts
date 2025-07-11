@@ -9,31 +9,24 @@ export interface Cliente {
   idPaese: string;
   tel: string;
   email: string;
-  noteCliente?: string;
-   Sem1:number         
-  Sem2:number         
-  Sem3:number         
-  Sem4:number 
-  // NoteCliFat:string
-  // NoteCliLst:string
-  // NoteCliOff:string
-  // NoteCliOrd:string
-  // NoteCliente:string
-  // NoteCrmElab:string
+  Sem1: number;
+  Sem2: number;
+  Sem3: number;
+  Sem4: number;
+  noteCliente: string;
 }
 
 export interface Visita {
-  IdAttivita: number;           
-  DescAttivita: string;       
-  NoteAttivita: string;       
-  DataAttivita: string;               
-  RagSoc: string;   
-  Sem1:number         
-  Sem2:number         
-  Sem3:number         
-  Sem4:number         
+  IdAttivita: number;
+  DescAttivita: string;
+  NoteAttivita: string;
+  DataAttivita: string;
+  RagSoc: string;
+  Sem1: number;
+  Sem2: number;
+  Sem3: number;
+  Sem4: number;
 }
-
 
 export interface Contatto {
   idContatto: number;
@@ -47,8 +40,8 @@ export interface Contatto {
   telefonoElaborato: string;
   cittaClienteFornitore: string;
   paeseClienteFornitore: string;
-   Sem1:number         
-  Sem2:number         
-  Sem3:number         
-  Sem4:number 
+  Sem1: number;
+  Sem2: number;
+  Sem3: number;
+  Sem4: number;
 }

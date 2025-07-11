@@ -150,19 +150,28 @@ export function useAuthHook() {
   const logout = useCallback(async () => {
     setLoading(true);
     try {
-      // opzionale: avvisa API di logout/revoca token
-      const res = await fetchWithAuth("/api/revoke", {
-        method: "POST",
-      }).catch(() => {
-        // ignora errori per non bloccare logout
-      });
+      const token = accessTokenRef.current;
+
+      if (token) {
+        await fetch("/api/revoke", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }).catch((err) => {
+          console.warn("[logout] Errore durante revoke:", err);
+          // Ignora errori di revoca per continuare il logout
+        });
+      }
 
       updateAccessToken(null);
       setUsername(null);
 
-      await removeItem(REFRESH_TOKEN_KEY);
-      await removeItem(USERNAME_KEY);
-      await removeItem(ACCESS_TOKEN_KEY);
+      await removeItem("refreshToken");
+      await removeItem("username");
+      await removeItem("accessToken");
+
       triedRefresh.current = false;
 
       router.push("/");
@@ -175,8 +184,6 @@ export function useAuthHook() {
     input: RequestInfo,
     init?: RequestInit
   ): Promise<Response> {
-
-
     const token = accessTokenRef.current;
     const headers = new Headers(init?.headers || {});
 

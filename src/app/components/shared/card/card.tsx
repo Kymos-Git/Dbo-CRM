@@ -9,7 +9,7 @@
 "use client";
 
 import Link from "next/link";
-import React, {  useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./card.css"; // Import CSS per la card
 import Detail from "../detail/detail";
 import { Cliente, Contatto, Visita } from "@/app/interfaces/interfaces";
@@ -126,11 +126,20 @@ export default function GenericCard({ title, fields, dato }: GenericCardProps) {
       transition: { duration: 1 },
     });
     setShowDetail(true);
-    const grid = document.querySelector(".gr");
-    grid?.classList.add("hidden");
-    const main = document.getElementsByTagName("main")[0] as HTMLElement;
-    main.style.filter = "blur(5px)";
   };
+
+  useEffect(() => {
+    const main = document.getElementsByTagName("main")[0] as HTMLElement;
+    const grid = document.querySelector(".gr");
+
+    if (showDetail) {
+      grid?.classList.add("hidden");
+      main.style.filter = "blur(5px)";
+    } else {
+      grid?.classList.remove("hidden");
+      main.style.filter = "blur(0px)";
+    }
+  },[showDetail]);
 
   return (
     // Container principale che centra la card nella pagina con flexbox

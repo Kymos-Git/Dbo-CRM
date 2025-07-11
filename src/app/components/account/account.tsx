@@ -10,7 +10,7 @@ export default function Account() {
   function Wrapper() {
     return (
       <div className="ac-wrapper absolute bottom-[110%] right-[50%] w-[30vw] h-[10vh] rounded-2xl md:w-[10vw]">
-        <div className="ac-logout justify-center items-center flex p-2 w-full rounded-2xl cursor-pointer hover:scale-110" onClick={()=>logout()}><LogOut size={20} /><span className="ml-1">Logout</span></div>
+        <div className="ac-logout justify-center items-center flex p-2 w-full rounded-2xl cursor-pointer hover:scale-110" onClick={()=>logout()}><LogOut size={20} /><span className="ml-4">Logout</span></div>
       </div>
     );
   }

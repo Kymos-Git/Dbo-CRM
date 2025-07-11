@@ -83,7 +83,7 @@ export default function Sidebar() {
               }} // chiude la sidebar cliccando su link (utile su mobile)
             >
               {/* Icona + label */}
-              <span className="icon max-w-[10vw] w-[10%]">{icon}</span><span>{label}</span> 
+              <span >{icon}</span><span>{label}</span> 
             </Link>
           );
         })}

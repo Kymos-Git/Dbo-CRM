@@ -80,7 +80,7 @@ const ExpandableInput = ({
             w-full px-1
             text-sm sm:text-base
             focus:outline-none 
-            hover:shadow-md cursor-pointer select-text
+            cursor-pointer select-text
             truncate min-h-[44px] border-t-0 border-l-0 border-b-1 border-r-0 border-gray-400"
           onFocus={() => setIsOpen(true)} // apre modal al focus
         />
@@ -99,7 +99,7 @@ const ExpandableInput = ({
           >
             <motion.div
               onClick={(e) => e.stopPropagation()} // impedisce chiusura cliccando dentro modal
-              className="ex-modal w-[90%] rounded-lg p-4 max-w-4xl border shadow-lg"
+              className="ex-modal w-[90%] rounded-lg p-4 max-w-4xl shadow-lg"
               style={{ height: textareaHeight ? textareaHeight + 110 : "auto" }} // altezza dinamica
               initial={{ y: -20 }}
               animate={{ y: 0 }}
@@ -107,7 +107,7 @@ const ExpandableInput = ({
             >
               <label
                 htmlFor={`${label}-expanded`}
-                className="ex-modal-label mb-4 text-m sm:text-sm md:text-sm font-semibold text-[#1077bc] uppercase tracking-widest"
+                className="ex-modal-label mb-4 text-m sm:text-sm md:text-sm font-semibold uppercase tracking-widest"
               >
                 {label}
               </label>
@@ -121,10 +121,10 @@ const ExpandableInput = ({
                   defaultValue={value}
                   onInput={handleInput}
                   className="ex-textarea
-                    w-full border rounded-lg px-3 py-2
-                    text-s sm:text-base placeholder:text-[#a1cde8]
-                    focus:outline-none transition-shadow shadow-md
-                    min-h-[44px] resize-none overflow-hidden mt-4"
+                    w-full px-3 py-2
+                    text-s sm:text-base
+                    focus:outline-none
+                    min-h-[44px] resize-none overflow-hidden mt-4 mb-2"
                   onBlur={() => setIsOpen(false)} // chiude modal perdendo focus
                   rows={1}
                 />
@@ -143,13 +143,15 @@ const ExpandableInput = ({
                   onBlur={() => setIsOpen(false)}
                 />
               )}
-              {(label === "Telefono" || label === "Email" || label==='Cellulare') && (
+              {(label === "Telefono" ||
+                label === "Email" ||
+                label === "Cellulare") && (
                 <span
                   className="ex-copy cursor-pointer"
                   onClick={copyText}
                   title="Copia"
                 >
-                  <Copy className="w-5 h-5 text-gray-500 hover:text-blue-600 transition" />
+                  <Copy className="es-copy w-5 h-5 transition" />
                 </span>
               )}
             </motion.div>

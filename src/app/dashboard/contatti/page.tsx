@@ -153,7 +153,7 @@ const ContattiVirtualGrid = () => {
           columnWidth={CARD_WIDTH}
           rowHeight={CARD_HEIGHT}
           height={windowHeight *0.8}
-          width={windowWidth* 0.92}
+           width={isMobile?windowWidth*0.92:windowWidth}
         >
           {Cell}
         </Grid>
