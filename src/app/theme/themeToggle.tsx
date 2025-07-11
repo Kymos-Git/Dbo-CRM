@@ -23,10 +23,10 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}  // toggle tema
-      className="p-2 rounded-lg transition absolute top-1 right-1 cursor-pointer md:hover:scale-110"
+      className="w-5 h-5 p-2 rounded-lg transition absolute bottom-9 md:bottom-8 right-20 cursor-pointer md:hover:scale-110"
     >
       {/* Icona cambia in base al tema attuale */}
-      {theme === "dark" ? <Sun /> : <Moon />}
+      {theme === "dark" ? <Sun size={30}/> : <Moon size={30} />}
     </button>
   );
 }

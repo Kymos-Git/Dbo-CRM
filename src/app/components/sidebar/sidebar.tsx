@@ -62,7 +62,7 @@ export default function Sidebar() {
 
       {/* Navigazione link */}
       <nav className="nav-links">
-        <ThemeToggle />
+        
         {/* Componente per cambiare tema (light/dark) */}
 
         {/* Mappatura dei link, con evidenziazione se attivi */}
@@ -92,6 +92,7 @@ export default function Sidebar() {
       <div className="sb-account">
         <Account />
       </div>
+        <ThemeToggle />
     </div>
   );
 }

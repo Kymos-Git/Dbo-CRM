@@ -10,12 +10,11 @@
   --pulse-dark: #1077BC;
   --pulse: #58A0D3;
 
-  --font-family: Verdana, sans-serif;
 }
 
 .dark {
-  --bg: #191919;
-  --bg-alt: #383838;
+  --bg:#343434;
+  --bg-alt: #636363;
   --primary:#ffd700;
 
   --text: #F0F0F0;
@@ -36,7 +35,7 @@ html,.page {
   overflow: hidden;
 
   background-color: var(--bg);
-  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";;
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
 }
 .page{
   background-color: var(--text);
