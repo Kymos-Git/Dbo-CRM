@@ -4,18 +4,29 @@
 }
 .cd-card {
     background-color: var(--bg);
-    border: 1px solid var(--border);
+    border: 2px solid var(--bg-alt);
 }
 .cd-title {
-    color: var(--primary-dark);
+    color: var(--primary);
 }
 .cd-fields {
     color: var(--text);
 }
-.cd-field-row {}
-.cd-field-label {}
+
 .cd-field-link:hover {
     color: var(--primary);
     text-decoration: underline;
 }
-.cd-field-value {}
+
+
+.cd-cube{
+    width: 42%;
+    margin: 4%;
+    height: 42%;
+    border-radius: .2rem .1rem;
+    background-color: #c2c2c2;
+    border: .08rem solid var(--text);
+    float: left;
+    transition: all .4s ease-in-out;
+}
+

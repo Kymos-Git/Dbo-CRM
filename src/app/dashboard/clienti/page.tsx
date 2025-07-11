@@ -8,14 +8,12 @@ import { MapPin, Mail, Phone } from "lucide-react";
 import { useEffect, useState } from "react";
 import { FixedSizeGrid as Grid, GridChildComponentProps } from "react-window";
 import { ProtectedRoute } from "@/app/auth/ProtectedRoute";
-import Detail from "@/app/components/shared/detail/detail";
-import { motion, AnimatePresence } from "framer-motion";
 import { Cliente } from "@/app/interfaces/interfaces";
 import { getClienti } from "@/app/services/api";
 import { LoadingComponent } from "@/app/components/loading/loading";
 import { useAuth } from "@/app/context/authContext";
-import "./clienti.css"
-import { useRouter } from "next/navigation";
+
+import "./clienti.css";
 
 const ClientiVirtualGrid = () => {
   const [filtersValues, setFiltersValues] = useState<Record<string, string>>(
@@ -23,15 +21,15 @@ const ClientiVirtualGrid = () => {
   );
   const [windowHeight, setWindowHeight] = useState(0);
   const [windowWidth, setWindowWidth] = useState(0);
-  const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
   const [clientiCRM, setClientiCRM] = useState<Cliente[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { fetchWithAuth } = useAuth();
-  const router=useRouter();
+  const { fetchWithAuth, isReady } = useAuth();
 
   useEffect(() => {
+    if (!isReady) return;
+
     async function fetchClienti() {
       try {
         const data = await getClienti(fetchWithAuth);
@@ -45,7 +43,7 @@ const ClientiVirtualGrid = () => {
       }
     }
     fetchClienti();
-  }, []);
+  }, [isReady]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -60,7 +58,9 @@ const ClientiVirtualGrid = () => {
   const CARD_COUNT = windowHeight < 600 ? 2 : windowHeight < 800 ? 3 : 4;
   const isMobile = windowWidth < 768;
   const columnCount = isMobile ? 1 : 3;
-  const CARD_WIDTH = isMobile? Math.floor((windowWidth-30) / columnCount): Math.floor(windowWidth/columnCount);
+  const CARD_WIDTH = isMobile
+    ? Math.floor((windowWidth - 30) / columnCount)
+    : Math.floor(windowWidth / columnCount);
   const CARD_HEIGHT = Math.floor((windowHeight * 0.8) / CARD_COUNT);
   const rowCount = Math.ceil(clientiCRM.length / columnCount);
 
@@ -75,10 +75,7 @@ const ClientiVirtualGrid = () => {
     const cliente = clientiCRM[index];
 
     return (
-      <div
-        style={{ ...style, margin: 0, padding: 0, cursor: "pointer" }}
-        onClick={() => setSelectedCliente(cliente)}
-      >
+      <div style={{ ...style, margin: 0, padding: 0 }}>
         <GenericCard
           title={cliente.ragSocCompleta}
           fields={[
@@ -103,6 +100,7 @@ const ClientiVirtualGrid = () => {
               href: `tel:${cliente.tel}`,
             },
           ]}
+          dato={cliente}
         />
       </div>
     );
@@ -126,40 +124,25 @@ const ClientiVirtualGrid = () => {
     return `https://www.google.com/maps/search/?api=1&query=${encoded}`;
   }
 
-  const detailFieldsCliente =
-    selectedCliente === null
-      ? []
-      : [
-          {
-            title: "Ragione Sociale",
-            value: selectedCliente.ragSocCompleta,
-            type: "text",
-          },
-          { title: "Telefono", value: selectedCliente.tel, type: "text" },
-          { title: "Email", value: selectedCliente.email, type: "text" },
-          {
-            title: "Indirizzo",
-            value: selectedCliente.indirizzo,
-            type: "text",
-          },
-          { title: "Città", value: selectedCliente.citta, type: "text" },
-          { title: "CAP", value: selectedCliente.cap, type: "text" },
-          {
-            title: "Provincia",
-            value: selectedCliente.provincia || "",
-            type: "text",
-          },
-          selectedCliente.noteCliente
-            ? {
-                title: "Note",
-                value: selectedCliente.noteCliente,
-                type: "text",
-              }
-            : null,
-        ].filter(
-          (field): field is { title: string; value: string; type: string } =>
-            field !== null
-        );
+  function htmlToPlainText(html: string): string {
+    if (!html) return "";
+
+    // Sostituisci i <br> con \n
+    let text = html.replace(/<br\s*\/?>/gi, "\n");
+
+    // Sostituisci i <p> e </p> con \n\n per separare paragrafi
+    text = text.replace(/<\/p>/gi, "\n\n");
+    text = text.replace(/<p[^>]*>/gi, "");
+
+    // Rimuovi eventuali altri tag HTML rimanenti
+    text = text.replace(/<[^>]+>/g, "");
+
+    // Rimuovi spazi vuoti multipli o linee vuote extra se vuoi
+    text = text.replace(/\n\s*\n/g, "\n\n"); // doppio a capo consistente
+
+    // Trim per rimuovere spazi inutili a inizio e fine
+    return text.trim();
+  }
 
   function mapRawToCliente(raw: any): Cliente {
     return {
@@ -173,7 +156,11 @@ const ClientiVirtualGrid = () => {
       idPaese: raw.IdPaese,
       tel: raw.Tel,
       email: raw.EMail,
-      noteCliente: raw.Note,
+      noteCliente: htmlToPlainText(raw.NoteCrmElab),
+      Sem1: raw.Sem1 || 0,
+      Sem2: raw.Sem2 || 0,
+      Sem3: raw.Sem3 || 0,
+      Sem4: raw.Sem4 || 0,
     };
   }
 
@@ -188,56 +175,19 @@ const ClientiVirtualGrid = () => {
       )}
 
       {!loading && !error && clientiCRM.length > 0 && (
-        <Grid
-          columnCount={columnCount}
-          rowCount={rowCount}
-          columnWidth={CARD_WIDTH}
-          rowHeight={CARD_HEIGHT}
-          height={windowHeight}
-          width={windowWidth}
-        >
-          {Cell}
-        </Grid>
-      )}
-
-      <AnimatePresence>
-        {selectedCliente && (
-          <motion.div
-            className="fixed inset-0 flex items-center justify-center backdrop-blur-xs z-50 p-4"
-            onClick={() => setSelectedCliente(null)}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
+        <div className="gr">
+          <Grid
+            height={windowHeight * 0.8}
+             width={isMobile?windowWidth*0.92:windowWidth}
+            columnCount={columnCount}
+            columnWidth={CARD_WIDTH}
+            rowCount={rowCount}
+            rowHeight={CARD_HEIGHT}
           >
-            <motion.div
-              className="cl-zoom relative rounded-xl max-w-4xl w-full h-[80vh] overflow-auto p-6 sm:p-8"
-              onClick={(e) => e.stopPropagation()}
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <button
-                onClick={() => setSelectedCliente(null)}
-                className="cl-btn absolute top-4 right-4 transition font-bold text-lg rounded cursor-pointer"
-                aria-label="Chiudi dettaglio Cliente"
-              >
-                ✕
-              </button>
-
-              
-              <Detail
-                title={selectedCliente.ragSocCompleta}
-                fields={detailFieldsCliente}
-              />
-              <button className="cl-btnCnt absolute bottom-4 right-4 rounded-2xl transition h-10 w-25 text-xs cursor-pointer md:hover:scale-105" onClick={()=>router.push(`./contatti?ragSoc=${encodeURIComponent(selectedCliente?.ragSocCompleta || "")}`)}>
-                Vai ai contatti
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            {Cell}
+          </Grid>
+        </div>
+      )}
     </ProtectedRoute>
   );
 };
@@ -247,15 +197,8 @@ export default ClientiVirtualGrid;
 const filtersConfig: FilterConfig[] = [
   {
     type: "text",
-    label: "Nome",
+    label: "Nome/Rag.Soc",
     name: "ragioneSociale",
     placeholder: "Cerca...",
   },
-  {
-    type: "text",
-    label: "Città",
-    name: "citta",
-    placeholder: "Filtra città...",
-  },
-
 ];

@@ -33,11 +33,10 @@
     color: var(--text);
 }
 
-.ct-dropdown-item {
-   
+.ct-dropdown-item:hover {
+   background-color: var(--bg);
+   color: var(--primary);
+   transition: 300ms ease;
 }
 
-.ct-button-secondary {
-
-}
 

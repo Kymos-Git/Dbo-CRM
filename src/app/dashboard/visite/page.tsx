@@ -15,15 +15,13 @@
 
 import { ProtectedRoute } from "@/app/auth/ProtectedRoute";
 import GenericCard from "@/app/components/shared/card/card";
-import Detail from "@/app/components/shared/detail/detail";
+
 import GenericFilters, {
   FilterConfig,
 } from "@/app/components/shared/filters/filters";
 import { useEffect, useState } from "react";
 import { FixedSizeGrid as Grid, GridChildComponentProps } from "react-window";
-import { motion, AnimatePresence } from "framer-motion";
 import { Visita } from "@/app/interfaces/interfaces";
-import "./visite.css";
 import { getVisite } from "@/app/services/api";
 import { LoadingComponent } from "@/app/components/loading/loading";
 import { useAuth } from "@/app/context/authContext";
@@ -38,8 +36,6 @@ const VisiteVirtualGrid = () => {
   const [windowHeight, setWindowHeight] = useState(0);
   const [windowWidth, setWindowWidth] = useState(0);
 
-  // Stato per la visita selezionata nel dettaglio popup
-  const [selectedVisita, setSelectedVisita] = useState<Visita | null>(null);
 
   const [visiteCRM, setVisiteCRM] = useState<Visita[]>([]);
   const [loading, setLoading] = useState(true);
@@ -106,7 +102,6 @@ const VisiteVirtualGrid = () => {
     return (
       <div
         style={{ ...style, margin: 0, padding: 0, cursor: "pointer" }}
-        onClick={() => setSelectedVisita(visita)} // seleziona visita per dettaglio
       >
         <GenericCard
           title={visita.RagSoc}
@@ -114,25 +109,13 @@ const VisiteVirtualGrid = () => {
             { title: "Data:", value: visita.DataAttivita },
             { title: "Desc:", value: visita.DescAttivita },
           ]}
+          dato={visita}
         />
       </div>
     );
   };
 
-  // Dati da mostrare nel popup dettaglio visita (selezionata)
-  const detailFields =
-    selectedVisita === null
-      ? []
-      : [
-          { title: "Rag.Soc", value: selectedVisita.RagSoc, type: "text" },
-          { title: "Data", value: selectedVisita.DataAttivita, type: "text" },
-          {
-            title: "Descrizione",
-            value: selectedVisita.DescAttivita,
-            type: "text",
-          },
-          { title: "Note", value: selectedVisita.NoteAttivita, type: "text" },
-        ];
+
 
   function mapRawToVisite(raw: any): Visita {
     return {
@@ -141,6 +124,10 @@ const VisiteVirtualGrid = () => {
       NoteAttivita: raw.NoteAttivita,
       DataAttivita: formatDate(raw.DataAttivita),
       RagSoc: raw.RagSoc,
+      Sem1:raw.Sem1|| 0,
+      Sem2:raw.Sem2|| 0,
+      Sem3:raw.Sem3|| 0,
+      Sem4:raw.Sem4|| 0,
     };
   }
 
@@ -172,61 +159,12 @@ const VisiteVirtualGrid = () => {
           rowCount={rowCount}
           columnWidth={CARD_WIDTH}
           rowHeight={CARD_HEIGHT}
-          height={windowHeight}
-          width={windowWidth}
+          height={windowHeight*0.8}
+          width={isMobile?windowWidth*0.92:windowWidth}
         >
           {Cell}
         </Grid>
       )}
-
-      {/* Popup dettaglio visita con animazioni ingresso/uscita */}
-      <AnimatePresence>
-        {selectedVisita && (
-          <motion.div
-            className="
-              fixed inset-0 flex items-center justify-center
-              backdrop-blur-xs
-              z-50
-              p-4
-            "
-            onClick={() => setSelectedVisita(null)} // chiude popup cliccando fuori
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <motion.div
-              className="vt-zoom
-                relative rounded-xl max-w-4xl w-full h-[80vh] overflow-auto
-                p-6 sm:p-8
-              "
-              onClick={(e) => e.stopPropagation()} // previene chiusura cliccando dentro
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              {/* Bottone chiusura */}
-              <button
-                onClick={() => setSelectedVisita(null)}
-                className="vt-button
-                  absolute top-4 right-4 transition
-                  font-bold text-lg rounded cursor-pointer
-                "
-                aria-label="Chiudi dettaglio cliente"
-              >
-                ✕
-              </button>
-
-              {/* Dettaglio visita */}
-              <Detail
-                title={`${selectedVisita.RagSoc}`}
-                fields={detailFields}
-              />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </ProtectedRoute>
   );
 };

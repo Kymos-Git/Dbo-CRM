@@ -62,8 +62,8 @@ export default function Sidebar() {
 
       {/* Navigazione link */}
       <nav className="nav-links">
-        {/* Componente per cambiare tema (light/dark) */}
         <ThemeToggle />
+        {/* Componente per cambiare tema (light/dark) */}
 
         {/* Mappatura dei link, con evidenziazione se attivi */}
         {links.map(({ href, label, icon }) => {
@@ -78,13 +78,12 @@ export default function Sidebar() {
               scroll={true}
               className={`link ${isActive ? "active" : ""}`} // aggiunge classe active se selezionato
               onClick={() => {
-                console.log("cliccato");
                 setLoading(true);
                 setIsOpen(!isOpen);
               }} // chiude la sidebar cliccando su link (utile su mobile)
             >
               {/* Icona + label */}
-              <span className="icon">{icon}</span> {label}
+              <span >{icon}</span><span>{label}</span> 
             </Link>
           );
         })}

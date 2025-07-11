@@ -29,6 +29,7 @@ export function useAuthHook() {
 
   useEffect(() => {
     async function init() {
+      console.log("[init] start");
       setLoading(true);
       try {
         const savedUsername = (await getItem(USERNAME_KEY)) as string | null;
@@ -39,7 +40,7 @@ export function useAuthHook() {
           | string
           | null;
 
-        console.log("init:", {
+        console.log("dati:", {
           savedUsername,
           savedAccessToken,
           savedRefreshToken,
@@ -55,7 +56,10 @@ export function useAuthHook() {
         }
 
         setUsername(savedUsername);
+        console.log("username:", savedUsername);
+        console.log("token pre save", savedAccessToken);
         updateAccessToken(savedAccessToken);
+        console.log("token", accessToken);
         triedRefresh.current = true;
       } catch (error) {
         console.error("[init] Errore init auth:", error);
@@ -146,19 +150,28 @@ export function useAuthHook() {
   const logout = useCallback(async () => {
     setLoading(true);
     try {
-      // opzionale: avvisa API di logout/revoca token
-      const res = await fetchWithAuth("/api/revoke", {
-        method: "POST",
-      }).catch(() => {
-        // ignora errori per non bloccare logout
-      });
+      const token = accessTokenRef.current;
+
+      if (token) {
+        await fetch("/api/revoke", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }).catch((err) => {
+          console.warn("[logout] Errore durante revoke:", err);
+          // Ignora errori di revoca per continuare il logout
+        });
+      }
 
       updateAccessToken(null);
       setUsername(null);
 
-      await removeItem(REFRESH_TOKEN_KEY);
-      await removeItem(USERNAME_KEY);
-      await removeItem(ACCESS_TOKEN_KEY);
+      await removeItem("refreshToken");
+      await removeItem("username");
+      await removeItem("accessToken");
+
       triedRefresh.current = false;
 
       router.push("/");
@@ -171,22 +184,25 @@ export function useAuthHook() {
     input: RequestInfo,
     init?: RequestInit
   ): Promise<Response> {
-    const headers = new Headers(init?.headers);
+    const token = accessTokenRef.current;
+    const headers = new Headers(init?.headers || {});
 
-    // Usa il token attuale se presente
-    if (accessTokenRef.current) {
-      headers.set("Authorization", `Bearer ${accessTokenRef.current}`);
+    headers.set("Authorization", `Bearer ${token}`);
+
+    if (!headers.has("Content-Type")) {
+      headers.set("Content-Type", "application/json"); // fallback
     }
 
     let response = await fetch(input, { ...init, headers });
 
     if (response.status !== 401) return response;
 
-    // Se 401, provo a rinnovare il token
+    // Tentativo di refresh
     try {
       console.log("[fetchWithAuth] token scaduto, provo refresh...");
       const refreshToken = (await getItem(REFRESH_TOKEN_KEY)) as string | null;
-      const currentUsername = username ?? (await getItem('username')as string | null);
+      const currentUsername =
+        username ?? ((await getItem(USERNAME_KEY)) as string | null);
 
       if (!refreshToken || !currentUsername) {
         throw new Error("Refresh token o username non disponibile");
@@ -197,17 +213,12 @@ export function useAuthHook() {
         currentUsername
       );
 
-      // await setItem(ACCESS_TOKEN_KEY,newAccessToken)
-      // updateAccessToken(newAccessToken);
-
-      // Aggiorna header con il nuovo token
+      // Aggiorna header
       headers.set("Authorization", `Bearer ${newAccessToken}`);
+
       response = await fetch(input, { ...init, headers });
 
-  
-
       if (response.status === 401) {
-        // Se ancora 401, logout
         await logout();
         throw new Error("Sessione scaduta, effettua il login");
       }

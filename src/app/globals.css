@@ -2,15 +2,11 @@
 
 
 :root { 
-  --bg: #FFFFFF ;
-  --bg-alt: #f2f3f4;
-  --primary:#0cc6ff ;
-  --primary-dark: #1077BC;
-  --primary-hover: #189AB4;
-  --text: #1A1A1A;
-  --text-muted: #A1CDE8;
-  --border: #42BCE1;
-  --opposite: #1A1A1A;  
+  --bg: #f0eded ;
+  --bg-alt:#cbc9c9;
+  --primary:#027bff;
+  --text: #383838;
+
   --pulse-dark: #1077BC;
   --pulse: #58A0D3;
 
@@ -21,17 +17,17 @@
   --bg: #191919;
   --bg-alt: #383838;
   --primary:#ffd700;
-  --primary-dark:#fcd600;
+
   --text: #F0F0F0;
-  --text-muted: #7FB3D5;
   --border: #ffd700;
-  --opposite: #FFFFFF;
+
+
   --pulse-dark: #ffd700;
   --pulse: #ffd700;
 }
 
 body,
-html {
+html,.page {
   height: 100svh;
   width: 100vw;
   padding: 0;
@@ -40,6 +36,10 @@ html {
   overflow: hidden;
 
   background-color: var(--bg);
+}
+.page{
+  background-color: var(--text);
+  color: var(--bg);
 }
 
 
@@ -56,3 +56,4 @@ html {
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+

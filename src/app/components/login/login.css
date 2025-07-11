@@ -1,0 +1,145 @@
+
+
+
+.login {
+  height: 32vh;
+  width: 70vw;
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  border-radius: 25px;
+  background-color: var(--bg);
+
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 4%;
+
+  transition: box-shadow 0.5s ease;
+
+  box-shadow: 0 0 20px var(--bg-alt);
+
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+.main{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: 80%;
+  height: 100%;
+}
+
+.icon {
+  height: 30%;
+  width: 30%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: var(--opposite);
+  border-radius: 25px;
+}
+
+.username,
+.password {
+  width: 100%;
+  margin-top: 1%;
+  border: none;
+}
+
+.username h3,
+.password h3 {
+  font-size: 12px;
+  color: var(--primary);
+}
+
+.username input,
+.password input {
+  width: 85%;
+  padding: 1%;
+  color: var(--text);
+  border:none ;
+  border-bottom: 1px solid var(--bg-alt);
+  font-size: 12px;
+  background-color: var(--bg);
+}
+
+
+.username input:focus,
+.password input:focus {
+  border-color: var(--primary);
+  outline: none;
+  background-color: var(--bg);
+}
+
+.loadingComp {
+  width: 10vw;
+  height: 5vh;
+  position: absolute;
+  top: 87%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.btnLogin {
+  height: 15%;
+  width: 50%;
+  margin-top: 15%;
+  border: none;
+  border-radius: 25px;
+  background-color: var(--bg);
+  border: 1px solid var(--bg-alt);
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  color: var(--bg-alt);
+}
+
+.btnLogin:hover {
+  background-color: var(--bg-alt);
+  color: var(--bg);
+  transform: scale(1.03);
+  
+}
+
+@keyframes pulseGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 20px var(--pulse-dark);
+  }
+  50% {
+    box-shadow: 0 0 30px 15px var(--pulse);
+  }
+}
+
+.loading {
+  animation: pulseGlow 2s infinite ease-in-out;
+}
+
+@media (min-width: 768px) {
+  .container{
+    width: 100vw;
+    height: 100vh;
+  }
+  .login {
+    width: 20vw;
+    height: 25vh;
+    padding: 1%;
+    flex-direction: row;
+  }
+  .icon{
+    width: 50%;
+    height: 40%;
+    margin-right: 8%;
+  }
+  
+.username,
+.password{
+
+}
+}
