@@ -1,6 +1,7 @@
+
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import ExpandableInput from "../expandedInput/expandeInput";
 import "./detail.css";
 import { useRouter } from "next/navigation";
@@ -68,12 +69,16 @@ export default function Detail({
       />
     );
   }
+  const controls=useAnimation()
 
-  useEffect(()=>{
-
-  },[])
-
-
+  const handleNavigation = async () => {
+   await controls.start({
+        scale:[1,1.5,1],
+        transition:{duration:1}
+    })
+    onNavigate();
+    document.getElementsByTagName("main")[0].style.filter = "blur(0px)";
+  };
 
   return createPortal(
     <AnimatePresence>
@@ -94,15 +99,12 @@ export default function Detail({
               ></button>
 
               {flgCliente && (
-                <button
-                  onClick={() => {
-                    onNavigate();
-                    document.getElementsByTagName("main")[0].style.filter =
-                      "blur(0px)";
-                  }}
-                  className="dt-cnt absolute left-10 md:left-5 top-5.3 rounded-2xl transition cursor-pointer md:hover:scale-105 w-4 h-4 bg-green-400 "
+                <motion.button
+                  onClick={handleNavigation}
+                  className="dt-cnt absolute left-7 md:left-5 top-5.3 rounded-2xl transition cursor-pointer md:hover:scale-105 w-4 h-4 bg-green-400 "
                   title="vai ai contatti"
-                ></button>
+                  animate={controls}
+                ></motion.button>
               )}
             </div>
 
@@ -147,20 +149,18 @@ export default function Detail({
                     <ExpandableInput label={title} value={value} type={type} />
                   </div>
                 ))}
-
-             
             </form>
-              {/* Campo Note alla fine come semplice textarea */}
-             {fields
-                .filter(({ title }) => title.toLowerCase() === "note")
-                .map(({ title, value }, i) => (
-                  <div key={`note-${i}`} className="dt-field mb-4">
-                    <label className="dt-note-label block mb-1 font-semibold">
-                      {title.toUpperCase()}
-                    </label>
-                    <NoteField value={value} />
-                  </div>
-                ))}
+            {/* Campo Note alla fine come semplice textarea */}
+            {fields
+              .filter(({ title }) => title.toLowerCase() === "note")
+              .map(({ title, value }, i) => (
+                <div key={`note-${i}`} className="dt-field mb-4">
+                  <label className="dt-note-label block mb-1 font-semibold">
+                    {title.toUpperCase()}
+                  </label>
+                  <NoteField value={value} />
+                </div>
+              ))}
           </motion.div>
         </motion.div>
       )}
