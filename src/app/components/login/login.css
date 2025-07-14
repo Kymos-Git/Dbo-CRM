@@ -79,7 +79,7 @@
   width: 10vw;
   height: 5vh;
   position: absolute;
-  top: 87%;
+  top: 80%;
   left: 50%;
   transform: translateX(-50%);
 }
@@ -137,8 +137,8 @@
     margin-right: 8%;
   }
   
-.username,
-.password{
-
-}
+  .loadingComp{
+    left: 70%;
+    top: 80%;
+  }
 }

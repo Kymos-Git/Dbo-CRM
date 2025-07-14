@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/authContext";
 import { useTheme } from "next-themes";
 import "./login.css";
+import { toast } from "react-toastify";
 
 export function Login() {
   // Stato per username inserito dall’utente
@@ -27,8 +28,6 @@ export function Login() {
   // Stato per indicare se è in corso il caricamento della richiesta login
   const [loading, setLoading] = useState(false);
 
-  // Stato per salvare eventuali messaggi di errore da mostrare all’utente
-  const [errorMsg, setErrorMsg] = useState("");
 
   // Stato per gestire dinamicamente la sorgente dell’immagine logo in base al tema
   const [logoSrc, setLogoSrc] = useState("/kymos-nero.png");
@@ -55,11 +54,9 @@ export function Login() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault(); // Previene il comportamento di submit di default (ricarica pagina)
     if (!isReady) {
-      setErrorMsg("Configurazione non ancora pronta, riprova.");
       return;
     }
     setLoading(true); // Attiva lo stato di loading
-    setErrorMsg(""); // Pulisce eventuali errori precedenti
 
     try {
       // Chiama la funzione login fornita da useAuth con username e password
@@ -82,11 +79,9 @@ export function Login() {
       // Se error è un'istanza di Error, estraggo il messaggio
       if (error instanceof Error) message = error.message;
 
-      // Imposto il messaggio di errore nello stato
-      setErrorMsg(message);
 
       // Mostro alert con messaggio di errore
-      alert(message);
+      toast.error(message)
     } finally {
       // Disattivo lo stato di loading
       setLoading(false);
