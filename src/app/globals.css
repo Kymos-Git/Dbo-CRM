@@ -64,8 +64,9 @@ html,.page {
 .my-toast {
   width: 60vw !important;
   height: 10vh !important;
-  background-color: var(--bg-alt);
-  color: var(--text);
+  background-color: var(--bg) !important;
+  border: 1px solid var(--primary)!important;
+  color: var(--text) !important;
   border-radius: 25px !important;
   display: flex;
   align-items: center;
@@ -81,7 +82,7 @@ html,.page {
 
 .my-toast-progress {
   height: 0.8vh;
-  background-color: var(--primary);
+  background-color: var(--primary) !important;
   border-radius: 999px;
   position: absolute;
   bottom: 0;
@@ -92,5 +93,11 @@ html,.page {
 
 .Toastify__toast-container--bottom-right {
   bottom: 5vh !important;
-  right: 10vw !important;
+}
+
+@media (min-width:768px){
+  .my-toast{
+    width: 20vw !important;
+    margin-right: 2vw;
+  }
 }

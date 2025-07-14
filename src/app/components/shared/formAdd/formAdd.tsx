@@ -94,7 +94,7 @@ export default function FormAdd({ type, onClose }: formProps) {
 
         <div className="frm-semaphore flex items-center space-x-1 ml-2">
           <button
-            className="rounded-2xl transition w-3 h-3"
+            className="rounded-2xl transition w-3 h-3 cursor-pointer "
             style={{ backgroundColor: "#00ca4e" }}
             onClick={sendData}
             name="invia"
@@ -138,24 +138,24 @@ export default function FormAdd({ type, onClose }: formProps) {
             return (
               <div
                 key={i}
-                className={`frm-field mb-4 ${
+                className={`frm-field mb-4 w-full${
                   isTextarea ? "col-span-2 md:col-span-3" : ""
                 }`}
               >
-                <label className="ex-modal-label mb-1 text-xs font-semibold tracking-widest uppercase block">
+                <label className="frm-modal-label mb-1 text-xs font-semibold tracking-widest uppercase block text-[var(--primary)] ">
                   {name}
                 </label>
 
                 {isTextarea ? (
                   <textarea
                     name={name}
-                    className="w-[90%] px-3 py-2 text-sm focus:outline-none  border-b-1 border-b-[var(--grey)] min-h-[100px]"
+                    className=" px-3 py-2 text-sm focus:outline-none  border-b-1 border-b-[var(--grey)] min-h-[100px] md:w-[100%] w-[90%]"
                   />
                 ) : type === "text" || type === "number" ? (
                   <input
                     name={name}
                     type={type}
-                    className=" w-[90%]px-3 py-2 text-sm focus:outline-none  border-b-1 border-b-[var(--grey)] min-h-[44px] "
+                    className="md:w-[95%] w-[90%] px-3 py-2 text-sm focus:outline-none  border-b-1 border-b-[var(--grey)] min-h-[44px] "
                   />
                 ) : type === "checkbox" ? (
                   <input type="checkbox" name={name} className="mt-2" />
@@ -164,7 +164,7 @@ export default function FormAdd({ type, onClose }: formProps) {
                     type="date"
                     name={name}
                     placeholder="YYYY-MM-DD"
-                    className="w-[90%] px-3 py-2 text-sm focus:outline-none border-b-1 border-b-[var(--grey)] min-h-[44px]"
+                    className="md:w-[95%] w-[90%] px-3 py-2 text-sm focus:outline-none border-b-1 border-b-[var(--grey)] min-h-[44px]"
                   />
                 ) : null}
               </div>
