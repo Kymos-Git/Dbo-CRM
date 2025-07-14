@@ -1,0 +1,20 @@
+import { z } from "zod";
+
+export const schemaCliente = z.object({
+  ragione_sociale: z.string(),
+  indirizzo: z.string(),
+  citta: z.string(),
+  cap: z.string(),
+  provincia: z.string(),
+  idZona: z.string(),
+  idPaese: z.string(),
+  tel: z.string(),
+  email: z.string().regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Email non valida"),
+  Sem1: z.number().int().min(1).max(6),
+  Sem2: z.number().int().min(1).max(6),
+  Sem3: z.number().int().min(1).max(6),
+  Sem4: z.number().int().min(1).max(6),
+  note: z.string(),
+});
+
+export type Cliente = z.infer<typeof schemaCliente>;

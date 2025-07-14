@@ -34,7 +34,7 @@ export async function getClienti(
      body: JSON.stringify({ pageSize: 100 }),
      method:'POST'
   });
-  if (!res.ok) throw new Error("Errore nel fetch dei clienti");
+  if (!res.ok) throw new Error("Errore nel caricamento dei clienti");
   return (await res.json()) as interfaces.Cliente[];
 }
 
@@ -51,7 +51,7 @@ export async function getContatti(
      body: JSON.stringify({ pageSize: 100 }),
      method:'POST'
   });
-  if (!res.ok) throw new Error("Errore nel fetch dei contatti");
+  if (!res.ok) throw new Error("Errore nel caricamento dei contatti");
   return (await res.json()) as interfaces.Contatto[];
 }
 
@@ -67,6 +67,6 @@ export async function getVisite(
     },
     method:'POST'
   });
-  if (!res.ok) throw new Error("Errore nel fetch delle visite");
+  if (!res.ok) throw new Error("Errore nel caricamento delle visite");
   return (await res.json()) as interfaces.Visita[];
 }

@@ -190,10 +190,10 @@ export default function GenericCard({ title, fields, dato }: GenericCardProps) {
           onClick={handleAnimation}
           animate={controls}
         >
-          <div className="cd-cube" style={{ backgroundColor: colors[0] }}></div>
-          <div className="cd-cube" style={{ backgroundColor: colors[1] }}></div>
-          <div className="cd-cube" style={{ backgroundColor: colors[2] }}></div>
-          <div className="cd-cube" style={{ backgroundColor: colors[3] }}></div>
+          <div className="cd-cube rotate-90" style={{ backgroundColor: colors[0] }}></div>
+          <div className="cd-cube " style={{ backgroundColor: colors[1] }}></div>
+          <div className="cd-cube rotate-180" style={{ backgroundColor: colors[2] }}></div>
+          <div className="cd-cube rotate-90" style={{ backgroundColor: colors[3] }}></div>
         </motion.div>
       </div>
 

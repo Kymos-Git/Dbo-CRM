@@ -46,7 +46,7 @@ export default function GenericFilters({
   }
 
   return (
-    <div className="ft-container w-full grow px-4 py-2 flex justify-center items-start" style={{ minHeight: "10vh" }}>
+    <div className="ft-container w-full grow px-4 py-2 flex justify-center items-start pl-7" style={{ minHeight: "10vh" }}>
       <form
         onSubmit={(e) => e.preventDefault()}
         className="ft-form w-full h-full grid gap-3"

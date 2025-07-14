@@ -11,12 +11,21 @@ import Sidebar from "../components/sidebar/sidebar";
 import { RouteLoadingProvider } from "../context/routeContext";
 import RouteLoader from "../components/routeLoader/routeLoader";
 import "./dashboard.css"
+import { toast } from "react-toastify";
+import { getItem } from "../lib/indexedDB";
 
   
 
 export default function DashBoardLayout({ children }: { children: ReactNode }) {
 
+async function showWelcomeToast() {
+  const username = await getItem('username');
+  toast.success(`Benvenuto ${username}`);
+}
+
   useEffect(() => {
+    showWelcomeToast();
+
     function setAppHeight() {
       document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
     }

@@ -10,12 +10,13 @@
   --pulse-dark: #1077BC;
   --pulse: #58A0D3;
 
-  --font-family: Verdana, sans-serif;
+  --grey: #636363;
+
 }
 
 .dark {
-  --bg: #191919;
-  --bg-alt: #383838;
+  --bg:#343434;
+  --bg-alt: #636363;
   --primary:#ffd700;
 
   --text: #F0F0F0;
@@ -24,6 +25,8 @@
 
   --pulse-dark: #ffd700;
   --pulse: #ffd700;
+
+  --grey:#636363;
 }
 
 body,
@@ -36,7 +39,7 @@ html,.page {
   overflow: hidden;
 
   background-color: var(--bg);
-  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";;
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
 }
 .page{
   background-color: var(--text);
@@ -58,3 +61,43 @@ html,.page {
   background: transparent;
 }
 
+.my-toast {
+  width: 60vw !important;
+  height: 10vh !important;
+  background-color: var(--bg) !important;
+  border: 1px solid var(--primary)!important;
+  color: var(--text) !important;
+  border-radius: 25px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 1rem;
+  padding: 1vh;
+  box-shadow: 0 0.5vh 2vh rgba(0, 0, 0, 0.2);
+  position: relative;
+  margin-right: 2%;
+  overflow: hidden; 
+}
+
+.my-toast-progress {
+  height: 0.8vh;
+  background-color: var(--primary) !important;
+  border-radius: 999px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: 0 1vh 0 1vh; 
+}
+
+.Toastify__toast-container--bottom-right {
+  bottom: 5vh !important;
+}
+
+@media (min-width:768px){
+  .my-toast{
+    width: 20vw !important;
+    margin-right: 2vw;
+  }
+}
