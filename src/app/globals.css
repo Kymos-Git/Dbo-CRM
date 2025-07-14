@@ -10,6 +10,8 @@
   --pulse-dark: #1077BC;
   --pulse: #58A0D3;
 
+  --grey: #636363;
+
 }
 
 .dark {
@@ -23,6 +25,8 @@
 
   --pulse-dark: #ffd700;
   --pulse: #ffd700;
+
+  --grey:#636363;
 }
 
 body,
@@ -57,3 +61,36 @@ html,.page {
   background: transparent;
 }
 
+.my-toast {
+  width: 60vw !important;
+  height: 10vh !important;
+  background-color: var(--bg-alt);
+  color: var(--text);
+  border-radius: 25px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 1rem;
+  padding: 1vh;
+  box-shadow: 0 0.5vh 2vh rgba(0, 0, 0, 0.2);
+  position: relative;
+  margin-right: 2%;
+  overflow: hidden; 
+}
+
+.my-toast-progress {
+  height: 0.8vh;
+  background-color: var(--primary);
+  border-radius: 999px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: 0 1vh 0 1vh; 
+}
+
+.Toastify__toast-container--bottom-right {
+  bottom: 5vh !important;
+  right: 10vw !important;
+}

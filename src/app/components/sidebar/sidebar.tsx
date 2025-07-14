@@ -51,6 +51,7 @@ export default function Sidebar() {
       });
 
       onClick(label);
+      setIsOpen(false);
     };
 
     return (

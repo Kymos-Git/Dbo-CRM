@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeRegistry } from "./theme/themeRegistry";
 import { AuthProvider } from "./context/authContext";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,7 +29,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-          <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased `}
@@ -35,6 +40,18 @@ export default function RootLayout({
         <AuthProvider>
           <ThemeRegistry>{children}</ThemeRegistry>
         </AuthProvider>
+        <ToastContainer
+          position="bottom-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          pauseOnHover
+          toastClassName="my-toast"
+          progressClassName="my-toast-progress"
+        />
       </body>
     </html>
   );

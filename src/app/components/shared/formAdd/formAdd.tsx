@@ -4,6 +4,8 @@ import { schemaContatto } from "@/app/interfaces/schemaContatto";
 import { schemaVisita } from "@/app/interfaces/schemaVisita";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 type formProps = {
   type: "cliente" | "contatto" | "visita";
@@ -58,11 +60,15 @@ export default function FormAdd({ type, onClose }: formProps) {
 
   const fields = generateFieldsFromSchema(schema);
 
-  const sendData = () => {};
+  const sendData = () => {
+
+    console.log('inviato')
+    toast.info('Non ancora implementato')
+  };
 
   return createPortal(
     <motion.div
-      className="frm-container fixed inset-0 flex flex-row flex-wrap backdrop-blur-xs z-50 p-4 top-[50%] left-[50%] transform -translate-x-[50%] -translate-y-1/2 w-[90%] h-[80%] overflow-hidden rounded-2xl md:pt-1 bg-[var(--bg)]"
+      className="frm-container fixed inset-0 flex flex-row flex-wrap backdrop-blur-xs z-50 p-4 top-[50%] left-[50%] transform -translate-x-[50%] -translate-y-1/2 w-[90%] h-[80%] overflow-hidden rounded-2xl md:pt-1 bg-[var(--bg)] border-1 border-[var(--primary)]"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -143,13 +149,13 @@ export default function FormAdd({ type, onClose }: formProps) {
                 {isTextarea ? (
                   <textarea
                     name={name}
-                    className="w-full px-3 py-2 text-sm focus:outline-none border rounded min-h-[100px]"
+                    className="w-[90%] px-3 py-2 text-sm focus:outline-none  border-b-1 border-b-[var(--grey)] min-h-[100px]"
                   />
                 ) : type === "text" || type === "number" ? (
                   <input
                     name={name}
                     type={type}
-                    className="w-full px-3 py-2 text-sm focus:outline-none border rounded min-h-[44px]"
+                    className=" w-[90%]px-3 py-2 text-sm focus:outline-none  border-b-1 border-b-[var(--grey)] min-h-[44px] "
                   />
                 ) : type === "checkbox" ? (
                   <input type="checkbox" name={name} className="mt-2" />
@@ -157,7 +163,8 @@ export default function FormAdd({ type, onClose }: formProps) {
                   <input
                     type="date"
                     name={name}
-                    className="w-full px-3 py-2 text-sm focus:outline-none border rounded min-h-[44px]"
+                    placeholder="YYYY-MM-DD"
+                    className="w-[90%] px-3 py-2 text-sm focus:outline-none border-b-1 border-b-[var(--grey)] min-h-[44px]"
                   />
                 ) : null}
               </div>

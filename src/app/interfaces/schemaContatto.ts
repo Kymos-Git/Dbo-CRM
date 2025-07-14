@@ -6,7 +6,6 @@ export const schemaContatto = z.object({
   Rag_Sociale: z.string(),
   cellulare: z.string(),
   email: z.string().regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Email non valida"),
-  disabilita: z.boolean(),
   telefono: z.string(),
   città: z.string(),
   paese: z.string(),
