@@ -1,4 +1,4 @@
-/* Sidebar container */
+
 .sidebar {
   position: fixed;
   top: 0;
@@ -16,7 +16,7 @@
   border-right: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-/* Sidebar open */
+
 .sidebar.open {
   transform: translateX(0);
 }
@@ -37,7 +37,7 @@
   color: var(--bg);
     border-radius: 25px;
 }
-/* Toggle button */
+
 .button {
   position: fixed;
   top: 5%;
@@ -68,7 +68,7 @@
   color: white;
 }
 
-/* Navigation links container */
+
 .nav-links {
   display: flex;
   flex-direction: column;
@@ -76,7 +76,7 @@
   padding: 1rem 1rem;
 }
 
-/* Each link */
+
 .link {
   width: 80%;
   text-decoration: none;
@@ -100,7 +100,6 @@
   outline: none;
 }
 
-/* Active link styling */
 .link.active {
   background-color: var(--primary);
   color: var(--bg);
@@ -109,7 +108,7 @@
   transform: scale(1.07);
 }
 
-/* Icon inside links */
+
 .icon {
   user-select: none;
   color: var(--primary);

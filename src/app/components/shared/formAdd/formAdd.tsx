@@ -62,9 +62,13 @@ export default function FormAdd({ type, onClose }: formProps) {
 
   const sendData = () => {
 
-    console.log('inviato')
+
     toast.info('Non ancora implementato')
   };
+
+  const resetFields=()=>{
+     toast.info('Non ancora implementato')
+  }
 
   return createPortal(
     <motion.div
@@ -92,23 +96,21 @@ export default function FormAdd({ type, onClose }: formProps) {
           {type.toUpperCase()}
         </p>
 
-        <div className="frm-semaphore flex items-center space-x-1 ml-2">
+        <div className="frm-buttons flex items-center space-x-5 ml-2 ">
           <button
-            className="rounded-2xl transition w-3 h-3 cursor-pointer "
-            style={{ backgroundColor: "#00ca4e" }}
+            className="rounded-2xl transition w-17 h-9 cursor-pointer border-1 border-[var(--primary)]"
             onClick={sendData}
             name="invia"
             type="button"
-          />
-          {["#ff605c", "#ffbd44", "#3E94F7"].map((c, i) => (
-            <button
-              key={i}
-              className="rounded-2xl transition w-3 h-3"
-              style={{ backgroundColor: c }}
-              type="button"
-            />
-          ))}
-        </div>
+          >Crea</button>
+
+          <button
+            className="rounded-2xl transition w-17 h-9 cursor-pointer border-1 border-[var(--primary)]"
+            onClick={resetFields}
+            name="invia"
+            type="button"
+          >Svuota</button>
+         </div>
       </motion.div>
 
       {/* Form */}

@@ -49,9 +49,12 @@ export default function Sidebar() {
         rotate: [0, -360],
         transition: { duration: 1 },
       });
-
-      onClick(label);
-      setIsOpen(false);
+      
+      setTimeout(() => {
+        
+        onClick(label);
+        setIsOpen(false);
+      }, 1000);
     };
 
     return (
@@ -60,7 +63,7 @@ export default function Sidebar() {
         onClick={handleClick}
         animate={controls}
       >
-        <Plus size={20} />
+        <Plus size={25} />
       </motion.button>
     );
   };
