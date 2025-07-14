@@ -21,6 +21,22 @@
   transform: translateX(0);
 }
 
+.line{
+
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: space-between;
+
+}
+.line svg{
+  cursor: pointer;
+}
+.line svg:hover{
+   background-color: var(--primary);
+  color: var(--bg);
+    border-radius: 25px;
+}
 /* Toggle button */
 .button {
   position: fixed;
@@ -62,7 +78,7 @@
 
 /* Each link */
 .link {
-  width: 65%;
+  width: 80%;
   text-decoration: none;
   color: var(--text);
   font-size: 1.1rem;
@@ -89,7 +105,7 @@
   background-color: var(--primary);
   color: var(--bg);
   font-weight: 600;
-  box-shadow: 0 4px 12px rgba(42, 86, 198, 0.4);
+  box-shadow: 0 1px 10px  var(--primary);
   transform: scale(1.07);
 }
 
