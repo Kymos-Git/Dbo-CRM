@@ -61,8 +61,6 @@ export default function FormAdd({ type, onClose }: formProps) {
   const fields = generateFieldsFromSchema(schema);
 
   const sendData = () => {
-
-
     toast.info('Non ancora implementato')
   };
 
@@ -122,42 +120,20 @@ export default function FormAdd({ type, onClose }: formProps) {
         exit={{ scale: 0.95, opacity: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <form
-          className="
-              dt-form
-              grid 
-              grid-cols-2
-              sm:grid-cols-1
-              md:grid-cols-3
-              gap-x-2 
-              auto-rows-min
-            "
-          onSubmit={(e) => e.preventDefault()}
-        >
-          {fields.map(({ name, type }, i) => {
-            const isTextarea = name === "note";
-
-            return (
-              <div
-                key={i}
-                className={`frm-field mb-4 w-full${
-                  isTextarea ? "col-span-2 md:col-span-3" : ""
-                }`}
-              >
-                <label className="frm-modal-label mb-1 text-xs font-semibold tracking-widest uppercase block text-[var(--primary)] ">
+        <div className="dt-form">
+          {/* Regular fields grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-x-2 auto-rows-min">
+            {fields.filter(({ name }) => name !== "note").map(({ name, type }, i) => (
+              <div key={i} className="frm-field mb-4 w-full">
+                <label className="frm-modal-label mb-1 text-xs font-semibold tracking-widest uppercase block text-[var(--primary)]">
                   {name}
                 </label>
 
-                {isTextarea ? (
-                  <textarea
-                    name={name}
-                    className=" px-3 py-2 text-sm focus:outline-none  border-b-1 border-b-[var(--grey)] min-h-[100px] md:w-[100%] w-[90%]"
-                  />
-                ) : type === "text" || type === "number" ? (
+                {type === "text" || type === "number" ? (
                   <input
                     name={name}
                     type={type}
-                    className="md:w-[95%] w-[90%] px-3 py-2 text-sm focus:outline-none  border-b-1 border-b-[var(--grey)] min-h-[44px] "
+                    className="w-full px-3 py-2 text-sm focus:outline-none border-b-1 border-b-[var(--grey)] min-h-[44px]"
                   />
                 ) : type === "checkbox" ? (
                   <input type="checkbox" name={name} className="mt-2" />
@@ -166,13 +142,26 @@ export default function FormAdd({ type, onClose }: formProps) {
                     type="date"
                     name={name}
                     placeholder="YYYY-MM-DD"
-                    className="md:w-[95%] w-[90%] px-3 py-2 text-sm focus:outline-none border-b-1 border-b-[var(--grey)] min-h-[44px]"
+                    className="w-full px-3 py-2 text-sm focus:outline-none border-b-1 border-b-[var(--grey)] min-h-[44px] cursor-pointer"
                   />
                 ) : null}
               </div>
-            );
-          })}
-        </form>
+            ))}
+          </div>
+
+          {/* Note field - full width and moved to bottom */}
+          {fields.find(({ name }) => name === "note") && (
+            <div className="frm-field mb-4 w-full">
+              <label className="frm-modal-label mb-1 text-xs font-semibold tracking-widest uppercase block text-[var(--primary)]">
+                note
+              </label>
+              <textarea
+                name="note"
+                className="w-full px-3 py-2 text-sm focus:outline-none border-b-1 border-b-[var(--grey)] min-h-[100px]"
+              />
+            </div>
+          )}
+        </div>
       </motion.div>
     </motion.div>,
     document.body
