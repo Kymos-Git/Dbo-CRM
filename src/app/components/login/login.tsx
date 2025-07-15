@@ -19,23 +19,22 @@ import "./login.css";
 import { toast } from "react-toastify";
 
 export function Login() {
-  // Stato per username inserito dall’utente
+  // Stato per username inserito dall'utente
   const [username, setUsername] = useState("");
 
-  // Stato per password inserita dall’utente
+  // Stato per password inserita dall'utente
   const [password, setPassword] = useState("");
 
   // Stato per indicare se è in corso il caricamento della richiesta login
   const [loading, setLoading] = useState(false);
 
-
-  // Stato per gestire dinamicamente la sorgente dell’immagine logo in base al tema
+  // Stato per gestire dinamicamente la sorgente dell'immagine logo in base al tema
   const [logoSrc, setLogoSrc] = useState("/kymos-nero.png");
 
   // Hook per gestire la navigazione (redirect)
   const router = useRouter();
 
-  // Hook custom per l’autenticazione, espone la funzione login
+  // Hook custom per l'autenticazione, espone la funzione login
   const { login, isReady } = useAuth();
 
   // Hook per gestire il tema corrente (chiaro/scuro)
@@ -50,7 +49,7 @@ export function Login() {
     }
   }, [theme]);
 
-  // Funzione async che gestisce l’invio del form di login
+  // Funzione async che gestisce l'invio del form di login
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault(); // Previene il comportamento di submit di default (ricarica pagina)
     if (!isReady) {
@@ -62,12 +61,16 @@ export function Login() {
       // Chiama la funzione login fornita da useAuth con username e password
       await login(username, password);
 
-      // Redirect alla pagina /dashboard
-      router.push("/dashboard");
-
       // Resetto i campi input
       setUsername("");
       setPassword("");
+
+      // Redirect alla pagina /dashboard
+      router.push("/dashboard");
+      
+      // NOTA: Non disattivare loading qui - rimane attivo fino al cambio rotta
+      // setLoading(false) viene chiamato solo nel catch per gestire gli errori
+      
     } catch (error: unknown) {
       // In caso di errore creo delay di 2 secondi prima di mostrare il messaggio
       const delay = new Promise((resolve) => setTimeout(resolve, 2000));
@@ -79,11 +82,10 @@ export function Login() {
       // Se error è un'istanza di Error, estraggo il messaggio
       if (error instanceof Error) message = error.message;
 
-
       // Mostro alert con messaggio di errore
-      toast.error(message)
-    } finally {
-      // Disattivo lo stato di loading
+      toast.error(message);
+      
+      // Disattivo lo stato di loading solo in caso di errore
       setLoading(false);
     }
   }

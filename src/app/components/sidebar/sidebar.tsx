@@ -29,9 +29,21 @@ export default function Sidebar() {
   const { setLoading } = useRouteLoading();
 
   const links = [
-    { label: "Chat", icon: <MessageCircleMore size={20} />, href: "/dashboard" },
-    { label: "Contatti", icon: <User size={20} />, href: "/dashboard/contatti" },
-    { label: "Visite", icon: <BriefcaseBusiness size={20} />, href: "/dashboard/visite" },
+    {
+      label: "Chat",
+      icon: <MessageCircleMore size={20} />,
+      href: "/dashboard",
+    },
+    {
+      label: "Contatti",
+      icon: <User size={20} />,
+      href: "/dashboard/contatti",
+    },
+    {
+      label: "Visite",
+      icon: <BriefcaseBusiness size={20} />,
+      href: "/dashboard/visite",
+    },
     { label: "Clienti", icon: <Users size={20} />, href: "/dashboard/clienti" },
   ];
 
@@ -49,9 +61,8 @@ export default function Sidebar() {
         rotate: [0, -360],
         transition: { duration: 1 },
       });
-      
+
       setTimeout(() => {
-        
         onClick(label);
         setIsOpen(false);
       }, 1000);
@@ -72,7 +83,11 @@ export default function Sidebar() {
     <>
       <div className={`sidebar ${isOpen ? "open" : ""}`} id="sidebar">
         {/* Bottone per aprire/chiudere la sidebar */}
-        <div className="button" id="toggleBtn" onClick={() => setIsOpen(!isOpen)}>
+        <div
+          className="button"
+          id="toggleBtn"
+          onClick={() => setIsOpen(!isOpen)}
+        >
           {isOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
         </div>
 
@@ -120,13 +135,18 @@ export default function Sidebar() {
           <Account />
         </div>
 
-        <ThemeToggle />
+        <ThemeToggle
+          position={{
+            bottom: "2.2rem",
+            right: "4.5rem",
+          }}
+        />
       </div>
 
       {/* Overlay form dinamico */}
       {formType && (
         <div className="form-overlay fixed inset-0 backdrop-blur-sm flex justify-center items-center z-50">
-            <FormAdd type={formType} onClose={() => setFormType(null)} />
+          <FormAdd type={formType} onClose={() => setFormType(null)} />
         </div>
       )}
     </>

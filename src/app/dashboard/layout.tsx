@@ -3,7 +3,7 @@
 /**
  * DashBoardLayout.tsx
  *
- *   layout principale per la dashboard dell'applicazione.
+ * Layout principale per la dashboard dell'applicazione.
  */
 
 import { ReactNode, useEffect } from "react";
@@ -14,14 +14,19 @@ import "./dashboard.css"
 import { toast } from "react-toastify";
 import { getItem } from "../lib/indexedDB";
 
-  
-
 export default function DashBoardLayout({ children }: { children: ReactNode }) {
-
-async function showWelcomeToast() {
-  const username = await getItem('username');
-  toast.success(`Benvenuto ${username}`);
-}
+  async function showWelcomeToast() {
+    // ID univoco per il toast
+    const toastId = 'welcome-toast';
+    
+    // Verifica se il toast è già attivo
+    if (toast.isActive(toastId)) return;
+    
+    const username = await getItem('username');
+    toast.success(`Benvenuto ${username}`, {
+      toastId: toastId
+    });
+  }
 
   useEffect(() => {
     showWelcomeToast();
@@ -30,7 +35,7 @@ async function showWelcomeToast() {
       document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
     }
 
-    // Imposta all’avvio
+    // Imposta all'avvio
     setAppHeight();
 
     // Aggiorna al resize
@@ -40,21 +45,18 @@ async function showWelcomeToast() {
     return () => window.removeEventListener('resize', setAppHeight);
   }, []);
 
-
-
-
   return (
     // Contenitore flex per affiancare Sidebar e area contenuti
     <RouteLoadingProvider>
-      <div className="flex h-screen w-screen"  style={{ height: 'var(--app-height)' }}>
+      <div className="flex h-screen w-screen" style={{ height: 'var(--app-height)' }}>
         {/* Sidebar fissa sulla sinistra */}
         <Sidebar />
 
         {/* Area principale contenuti: cresce per occupare spazio disponibile */}
         <RouteLoader>
-        <main className="overflow-hidden p-4 h-full w-full">
-          {children}
-        </main>
+          <main className="overflow-hidden p-4 h-full w-full">
+            {children}
+          </main>
         </RouteLoader>
       </div>
     </RouteLoadingProvider>
