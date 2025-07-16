@@ -38,7 +38,6 @@ export interface Contatto {
   disabilita: boolean;
   tipoContatto: string;
   telefonoElaborato: string;
-  cittaClienteFornitore: string;
   paeseClienteFornitore: string;
   Sem1: number;
   Sem2: number;

@@ -14,6 +14,7 @@ import "./card.css"; // Import CSS per la card
 import Detail from "../detail/detail";
 import { Cliente, Contatto, Visita } from "@/app/interfaces/interfaces";
 import { useAnimation, motion } from "framer-motion";
+import { z, ZodObject } from "zod";
 
 // Definizione del tipo per ogni campo della card
 type CardField = {
@@ -29,6 +30,128 @@ type GenericCardProps = {
   dato: Cliente | Visita | Contatto;
 };
 
+// Configurazione per mappare i campi degli schemi ai titoli visualizzati
+type FieldConfig = {
+  key: string;
+  title: string;
+  type: string;
+  formatter?: (value: any) => string;
+  condition?: (data: any) => boolean;
+};
+
+function isCliente(dato: Cliente | Visita | Contatto): dato is Cliente {
+  return (dato as Cliente).ragSocCompleta !== undefined;
+}
+
+function isVisita(dato: Cliente | Visita | Contatto): dato is Visita {
+  return (dato as Visita).IdAttivita !== undefined;
+}
+
+function isContatto(dato: Cliente | Visita | Contatto): dato is Contatto {
+  return (dato as Contatto).nome !== undefined && (dato as Contatto).cognome !== undefined;
+}
+
+// Configurazioni per ogni tipo di dato
+const fieldConfigurations: Record<string, FieldConfig[]> = {
+  cliente: [
+    { key: "ragSocCompleta", title: "Rag.Soc.", type: "text" },
+    { key: "tel", title: "Telefono", type: "text" },
+    { key: "email", title: "Email", type: "text" },
+    { key: "indirizzo", title: "Indirizzo", type: "text" },
+    { key: "citta", title: "Città", type: "text" },
+    { key: "cap", title: "CAP", type: "text" },
+    { key: "provincia", title: "Provincia", type: "text" },
+    {
+      key: "noteCliente",
+      title: "Note",
+      type: "text",
+      condition: (data) => data.noteCliente && data.noteCliente.trim() !== "",
+    },
+  ],
+  visita: [
+    { key: "RagSoc", title: "Rag.Soc", type: "text" },
+    {
+      key: "DataAttivita",
+      title: "Data",
+      type: "text",
+      formatter: (value) => {
+        if (value instanceof Date) {
+          return value.toLocaleDateString("it-IT");
+        }
+        return value?.toString() || "";
+      },
+    },
+    { key: "DescAttivita", title: "Descrizione", type: "text" },
+    { key: "NoteAttivita", title: "Note", type: "text" },
+  ],
+  contatto: [
+    { key: "nome", title: "Nome", type: "text" },
+    { key: "cognome", title: "Cognome", type: "text" },
+    { key: "ragioneSociale", title: "Azienda", type: "text" },
+    { key: "cellulare", title: "Cellulare", type: "text" },
+    { key: "email", title: "Email", type: "text" },
+    { key: "telefonoElaborato", title: "Telefono", type: "text" },
+    { key: "paeseClienteFornitore", title: "Paese", type: "text" },
+    { key: "tipoContatto", title: "Tipo Contatto", type: "text" },
+  ],
+};
+
+// Funzione per generare detailFields dinamicamente
+function generateDetailFields(
+  dato: Cliente | Visita | Contatto,
+  schema?: z.ZodSchema<any>
+): { title: string; value: string; type: string }[] {
+  // Determina il tipo di dato
+  let dataType: string;
+  if (isCliente(dato)) {
+    dataType = "cliente";
+  } else if (isVisita(dato)) {
+    dataType = "visita";
+  } else if (isContatto(dato)) {
+    dataType = "contatto";
+  } else {
+    return [];
+  }
+
+  const config = fieldConfigurations[dataType];
+  if (!config) return [];
+
+  // Se è fornito uno schema Zod, usa le sue chiavi
+  let fieldsToProcess = config;
+  if (schema && schema instanceof ZodObject) {
+    const shape = schema.shape;
+    const schemaKeys = Object.keys(shape);
+    fieldsToProcess = config.filter((field) => schemaKeys.includes(field.key));
+  }
+
+  return fieldsToProcess
+    .filter((field) => {
+      // Applica la condizione se presente
+      if (field.condition) {
+        return field.condition(dato);
+      }
+      return true;
+    })
+    .map((field) => {
+      const rawValue = (dato as any)[field.key];
+      let formattedValue: string;
+
+      if (field.formatter) {
+        formattedValue = field.formatter(rawValue);
+      } else if (rawValue !== undefined && rawValue !== null) {
+        formattedValue = rawValue.toString();
+      } else {
+        formattedValue = "";
+      }
+
+      return {
+        title: field.title,
+        value: formattedValue,
+        type: field.type,
+      };
+    });
+}
+
 export default function GenericCard({ title, fields, dato }: GenericCardProps) {
   const [showDetail, setShowDetail] = useState(false);
   const controls = useAnimation();
@@ -37,52 +160,24 @@ export default function GenericCard({ title, fields, dato }: GenericCardProps) {
     setShowDetail(false);
   }
 
-  function isCliente(dato: Cliente | Visita | Contatto): dato is Cliente {
-    return (dato as Cliente).ragSocCompleta !== undefined;
-  }
+  // Esempio di come usare la funzione con uno schema Zod specifico
+  // Puoi passare lo schema come parametro opzionale
+  const schemaVisita = z.object({
+    DescAttivita: z.string(),
+    DataAttivita: z.date(),
+    RagSoc: z.string(),
+    NoteAttivita: z.string(),
+  });
 
-  function isVisita(dato: Cliente | Visita | Contatto): dato is Visita {
-    return (dato as Visita).IdAttivita !== undefined;
-  }
-
-  function isContatto(dato: Cliente | Visita | Contatto): dato is Contatto {
-    return (dato as Contatto).idContatto !== undefined;
-  }
-
+  // Genera i detailFields dinamicamente
   let detailFields: { title: string; value: string; type: string }[] = [];
 
-  if (isCliente(dato)) {
-    detailFields = [
-      { title: "Rag.Soc.", value: dato.ragSocCompleta, type: "text" },
-      { title: "Telefono", value: dato.tel, type: "text" },
-      { title: "Email", value: dato.email, type: "text" },
-      { title: "Indirizzo", value: dato.indirizzo, type: "text" },
-      { title: "Città", value: dato.citta, type: "text" },
-      { title: "CAP", value: dato.cap, type: "text" },
-      { title: "Provincia", value: dato.provincia || "", type: "text" },
-      ...(dato.noteCliente
-        ? [{ title: "Note", value: dato.noteCliente, type: "text" }]
-        : []),
-    ];
-  } else if (isVisita(dato)) {
-    detailFields = [
-      { title: "Rag.Soc", value: dato.RagSoc, type: "text" },
-      { title: "Data", value: dato.DataAttivita, type: "text" },
-      { title: "Descrizione", value: dato.DescAttivita, type: "text" },
-      { title: "Note", value: dato.NoteAttivita, type: "text" },
-    ];
-  } else if (isContatto(dato)) {
-    detailFields = [
-      { title: "Nome", value: dato.nome, type: "text" },
-      { title: "Cognome", value: dato.cognome, type: "text" },
-      { title: "Azienda", value: dato.ragioneSociale, type: "text" },
-      { title: "Cellulare", value: dato.cellulare, type: "text" },
-      { title: "Email", value: dato.email, type: "text" },
-      { title: "Telefono", value: dato.telefonoElaborato, type: "text" },
-      { title: "Città", value: dato.cittaClienteFornitore, type: "text" },
-      { title: "Paese", value: dato.paeseClienteFornitore, type: "text" },
-      { title: "Tipo Contatto", value: dato.tipoContatto, type: "text" },
-    ];
+  if (isVisita(dato)) {
+    // Per le visite, usa lo schema Zod specifico
+    detailFields = generateDetailFields(dato, schemaVisita);
+  } else {
+    // Per altri tipi, usa la configurazione standard
+    detailFields = generateDetailFields(dato);
   }
 
   const numericColors: number[] = [dato.Sem1, dato.Sem2, dato.Sem3, dato.Sem4];
@@ -139,7 +234,7 @@ export default function GenericCard({ title, fields, dato }: GenericCardProps) {
       grid?.classList.remove("hidden");
       main.style.filter = "blur(0px)";
     }
-  },[showDetail]);
+  }, [showDetail]);
 
   return (
     // Container principale che centra la card nella pagina con flexbox
@@ -163,9 +258,7 @@ export default function GenericCard({ title, fields, dato }: GenericCardProps) {
               className="cd-field-row flex items-center gap-1 truncate max-w-full"
             >
               {/* Titolo del campo, non si restringe mai */}
-              <strong className="cd-field-label flex-shrink-0">
-                {field.title}
-              </strong>{" "}
+              <strong className="cd-field-label flex-shrink-0">{field.title}</strong>{" "}
               {/* Se è presente href, mostra valore come link */}
               {field.href ? (
                 <Link
@@ -210,3 +303,4 @@ export default function GenericCard({ title, fields, dato }: GenericCardProps) {
     </div>
   );
 }
+  
