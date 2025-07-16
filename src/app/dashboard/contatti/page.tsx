@@ -19,7 +19,7 @@ import { useEffect, useState } from "react";
 import { FixedSizeGrid as Grid, GridChildComponentProps } from "react-window";
 import { ProtectedRoute } from "@/app/auth/ProtectedRoute";
 import { Contatto } from "@/app/interfaces/interfaces";
-import { getContatti } from "@/app/services/api";
+import { getContatti, getContattiFiltrati } from "@/app/services/api";
 import { LoadingComponent } from "@/app/components/loading/loading";
 import { useAuth } from "@/app/context/authContext";
 import { useSearchParams } from "next/navigation";
@@ -33,8 +33,8 @@ const ContattiVirtualGrid = () => {
   const [error, setError] = useState<string | null>(null);
 
   const { fetchWithAuth } = useAuth();
-    const searchParams = useSearchParams();
-    const initialRagSoc = searchParams.get("ragSoc") || "";
+  const searchParams = useSearchParams();
+  const initialRagSoc = searchParams.get("ragSoc") || "";
 
   const [filtersValues, setFiltersValues] = useState<Record<string, string>>({
     "Rag.Soc.": initialRagSoc,
@@ -71,12 +71,27 @@ const ContattiVirtualGrid = () => {
   const columnCount = isMobile ? 1 : 3;
   const CARD_WIDTH = isMobile
     ? Math.floor((windowWidth - 30) / columnCount)
-    : Math.floor(windowWidth*0.98 / columnCount);
+    : Math.floor((windowWidth * 0.98) / columnCount);
   const CARD_HEIGHT = Math.floor((windowHeight * 0.8) / CARD_COUNT);
   const rowCount = Math.ceil(contattiCRM.length / columnCount);
 
-  function handleFiltersChange(values: Record<string, string>) {
+  // Funzione per aggiornare filtri e fare fetch solo se cambiano
+  async function handleFiltersBlur(values: Record<string, string>) {
+    // Se i filtri sono identici, non fare nulla
+    if (JSON.stringify(values) === JSON.stringify(filtersValues)) return;
+
     setFiltersValues(values);
+    setLoading(true);
+    try {
+      const data = await getContattiFiltrati(fetchWithAuth, values);
+      setContattiCRM(data.map(mapRawToContatto));
+      setError(null);
+    } catch (err) {
+      setError("Errore nel caricamento delle visite filtrate.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   }
 
   const Cell = ({ columnIndex, rowIndex, style }: GridChildComponentProps) => {
@@ -135,8 +150,8 @@ const ContattiVirtualGrid = () => {
     <ProtectedRoute>
       <GenericFilters
         filters={filtersConfig}
-        onChange={handleFiltersChange}
-        initialValues={{ "nome": initialRagSoc }}
+        onBlur={handleFiltersBlur}
+        initialValues={{ nome: initialRagSoc }}
       />
 
       {loading && <LoadingComponent />}
@@ -152,8 +167,8 @@ const ContattiVirtualGrid = () => {
           rowCount={rowCount}
           columnWidth={CARD_WIDTH}
           rowHeight={CARD_HEIGHT}
-          height={windowHeight *0.8}
-           width={isMobile?windowWidth*0.92:windowWidth}
+          height={windowHeight * 0.8}
+          width={isMobile ? windowWidth * 0.92 : windowWidth}
         >
           {Cell}
         </Grid>
@@ -165,5 +180,10 @@ const ContattiVirtualGrid = () => {
 export default ContattiVirtualGrid;
 
 const filtersConfig: FilterConfig[] = [
-  { type: "text", label: "Nome/Rag.Soc", name: "nome", placeholder: "Cerca nome..." },
+  {
+    type: "text",
+    label: "Nome/Rag.Soc",
+    name: "nome",
+    placeholder: "Cerca nome...",
+  },
 ];

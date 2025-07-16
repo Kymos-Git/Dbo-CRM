@@ -25,6 +25,7 @@ import { Visita } from "@/app/interfaces/interfaces";
 import { getVisite } from "@/app/services/api";
 import { LoadingComponent } from "@/app/components/loading/loading";
 import { useAuth } from "@/app/context/authContext";
+import { getVisiteFiltrate } from "@/app/services/api";
 
 const VisiteVirtualGrid = () => {
   // Stato per i valori dei filtri
@@ -35,7 +36,6 @@ const VisiteVirtualGrid = () => {
   // Stati per dimensioni finestra (utili per il layout responsivo)
   const [windowHeight, setWindowHeight] = useState(0);
   const [windowWidth, setWindowWidth] = useState(0);
-
 
   const [visiteCRM, setVisiteCRM] = useState<Visita[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,6 +56,7 @@ const VisiteVirtualGrid = () => {
 
   useEffect(() => {
     async function fetchVisite() {
+      setLoading(true);
       try {
         const data = await getVisite(fetchWithAuth);
         setVisiteCRM(data.map(mapRawToVisite));
@@ -80,16 +81,29 @@ const VisiteVirtualGrid = () => {
   // Dimensioni singola card calcolate in base alla finestra
   const CARD_WIDTH = isMobile
     ? Math.floor((windowWidth - 30) / columnCount)
-    : Math.floor(windowWidth*0.98 / columnCount);
+    : Math.floor((windowWidth * 0.98) / columnCount);
   const CARD_HEIGHT = Math.floor((windowHeight * 0.8) / CARD_COUNT);
 
   // Numero totale righe necessarie per mostrare tutte le visite
   const rowCount = Math.ceil(visiteCRM.length / columnCount);
 
-  // Callback quando cambia il filtro: aggiorna lo stato e stampa valori (da estendere)
-  function handleFiltersChange(values: Record<string, string>) {
+  // Funzione per aggiornare filtri e fare fetch solo se cambiano
+  async function handleFiltersBlur(values: Record<string, string>) {
+    // Se i filtri sono identici, non fare nulla
+    if (JSON.stringify(values) === JSON.stringify(filtersValues)) return;
+
     setFiltersValues(values);
-    console.log("Filtri aggiornati:", values);
+    setLoading(true);
+    try {
+      const data = await getVisiteFiltrate(fetchWithAuth, values);
+      setVisiteCRM(data.map(mapRawToVisite));
+      setError(null);
+    } catch (err) {
+      setError("Errore nel caricamento delle visite filtrate.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   }
 
   // Funzione per rendere la cella della griglia: una card visita cliccabile
@@ -100,9 +114,7 @@ const VisiteVirtualGrid = () => {
     const visita = visiteCRM[index];
 
     return (
-      <div
-        style={{ ...style, margin: 0, padding: 0, cursor: "pointer" }}
-      >
+      <div style={{ ...style, margin: 0, padding: 0, cursor: "pointer" }}>
         <GenericCard
           title={visita.RagSoc}
           fields={[
@@ -115,8 +127,6 @@ const VisiteVirtualGrid = () => {
     );
   };
 
-
-
   function mapRawToVisite(raw: any): Visita {
     return {
       IdAttivita: raw.IdAttivita,
@@ -124,10 +134,10 @@ const VisiteVirtualGrid = () => {
       NoteAttivita: raw.NoteAttivita,
       DataAttivita: formatDate(raw.DataAttivita),
       RagSoc: raw.RagSoc,
-      Sem1:raw.Sem1|| 0,
-      Sem2:raw.Sem2|| 0,
-      Sem3:raw.Sem3|| 0,
-      Sem4:raw.Sem4|| 0,
+      Sem1: raw.Sem1 || 0,
+      Sem2: raw.Sem2 || 0,
+      Sem3: raw.Sem3 || 0,
+      Sem4: raw.Sem4 || 0,
     };
   }
 
@@ -143,7 +153,7 @@ const VisiteVirtualGrid = () => {
   return (
     <ProtectedRoute>
       {/* Componente filtro */}
-      <GenericFilters filters={filtersConfig} onChange={handleFiltersChange} />
+      <GenericFilters filters={filtersConfig} onBlur={handleFiltersBlur} />
 
       {loading && <LoadingComponent />}
       {error && <p className="error">{error}</p>}
@@ -159,8 +169,8 @@ const VisiteVirtualGrid = () => {
           rowCount={rowCount}
           columnWidth={CARD_WIDTH}
           rowHeight={CARD_HEIGHT}
-          height={windowHeight*0.8}
-          width={isMobile?windowWidth*0.92:windowWidth}
+          height={windowHeight * 0.8}
+          width={isMobile ? windowWidth * 0.92 : windowWidth}
         >
           {Cell}
         </Grid>

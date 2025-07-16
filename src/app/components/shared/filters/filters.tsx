@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "./filters.css";
 
 export type FilterConfig =
@@ -13,40 +13,37 @@ export type FilterConfig =
 
 type GenericFiltersProps = {
   filters: FilterConfig[];
-  onChange: (values: Record<string, string>) => void;
+  onBlur: (values: Record<string, string>) => void;
   initialValues?: Record<string, string>;
 };
 
 export default function GenericFilters({
   filters,
-  onChange,
+  onBlur,
   initialValues = {},
 }: GenericFiltersProps) {
-  // Genera valori di default vuoti
   const defaultValues = filters.reduce((acc, filter) => {
     acc[filter.name] = "";
     return acc;
   }, {} as Record<string, string>);
 
-  // Stato con merge tra default e initialValues
   const [values, setValues] = useState<Record<string, string>>({
     ...defaultValues,
     ...initialValues,
   });
 
-  // Facoltativo: per notificare i valori iniziali
-  useEffect(() => {
-    onChange(values);
-  }, []);
-
-  function handleChange(name: string, value: string) {
+  
+  function handleBlur(name: string, value: string) {
     const newValues = { ...values, [name]: value };
     setValues(newValues);
-    onChange(newValues);
+    onBlur(newValues);
   }
 
   return (
-    <div className="ft-container w-full grow px-4 py-2 flex justify-center items-start pl-7" style={{ minHeight: "10vh" }}>
+    <div
+      className="ft-container w-full grow px-4 py-2 flex justify-center items-start pl-7"
+      style={{ minHeight: "10vh" }}
+    >
       <form
         onSubmit={(e) => e.preventDefault()}
         className="ft-form w-full h-full grid gap-3"
@@ -76,9 +73,9 @@ export default function GenericFilters({
                 id={filter.name}
                 type="text"
                 placeholder={filter.placeholder}
-                value={values[filter.name]}
-                onChange={(e) => handleChange(filter.name, e.target.value)}
-                className="ft-input w-full p-2  border-b-1 border-b-gray-400 text-s leading-snug focus:outline-none focus:shadow-md "
+                defaultValue={values[filter.name]}
+                onBlur={(e) => handleBlur(filter.name, e.target.value)}
+                className="ft-input w-full p-2 border-b-1 border-b-gray-400 text-s leading-snug focus:outline-none focus:shadow-md"
                 style={{ minHeight: 32 }}
               />
             )}
@@ -87,9 +84,9 @@ export default function GenericFilters({
               <input
                 id={filter.name}
                 type="date"
-                value={values[filter.name]}
-                onChange={(e) => handleChange(filter.name, e.target.value)}
-                className="ft-input w-full p-2 border-b-1  border-b-gray-400 text-s leading-snug focus:outline-none  focus:shadow-md"
+                defaultValue={values[filter.name]}
+                onBlur={(e) => handleBlur(filter.name, e.target.value)}
+                className="ft-input w-full p-2 border-b-1 border-b-gray-400 text-s leading-snug focus:outline-none focus:shadow-md"
                 style={{ minHeight: 32 }}
               />
             )}
@@ -97,9 +94,9 @@ export default function GenericFilters({
             {filter.type === "select" && (
               <select
                 id={filter.name}
-                value={values[filter.name]}
-                onChange={(e) => handleChange(filter.name, e.target.value)}
-                className="ft-select w-full p-2 border-b-1 border-b-gray-400 text-s leading-snug focus:outline-nonefocus:shadow-md"
+                defaultValue={values[filter.name]}
+                onBlur={(e) => handleBlur(filter.name, e.target.value)}
+                className="ft-select w-full p-2 border-b-1 border-b-gray-400 text-s leading-snug focus:outline-none focus:shadow-md"
                 style={{ minHeight: 32 }}
               >
                 <option value="">Seleziona</option>

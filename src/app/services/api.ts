@@ -70,3 +70,23 @@ export async function getVisite(
   if (!res.ok) throw new Error("Errore nel caricamento delle visite");
   return (await res.json()) as interfaces.Visita[];
 }
+
+
+export async function getVisiteFiltrate( fetchFn: (input: string, init?: RequestInit) => Promise<Response>,filters: Record<string, string>): Promise<interfaces.Visita[]>{
+  const queryParams = new URLSearchParams(filters).toString();
+  const response = await fetchFn(`${queryParams}`);
+  if (!response.ok) throw new Error("Errore nel fetch delle visite filtrate");
+  return await response.json();
+}
+export async function getContattiFiltrati( fetchFn: (input: string, init?: RequestInit) => Promise<Response>,filters: Record<string, string>): Promise<interfaces.Visita[]>{
+  const queryParams = new URLSearchParams(filters).toString();
+  const response = await fetchFn(`${queryParams}`);
+  if (!response.ok) throw new Error("Errore nel fetch delle visite filtrate");
+  return await response.json();
+}
+export async function getClientiFiltrati( fetchFn: (input: string, init?: RequestInit) => Promise<Response>,filters: Record<string, string>): Promise<interfaces.Visita[]>{
+  const queryParams = new URLSearchParams(filters).toString();
+  const response = await fetchFn(`${queryParams}`);
+  if (!response.ok) throw new Error("Errore nel fetch delle visite filtrate");
+  return await response.json();
+}

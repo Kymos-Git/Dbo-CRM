@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import { FixedSizeGrid as Grid, GridChildComponentProps } from "react-window";
 import { ProtectedRoute } from "@/app/auth/ProtectedRoute";
 import { Cliente } from "@/app/interfaces/interfaces";
-import { getClienti } from "@/app/services/api";
+import { getClienti, getClientiFiltrati } from "@/app/services/api";
 import { LoadingComponent } from "@/app/components/loading/loading";
 import { useAuth } from "@/app/context/authContext";
 
@@ -64,9 +64,24 @@ const ClientiVirtualGrid = () => {
   const CARD_HEIGHT = Math.floor((windowHeight * 0.8) / CARD_COUNT);
   const rowCount = Math.ceil(clientiCRM.length / columnCount);
 
-  const handleFiltersChange = (values: Record<string, string>) => {
-    setFiltersValues(values);
-  };
+  // Funzione per aggiornare filtri e fare fetch solo se cambiano
+    async function handleFiltersBlur(values: Record<string, string>) {
+      // Se i filtri sono identici, non fare nulla
+      if (JSON.stringify(values) === JSON.stringify(filtersValues)) return;
+  
+      setFiltersValues(values);
+      setLoading(true);
+      try {
+        const data = await getClientiFiltrati(fetchWithAuth, values);
+        setClientiCRM(data.map(mapRawToCliente));
+        setError(null);
+      } catch (err) {
+        setError("Errore nel caricamento delle visite filtrate.");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
 
   const Cell = ({ columnIndex, rowIndex, style }: GridChildComponentProps) => {
     const index = rowIndex * columnCount + columnIndex;
@@ -166,7 +181,7 @@ const ClientiVirtualGrid = () => {
 
   return (
     <ProtectedRoute>
-      <GenericFilters filters={filtersConfig} onChange={handleFiltersChange} />
+      <GenericFilters filters={filtersConfig} onBlur={handleFiltersBlur} />
 
       {loading && <LoadingComponent />}
       {error && <p className="error">{error}</p>}
