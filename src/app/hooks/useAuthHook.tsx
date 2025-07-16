@@ -19,16 +19,15 @@ export function useAuthHook() {
 
   const triedRefresh = useRef(false);
   const refreshInProgress = useRef(false);
+  const logoutStartedRef = useRef(false); 
 
   let refreshPromise: Promise<string> | null = null;
 
-  // Funzione per aggiornare accessToken sia in stato che in ref
   const updateAccessToken = (token: string | null) => {
     accessTokenRef.current = token;
     setAccessTokenState(token);
   };
 
-  // Funzione helper per mostrare messaggi toast user-friendly
   const showToastError = (message?: string) => {
     toast.error(message || "Errore imprevisto, riprova più tardi");
   };
@@ -38,15 +37,10 @@ export function useAuthHook() {
       setLoading(true);
       try {
         const savedUsername = (await getItem(USERNAME_KEY)) as string | null;
-        const savedAccessToken = (await getItem(ACCESS_TOKEN_KEY)) as
-          | string
-          | null;
-        const savedRefreshToken = (await getItem(REFRESH_TOKEN_KEY)) as
-          | string
-          | null;
+        const savedAccessToken = (await getItem(ACCESS_TOKEN_KEY)) as string | null;
+        const savedRefreshToken = (await getItem(REFRESH_TOKEN_KEY)) as string | null;
 
         if (!savedUsername || !savedRefreshToken) {
-          // Se manca username o refresh token, siamo logout
           setUsername(null);
           updateAccessToken(null);
           triedRefresh.current = true;
@@ -68,10 +62,7 @@ export function useAuthHook() {
     init();
   }, []);
 
-  async function refreshAccessToken(
-    refreshToken: string,
-    username: string
-  ): Promise<string> {
+  async function refreshAccessToken(refreshToken: string, username: string): Promise<string> {
     if (refreshPromise) {
       return refreshPromise;
     }
@@ -87,8 +78,7 @@ export function useAuthHook() {
         });
 
         if (!res.ok) {
-          toast.warning("Sessione scaduta, effettua nuovamente il login");
-          await logout();
+          await logoutOnce(); 
           throw new Error("Refresh token scaduto");
         }
 
@@ -121,17 +111,15 @@ export function useAuthHook() {
       });
 
       let data: any = null;
-      // Provo a leggere il json solo se c'è un body
       const text = await res.text();
       try {
         data = text ? JSON.parse(text) : null;
       } catch {
-        data = null; // non è JSON valido
+        data = null;
       }
 
       if (!res.ok) {
-        // Messaggio utente basato su risposta o fallback
-        const userMessage ="Credenziali errate"
+        const userMessage = "Credenziali errate";
         toast.error(userMessage);
         throw new Error(userMessage);
       }
@@ -185,57 +173,53 @@ export function useAuthHook() {
       router.push("/");
     } catch (error) {
       console.warn("[logout] Errore durante revoke:", error);
-      // Non mostriamo errore toast all'utente, ma possiamo loggare
     } finally {
+      logoutStartedRef.current = false; 
       setLoading(false);
     }
   }, [router]);
 
-  async function fetchWithAuth(
-    input: RequestInfo,
-    init?: RequestInit
-  ): Promise<Response> {
+  const logoutOnce = useCallback(async () => {
+    if (logoutStartedRef.current) return;
+    logoutStartedRef.current = true;
+
+    toast.warning("Sessione scaduta, effettua nuovamente il login");
+    await logout();
+  }, [logout]);
+
+  async function fetchWithAuth(input: RequestInfo, init?: RequestInit): Promise<Response> {
     const token = accessTokenRef.current;
     const headers = new Headers(init?.headers || {});
-
     headers.set("Authorization", `Bearer ${token}`);
 
     if (!headers.has("Content-Type")) {
-      headers.set("Content-Type", "application/json"); // fallback
+      headers.set("Content-Type", "application/json");
     }
 
     let response = await fetch(input, { ...init, headers });
 
     if (response.status !== 401) return response;
 
-    // Tentativo di refresh
     try {
       const refreshToken = (await getItem(REFRESH_TOKEN_KEY)) as string | null;
-      const currentUsername =
-        username ?? ((await getItem(USERNAME_KEY)) as string | null);
+      const currentUsername = username ?? ((await getItem(USERNAME_KEY)) as string | null);
 
       if (!refreshToken || !currentUsername) {
         throw new Error("Refresh token o username non disponibile");
       }
 
-      const newAccessToken = await refreshAccessToken(
-        refreshToken,
-        currentUsername
-      );
+      const newAccessToken = await refreshAccessToken(refreshToken, currentUsername);
 
       headers.set("Authorization", `Bearer ${newAccessToken}`);
-
       response = await fetch(input, { ...init, headers });
 
       if (response.status === 401) {
-        toast.warning("Sessione scaduta, effettua nuovamente il login");
-        await logout();
+        await logoutOnce();
       }
 
       return response;
     } catch (err) {
-      toast.warning("Sessione scaduta, effettua nuovamente il login");
-      await logout();
+      await logoutOnce();
       throw new Error("[fetchWithAuth] Errore durante refresh token");
     }
   }

@@ -18,7 +18,6 @@ export async function getBaseApiUrl(): Promise<string> {
     throw new Error("BASE_API_URL non è una stringa valida");
   }
   return cachedBaseUrl;
-  
 }
 
 export async function getClienti(
@@ -26,13 +25,12 @@ export async function getClienti(
 ): Promise<interfaces.Cliente[]> {
   // const baseUrl = await getBaseApiUrl();
   // const res = await fetchFn(`${baseUrl}/GetCrmClienti`
-  const res=await fetchFn('/api/getCrmClienti/0'
-    ,{
+  const res = await fetchFn("/api/getCrmClienti/0", {
     headers: {
       "Content-Type": "application/json",
     },
-     body: JSON.stringify({ pageSize: 100 }),
-     method:'POST'
+    body: JSON.stringify({ pageSize: 100 }),
+    method: "POST",
   });
   if (!res.ok) throw new Error("Errore nel caricamento dei clienti");
   return (await res.json()) as interfaces.Cliente[];
@@ -43,13 +41,12 @@ export async function getContatti(
 ): Promise<interfaces.Contatto[]> {
   // const baseUrl = await getBaseApiUrl();
   // const res = await fetchFn(`${baseUrl}/GetCrmContatti`
-  const res = await fetchFn(`/api/GetCrmContatti/0`
-    ,{
-      headers: {
+  const res = await fetchFn(`/api/GetCrmContatti/0`, {
+    headers: {
       "Content-Type": "application/json",
     },
-     body: JSON.stringify({ pageSize: 100 }),
-     method:'POST'
+    body: JSON.stringify({ pageSize: 100 }),
+    method: "POST",
   });
   if (!res.ok) throw new Error("Errore nel caricamento dei contatti");
   return (await res.json()) as interfaces.Contatto[];
@@ -60,33 +57,70 @@ export async function getVisite(
 ): Promise<interfaces.Visita[]> {
   // const baseUrl = await getBaseApiUrl();
   // const res = await fetchFn(`${baseUrl}/GetCrmVisite`
-  const res = await fetchFn(`/api/GetCrmVisiteByUser`
-    ,{
-      headers: {
+  const res = await fetchFn(`/api/GetCrmVisiteByUser`, {
+    headers: {
       "Content-Type": "application/json",
     },
-    method:'POST'
+    method: "POST",
   });
   if (!res.ok) throw new Error("Errore nel caricamento delle visite");
   return (await res.json()) as interfaces.Visita[];
 }
 
+export async function getVisiteFiltrate(
+  fetchFn: (input: string, init?: RequestInit) => Promise<Response>,
+  filters: Record<string, string>
+): Promise<interfaces.Visita[]> {
+  const queryParams = new URLSearchParams(filters).toString();
+  const response = await fetchFn(`/api/Visite?=${queryParams}`, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+  });
+  if (!response.ok) throw new Error("Errore nel fetch delle visite filtrate");
+  return await response.json();
+}
 
-export async function getVisiteFiltrate( fetchFn: (input: string, init?: RequestInit) => Promise<Response>,filters: Record<string, string>): Promise<interfaces.Visita[]>{
+export async function getContattiFiltrati(
+  fetchFn: (input: string, init?: RequestInit) => Promise<Response>,
+  filters: Record<string, string>
+): Promise<interfaces.Visita[]> {
   const queryParams = new URLSearchParams(filters).toString();
-  const response = await fetchFn(`${queryParams}`);
+  const response = await fetchFn(`/api/Contatti?=${queryParams}`, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+  });
   if (!response.ok) throw new Error("Errore nel fetch delle visite filtrate");
   return await response.json();
 }
-export async function getContattiFiltrati( fetchFn: (input: string, init?: RequestInit) => Promise<Response>,filters: Record<string, string>): Promise<interfaces.Visita[]>{
+
+export async function getClientiFiltrati(
+  fetchFn: (input: string, init?: RequestInit) => Promise<Response>,
+  filters: Record<string, string>
+): Promise<interfaces.Visita[]> {
   const queryParams = new URLSearchParams(filters).toString();
-  const response = await fetchFn(`${queryParams}`);
+  const response = await fetchFn(`/api/Clienti?=${queryParams}`, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+  });
   if (!response.ok) throw new Error("Errore nel fetch delle visite filtrate");
   return await response.json();
 }
-export async function getClientiFiltrati( fetchFn: (input: string, init?: RequestInit) => Promise<Response>,filters: Record<string, string>): Promise<interfaces.Visita[]>{
-  const queryParams = new URLSearchParams(filters).toString();
-  const response = await fetchFn(`${queryParams}`);
-  if (!response.ok) throw new Error("Errore nel fetch delle visite filtrate");
-  return await response.json();
+
+
+export async function sendCliente(data:any){
+
+}
+
+export async function sendContatto(data:any){
+  
+}
+
+export async function sendVisita(data:any){
+  
 }

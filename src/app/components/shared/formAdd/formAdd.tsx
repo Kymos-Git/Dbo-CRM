@@ -1,11 +1,14 @@
-import { z } from "zod";
-import { schemaCliente } from "@/app/interfaces/schemaCliente";
-import { schemaContatto } from "@/app/interfaces/schemaContatto";
-import { schemaVisita } from "@/app/interfaces/schemaVisita";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
+import { z } from "zod";
 import "react-toastify/dist/ReactToastify.css";
+
+import { schemaCliente } from "@/app/interfaces/schemaCliente";
+import { schemaContatto } from "@/app/interfaces/schemaContatto";
+import { schemaVisita } from "@/app/interfaces/schemaVisita";
+import { sendCliente, sendContatto, sendVisita } from "@/app/services/api";
 
 type formProps = {
   type: "cliente" | "contatto" | "visita";
@@ -19,19 +22,25 @@ type Field = {
 
 function generateFieldsFromSchema(schema: z.ZodObject<any>): Field[] {
   const shape = schema.shape;
-
   return Object.keys(shape).map((key) => {
     const field = shape[key];
-    let type = "text";
+    let type: string;
 
-    if (field instanceof z.ZodString) {
-      type = "text";
-    } else if (field instanceof z.ZodNumber) {
-      type = "number";
-    } else if (field instanceof z.ZodBoolean) {
-      type = "checkbox";
-    } else if (field instanceof z.ZodDate) {
-      type = "date";
+    switch (true) {
+      case field instanceof z.ZodString:
+        type = "text";
+        break;
+      case field instanceof z.ZodNumber:
+        type = "number";
+        break;
+      case field instanceof z.ZodBoolean:
+        type = "checkbox";
+        break;
+      case field instanceof z.ZodDate:
+        type = "date";
+        break;
+      default:
+        type = "text";
     }
 
     return {
@@ -42,31 +51,88 @@ function generateFieldsFromSchema(schema: z.ZodObject<any>): Field[] {
 }
 
 export default function FormAdd({ type, onClose }: formProps) {
-  let schema: z.ZodObject<any>;
+  const [schema, setSchema] = useState<z.ZodObject<any> | null>(null);
+  const [fields, setFields] = useState<Field[]>([]);
+  const [formData, setFormData] = useState<Record<string, any>>({});
 
-  switch (type) {
-    case "cliente":
-      schema = schemaCliente;
-      break;
-    case "contatto":
-      schema = schemaContatto;
-      break;
-    case "visita":
-      schema = schemaVisita;
-      break;
-    default:
-      return <div>Tipo non riconosciuto</div>;
-  }
+  useEffect(() => {
+    let selectedSchema: z.ZodObject<any>;
+    switch (type) {
+      case "cliente":
+        selectedSchema = schemaCliente;
+        break;
+      case "contatto":
+        selectedSchema = schemaContatto;
+        break;
+      case "visita":
+        selectedSchema = schemaVisita;
+        break;
+      default:
+        return;
+    }
 
-  const fields = generateFieldsFromSchema(schema);
+    const generatedFields = generateFieldsFromSchema(selectedSchema);
+    const initialData: Record<string, any> = {};
 
-  const sendData = () => {
-    toast.info('Non ancora implementato')
+    generatedFields.forEach(({ name, type }) => {
+      initialData[name] = type === "checkbox" ? false : "";
+    });
+
+    setSchema(selectedSchema);
+    setFields(generatedFields);
+    setFormData(initialData);
+  }, [type]);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, type } = e.target;
+    const value =
+      e.target instanceof HTMLInputElement && type === "checkbox"
+        ? e.target.checked
+        : e.target.value;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const resetFields=()=>{
-     toast.info('Non ancora implementato')
-  }
+  const sendData = async () => {
+    if (!schema) return;
+    try {
+      const parsed = schema.parse(formData);
+      switch (type) {
+        case "cliente":
+          await sendCliente(parsed);
+          break;
+        case "contatto":
+          await sendContatto(parsed);
+          break;
+        case "visita":
+          await sendVisita(parsed);
+          break;
+      }
+      toast.success("Dati inviati con successo");
+      onClose();
+    } catch (err) {
+      toast.error(
+        "Errore nella validazione dei dati: " +
+          (err instanceof Error ? err.message : "Errore sconosciuto")
+      );
+    }
+  };
+
+  const resetFields = () => {
+    const resetData: Record<string, any> = {};
+    fields.forEach(({ name, type }) => {
+      resetData[name] = type === "checkbox" ? false : "";
+    });
+    setFormData(resetData);
+    toast.info("Campi resettati");
+  };
+
+  if (!schema) return null;
 
   return createPortal(
     <motion.div
@@ -77,7 +143,6 @@ export default function FormAdd({ type, onClose }: formProps) {
       transition={{ duration: 0.5 }}
       onClick={onClose}
     >
-      {/* Header */}
       <motion.div
         className="frm-header relative flex items-center justify-between h-15 w-full mb-5"
         onClick={(e) => e.stopPropagation()}
@@ -94,62 +159,73 @@ export default function FormAdd({ type, onClose }: formProps) {
           {type.toUpperCase()}
         </p>
 
-        <div className="frm-buttons flex items-center space-x-5 ml-2 ">
+        <div className="frm-buttons flex items-center space-x-5 ml-2">
           <button
             className="rounded-2xl transition w-17 h-9 cursor-pointer border-1 border-[var(--primary)]"
             onClick={sendData}
             name="invia"
             type="button"
-          >Crea</button>
+          >
+            Crea
+          </button>
 
           <button
             className="rounded-2xl transition w-17 h-9 cursor-pointer border-1 border-[var(--primary)]"
             onClick={resetFields}
-            name="invia"
+            name="reset"
             type="button"
-          >Svuota</button>
-         </div>
+          >
+            Svuota
+          </button>
+        </div>
       </motion.div>
 
-      {/* Form */}
       <motion.div
         className="frm-main relative rounded-xl max-w-4xl w-full h-[85%] overflow-auto p-2 pt-0 md:w-full md:max-w-full"
-        onClick={(e) => e.stopPropagation()} // previene chiusura cliccando sul form
+        onClick={(e) => e.stopPropagation()}
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
         transition={{ duration: 0.5 }}
       >
         <div className="dt-form">
-          {/* Regular fields grid */}
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-x-2 auto-rows-min">
-            {fields.filter(({ name }) => name !== "note").map(({ name, type }, i) => (
-              <div key={i} className="frm-field mb-4 w-full">
-                <label className="frm-modal-label mb-1 text-xs font-semibold tracking-widest uppercase block text-[var(--primary)]">
-                  {name}
-                </label>
-
-                {type === "text" || type === "number" ? (
-                  <input
-                    name={name}
-                    type={type}
-                    className="w-full px-3 py-2 text-sm focus:outline-none border-b-1 border-b-[var(--grey)] min-h-[44px]"
-                  />
-                ) : type === "checkbox" ? (
-                  <input type="checkbox" name={name} className="mt-2" />
-                ) : type === "date" ? (
-                  <input
-                    type="date"
-                    name={name}
-                    placeholder="YYYY-MM-DD"
-                    className="w-full px-3 py-2 text-sm focus:outline-none border-b-1 border-b-[var(--grey)] min-h-[44px] cursor-pointer"
-                  />
-                ) : null}
-              </div>
-            ))}
+            {fields
+              .filter(({ name }) => name !== "note")
+              .map(({ name, type }, i) => (
+                <div key={i} className="frm-field mb-4 w-full">
+                  <label className="frm-modal-label mb-1 text-xs font-semibold tracking-widest uppercase block text-[var(--primary)]">
+                    {name}
+                  </label>
+                  {type === "text" || type === "number" ? (
+                    <input
+                      name={name}
+                      type={type}
+                      value={formData[name]}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 text-sm focus:outline-none border-b-1 border-b-[var(--grey)] min-h-[44px]"
+                    />
+                  ) : type === "checkbox" ? (
+                    <input
+                      type="checkbox"
+                      name={name}
+                      checked={formData[name]}
+                      onChange={handleChange}
+                      className="mt-2"
+                    />
+                  ) : type === "date" ? (
+                    <input
+                      type="date"
+                      name={name}
+                      value={formData[name]}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 text-sm focus:outline-none border-b-1 border-b-[var(--grey)] min-h-[44px] cursor-pointer"
+                    />
+                  ) : null}
+                </div>
+              ))}
           </div>
 
-          {/* Note field - full width and moved to bottom */}
           {fields.find(({ name }) => name === "note") && (
             <div className="frm-field mb-4 w-full">
               <label className="frm-modal-label mb-1 text-xs font-semibold tracking-widest uppercase block text-[var(--primary)]">
@@ -157,6 +233,8 @@ export default function FormAdd({ type, onClose }: formProps) {
               </label>
               <textarea
                 name="note"
+                value={formData["note"]}
+                onChange={handleChange}
                 className="w-full px-3 py-2 text-sm focus:outline-none border-b-1 border-b-[var(--grey)] min-h-[100px]"
               />
             </div>

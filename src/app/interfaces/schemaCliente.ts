@@ -10,10 +10,6 @@ export const schemaCliente = z.object({
   Stato: z.string(),
   tel: z.string(),
   email: z.string().regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Email non valida"),
-  Sem1: z.number().int().min(1).max(6),
-  Sem2: z.number().int().min(1).max(6),
-  Sem3: z.number().int().min(1).max(6),
-  Sem4: z.number().int().min(1).max(6),
   note: z.string(),
 });
 
