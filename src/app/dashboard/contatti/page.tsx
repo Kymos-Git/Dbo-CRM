@@ -1,11 +1,12 @@
 /**
- * ContattoVirtualGrid.tsx
+ * ContattiVirtualGrid.tsx
  *
- * Questo componente mostra una lista di contatti (simulati) in una griglia virtualizzata
- * usando react-window per ottimizzare il rendering di molte card.
- * Offre filtri base e la possibilità di
- * selezionare un contatto per vedere i dettagli in un popup animato con framer-motion.
- * È protetto da un componente ProtectedRoute che gestisce autenticazione.
+ * Questo componente mostra una lista di contatti in una griglia virtualizzata utilizzando react-window
+ * per ottimizzare il rendering di molte card contemporaneamente. Permette di filtrare i contatti
+ * tramite un componente di filtri e carica i dati tramite API protette da autenticazione.
+ * L'interfaccia si adatta dinamicamente alla dimensione della finestra e supporta una visualizzazione
+ * responsive per dispositivi mobili. È protetto da ProtectedRoute per garantire che solo utenti autenticati
+ * possano accedervi.
  */
 
 "use client";
@@ -22,28 +23,45 @@ import { Contatto } from "@/app/interfaces/interfaces";
 import { getContatti, getContattiFiltrati } from "@/app/services/api";
 import { LoadingComponent } from "@/app/components/loading/loading";
 import { useAuth } from "@/app/context/authContext";
-import {  useSearchParams } from "next/navigation";
-
+import { useSearchParams } from "next/navigation";
 
 const ContattiVirtualGrid = () => {
+  /**
+   * Gestisce lo stato della dimensione della finestra per adattare
+   * dinamicamente la griglia di visualizzazione delle card.
+   */
   const [windowHeight, setWindowHeight] = useState(0);
   const [windowWidth, setWindowWidth] = useState(0);
 
+  /**
+   * Stato per memorizzare i dati dei contatti caricati dal backend,
+   * stato di caricamento e stato di errore.
+   */
   const [contattiCRM, setContattiCRM] = useState<Contatto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  /**
+   * Hook per ottenere la funzione fetch autenticata e i parametri di ricerca
+   * passati tramite URL, ad esempio un filtro iniziale su ragione sociale.
+   */
   const { fetchWithAuth } = useAuth();
   const searchParams = useSearchParams();
   const initialRagSoc = searchParams.get("ragSoc") || "";
 
+  /**
+   * Stato per mantenere i valori attuali dei filtri usati nella ricerca.
+   * Inizializzato con un filtro "Rag.Soc." da eventuale query string.
+   */
   const [filtersValues, setFiltersValues] = useState<Record<string, string>>({
     "Rag.Soc.": initialRagSoc,
   });
 
-
-
-
+  /**
+   * Effetto per caricare inizialmente i contatti all'avvio del componente.
+   * Chiama l'API getContatti usando la funzione fetch autenticata.
+   * Mappa i dati grezzi in oggetti Contatto.
+   */
   useEffect(() => {
     async function FetchContatti() {
       try {
@@ -60,6 +78,10 @@ const ContattiVirtualGrid = () => {
     FetchContatti();
   }, []);
 
+  /**
+   * Effetto per gestire il ridimensionamento della finestra e aggiornare
+   * gli stati di larghezza e altezza in modo da adattare dinamicamente la griglia.
+   */
   useEffect(() => {
     const handleResize = () => {
       setWindowHeight(window.innerHeight);
@@ -70,6 +92,10 @@ const ContattiVirtualGrid = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  /**
+   * Costanti per configurare la griglia virtuale in base alla dimensione della finestra,
+   * decidendo numero di colonne, dimensioni delle card e righe totali.
+   */
   const CARD_COUNT = windowHeight < 600 ? 2 : windowHeight < 800 ? 3 : 4;
   const isMobile = windowWidth < 768;
   const columnCount = isMobile ? 1 : 3;
@@ -79,9 +105,12 @@ const ContattiVirtualGrid = () => {
   const CARD_HEIGHT = Math.floor((windowHeight * 0.8) / CARD_COUNT);
   const rowCount = Math.ceil(contattiCRM.length / columnCount);
 
-  // Funzione per aggiornare filtri e fare fetch solo se cambiano
+  /**
+   * Funzione chiamata quando si esce dal campo filtro per aggiornare
+   * la lista filtrata di contatti. Richiama l'API con i filtri correnti
+   * e aggiorna la lista visualizzata.
+   */
   async function handleFiltersBlur(values: Record<string, string>) {
-    // Se i filtri sono identici, non fare nulla
     if (JSON.stringify(values) === JSON.stringify(filtersValues)) return;
 
     setFiltersValues(values);
@@ -98,6 +127,11 @@ const ContattiVirtualGrid = () => {
     }
   }
 
+  /**
+   * Funzione componente per il rendering di ogni cella della griglia virtualizzata.
+   * Calcola l'indice corretto in base a riga e colonna, esclude celle fuori range,
+   * e mostra i dati del contatto in una Card con icone e link attivi.
+   */
   const Cell = ({ columnIndex, rowIndex, style }: GridChildComponentProps) => {
     const index = rowIndex * columnCount + columnIndex;
     if (index >= contattiCRM.length) return null;
@@ -130,6 +164,10 @@ const ContattiVirtualGrid = () => {
     );
   };
 
+  /**
+   * Funzione di utilità per mappare un oggetto raw proveniente dall'API
+   * in un oggetto Contatto conforme all'interfaccia usata nel componente.
+   */
   function mapRawToContatto(raw: any): Contatto {
     return {
       idContatto: raw.IdContatto,

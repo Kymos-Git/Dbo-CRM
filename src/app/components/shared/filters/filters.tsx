@@ -1,3 +1,12 @@
+/**
+ * GenericFilters.tsx
+ *
+ * Componente generico per la gestione di filtri con diversi tipi di input: testo, data e select.
+ * Riceve una configurazione dei filtri (label, tipo, nome, opzioni) e gestisce lo stato interno dei valori.
+ * Al momento del blur di ogni input, aggiorna lo stato e invoca la callback `onBlur` con i valori correnti.
+ * Supporta valori iniziali opzionali per precompilare i filtri.
+ */
+
 import { useState } from "react";
 import "./filters.css";
 
@@ -22,17 +31,25 @@ export default function GenericFilters({
   onBlur,
   initialValues = {},
 }: GenericFiltersProps) {
+  // Inizializza i valori di default per tutti i filtri con stringhe vuote
   const defaultValues = filters.reduce((acc, filter) => {
     acc[filter.name] = "";
     return acc;
   }, {} as Record<string, string>);
 
+  // Stato interno che tiene traccia dei valori correnti di tutti i filtri,
+  // combinando i valori di default e quelli eventualmente forniti inizialmente
   const [values, setValues] = useState<Record<string, string>>({
     ...defaultValues,
     ...initialValues,
   });
 
-  
+  /**
+   * Funzione chiamata al blur di un input filtro.
+   * Aggiorna lo stato interno con il nuovo valore e chiama la callback onBlur con i valori aggiornati.
+   * @param name - nome del filtro modificato
+   * @param value - valore corrente del filtro
+   */
   function handleBlur(name: string, value: string) {
     const newValues = { ...values, [name]: value };
     setValues(newValues);

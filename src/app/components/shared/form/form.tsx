@@ -1,3 +1,15 @@
+/**
+ * Form
+ * 
+ * Componente modale che gestisce la visualizzazione di un form popup.
+ * Usa React Portals per rendere il contenuto fuori dal normale flusso DOM, sovrapponendolo a tutto il resto.
+ * Integra animazioni di apertura/chiusura con framer-motion.
+ * Supporta la visualizzazione di un header con titolo, bottoni di chiusura, pulsanti di azione opzionali e indicatori colore.
+ * Può includere una funzione di navigazione legata a un flag cliente.
+ * Gestisce internamente il montaggio per evitare rendering prematuri sul server.
+ */
+
+
 "use client";
 
 import { createPortal } from "react-dom";
@@ -14,9 +26,10 @@ type FormProps = {
   onNavigate?: () => void;
   fglButtons: boolean;
   buttons?: string[];
-   onSend?: () => void;   
+  onSend?: () => void;   
   onReset?: () => void;
 };
+
 
 export default function Form({
   visible,
@@ -31,15 +44,20 @@ export default function Form({
   onSend,
   onReset
 }: FormProps) {
+  // Controlli per animazioni tramite framer-motion
   const controls = useAnimation();
+  // Stato per verificare che il componente sia montato (client-side only)
   const [mounted, setMounted] = useState(false);
 
+  // Imposta mounted a true solo dopo il primo render (per evitare problemi SSR)
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // Se non montato, non renderizza nulla (evita problemi server-side)
   if (!mounted) return null;
 
+  // Ritorna il contenuto modale tramite portal sul body del documento
   return createPortal(
     <AnimatePresence>
       {visible && (
@@ -55,12 +73,14 @@ export default function Form({
             }
           >
             <div className="flex items-center space-x-2 w-10">
+              {/* Bottone per chiudere il form */}
               <button
                 onClick={onClose}
                 className="frm-close transition font-bold text-lg rounded-2xl cursor-pointer bg-red-600 w-4 h-4"
                 aria-label="Chiudi form"
               ></button>
 
+              {/* Pulsante di navigazione visibile solo se flgCliente è attivo e onNavigate fornito */}
               {flgCliente && onNavigate && (
                 <motion.button
                   onClick={(e) => {
@@ -74,10 +94,12 @@ export default function Form({
               )}
             </div>
 
+            {/* Titolo del form */}
             <p className="text-center text-xs font-bold tracking-wide">
               {title}
             </p>
 
+            {/* Se fglButtons è falso, mostra il semaforo, altrimenti mostra i pulsanti Azione */}
             {!fglButtons ? (
               <div className="frm-semaphore flex items-center space-x-1 ml-2">
                 {colors.map((c, i) => (
@@ -111,8 +133,9 @@ export default function Form({
             )}
           </motion.div>
 
+          {/* Contenuto principale del form, scrollabile e animato */}
           <motion.div
-            className="frm-main relative rounded-xl max-w-4xl w-full h-[85%] p-2 pt-0 md:w-full md:max-w-full"
+            className="frm-main relative rounded-xl max-w-4xl w-full h-[85%] p-2 pt-0 md:w-full md:max-w-full overflow-auto"
             onClick={(e) => e.stopPropagation()}
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}

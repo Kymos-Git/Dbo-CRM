@@ -29,7 +29,7 @@ export default function ThemeToggle({ position, className = "", style = {} }: Th
 
   if (!mounted) return null;
 
-  // Combina position, style personalizzato e posizione assoluta se necessario
+ 
   const finalStyle = {
     ...(position && { position: 'absolute' as const }),
     ...position,

@@ -3,7 +3,8 @@
  *
  * Componente per mostrare un input o textarea che inizialmente è "compresso" (readonly).
  * Al click o focus, si apre un modal con l'input espanso per una visualizzazione più comoda.
- *
+ * Supporta la copia del valore per alcuni tipi di campi (Telefono, Email, Cellulare).
+ * Gestisce l'altezza dinamica del textarea per adattarsi al contenuto.
  */
 
 "use client";
@@ -24,23 +25,34 @@ const ExpandableInput = ({
   value,
   type = "text",
 }: ExpandableInputProps) => {
-  const [isOpen, setIsOpen] = useState(false); // Stato per apertura/chiusura modal
+  // Stato che indica se il modal espanso è aperto o chiuso
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Stato per memorizzare l'altezza dinamica del textarea espanso
   const [textareaHeight, setTextareaHeight] = useState<number | undefined>(
     undefined
-  ); // Altezza textarea dinamica
+  ); 
+
+  // Ref al textarea per calcolare l'altezza del contenuto
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Quando il modal si apre, calcola e imposta altezza textarea basata sul contenuto
+  /**
+   * useEffect che aggiorna l'altezza del textarea ogni volta che il modal si apre
+   * o cambia il valore, per adattarsi dinamicamente al contenuto.
+   */
   useEffect(() => {
     if (isOpen && textareaRef.current) {
       const el = textareaRef.current;
-      el.style.height = "auto"; // reset altezza
-      el.style.height = el.scrollHeight + "px"; // aggiorna all’altezza contenuto
-      setTextareaHeight(el.scrollHeight); // salva altezza in stato
+      el.style.height = "auto"; 
+      el.style.height = el.scrollHeight + "px";
+      setTextareaHeight(el.scrollHeight)
     }
   }, [isOpen, value]);
 
-  // Aggiorna altezza textarea quando l’utente digita (solo per textarea)
+  /**
+   * Funzione chiamata all'input del textarea per aggiornare l'altezza
+   * del campo in base al contenuto digitato, mantenendo il resize automatico.
+   */
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const el = e.target;
     el.style.height = "auto";
@@ -48,6 +60,10 @@ const ExpandableInput = ({
     setTextareaHeight(el.scrollHeight);
   };
 
+  /**
+   * Funzione che copia il valore del campo negli appunti,
+   * mostrando alert di conferma o errore.
+   */
   const copyText = async () => {
     try {
       await navigator.clipboard.writeText(value as string);
@@ -59,10 +75,10 @@ const ExpandableInput = ({
 
   return (
     <>
-      {/* Campo compresso: label + input readonly */}
+      {/* Input compresso, cliccabile per aprire il modal */}
       <div
         className="ex-wrapper cursor-pointer"
-        onClick={() => setIsOpen(true)} // apre modal al click
+        onClick={() => setIsOpen(true)} 
         title="Clicca per espandere"
       >
         <label
@@ -82,11 +98,11 @@ const ExpandableInput = ({
             focus:outline-none 
             cursor-pointer select-text
             truncate min-h-[44px] border-t-0 border-l-0 border-b-1 border-r-0 border-gray-400"
-          onFocus={() => setIsOpen(true)} // apre modal al focus
+          onFocus={() => setIsOpen(true)}
         />
       </div>
 
-      {/* Modal con animazioni di apertura/chiusura */}
+      {/* Modal espanso con animazioni di apertura e chiusura */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -95,12 +111,12 @@ const ExpandableInput = ({
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.25 }}
             className="ex-backdrop fixed inset-0 backdrop-blur-xs bg-opacity-40 flex items-center justify-center z-50"
-            onClick={() => setIsOpen(false)} // chiude modal cliccando fuori
+            onClick={() => setIsOpen(false)} 
           >
             <motion.div
-              onClick={(e) => e.stopPropagation()} // impedisce chiusura cliccando dentro modal
+              onClick={(e) => e.stopPropagation()} 
               className="ex-modal w-[90%] rounded-lg p-4 max-w-4xl shadow-lg"
-              style={{ height: textareaHeight ? textareaHeight + 110 : "auto" }} // altezza dinamica
+              style={{ height: textareaHeight ? textareaHeight + 110 : "auto" }}  
               initial={{ y: -20 }}
               animate={{ y: 0 }}
               exit={{ y: -20 }}
@@ -112,7 +128,7 @@ const ExpandableInput = ({
                 {label}
               </label>
 
-              {/* Se tipo è text, mostra textarea espandibile */}
+              {/* Se il tipo è text, mostra un textarea espandibile, altrimenti un input */}
               {type === "text" ? (
                 <textarea
                   id={`${label}-expanded`}
@@ -125,11 +141,10 @@ const ExpandableInput = ({
                     text-s sm:text-base
                     focus:outline-none
                     min-h-[44px] resize-none overflow-hidden mt-4 mb-2"
-                  onBlur={() => setIsOpen(false)} // chiude modal perdendo focus
+                  onBlur={() => setIsOpen(false)} 
                   rows={1}
                 />
               ) : (
-                // Per altri tipi, usa input espanso readonly
                 <input
                   id={`${label}-expanded`}
                   type={type}
@@ -143,6 +158,8 @@ const ExpandableInput = ({
                   onBlur={() => setIsOpen(false)}
                 />
               )}
+
+              {/* Icona copia per alcuni label specifici */}
               {(label === "Telefono" ||
                 label === "Email" ||
                 label === "Cellulare") && (

@@ -1,3 +1,14 @@
+/**
+ * Componente Sidebar
+ * 
+ * Gestisce la barra laterale di navigazione dell'applicazione.
+ * Permette di navigare tra varie sezioni (Chat, Contatti, Visite, Clienti),
+ * e di eseguire azioni rapide come creare, modificare o eliminare elementi
+ * tramite un menu contestuale.
+ * Contiene anche il toggle del tema e la gestione dell'account utente.
+ * Inoltre gestisce lo stato di apertura della sidebar e l'apertura dei modali di form.
+ */
+
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -20,6 +31,7 @@ import FormAdd from "../shared/formAdd/formAdd";
 import { toast } from "react-toastify";
 
 type FormType = "cliente" | "visita" | "contatto" | null;
+
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -46,6 +58,15 @@ export default function Sidebar() {
     { label: "Clienti", icon: <Users size={20} />, href: "/dashboard/clienti" },
   ];
 
+  /**
+   * Componente MenuButton (interno a Sidebar)
+   * 
+   * Rappresenta un pulsante con menu a tendina che permette di scegliere
+   * rapidamente un'azione ("Crea", "Modifica", "Elimina") relativa alla sezione specificata.
+   * Gestisce l'apertura/chiusura del menu, la chiusura cliccando fuori,
+   * e in base all'azione selezionata chiama callback o naviga con router.
+   * Mostra notifiche toast informando l'utente sulle azioni eseguite.
+   */
   const MenuButton = ({
     label,
     href,
@@ -61,18 +82,16 @@ export default function Sidebar() {
     const router = useRouter();
 
     const handleOption = (action: string) => {
-
       const labelSingolari: Record<
-          string,
-          { articolo: string; nome: string }
-        > = {
-          clienti: { articolo: "il", nome: "cliente" },
-          contatti: { articolo: "il", nome: "contatto" },
-          visite: { articolo: "la", nome: "visita" },
-        };
+        string,
+        { articolo: string; nome: string }
+      > = {
+        clienti: { articolo: "il", nome: "cliente" },
+        contatti: { articolo: "il", nome: "contatto" },
+        visite: { articolo: "la", nome: "visita" },
+      };
 
-        const { articolo, nome } = labelSingolari[label];
-
+      const { articolo, nome } = labelSingolari[label];
 
       if (action === "crea") {
         onCreate(label);
@@ -82,16 +101,13 @@ export default function Sidebar() {
       if (action === "modifica") {
         router.push(`${href}?editMode=true`);
 
-
-        
-
         toast.info(`Apri ${articolo} ${nome} che vuoi modificare`);
         setIsOpen(false);
       }
 
       if (action === "elimina") {
         router.push(`${href}?deleteMode=true`);
-         toast.info(`Apri ${articolo} ${nome} che vuoi eliminare`);
+        toast.info(`Apri ${articolo} ${nome} che vuoi eliminare`);
         setIsOpen(false);
       }
     };
@@ -126,7 +142,7 @@ export default function Sidebar() {
         ></button>
 
         {menuOpen && (
-          <div className="absolute top-full right-0 mt-1 bg-[var(--bg)] border rounded-2xl shadow-md text-sm z-50 w-40 h-30   border-[var(--primary)]">
+          <div className="absolute top-full right-0 mt-1 bg-[var(--bg)] border rounded-2xl shadow-md text-sm z-50 w-40 h-27   border-[var(--primary)] overflow-hidden">
             <ul className="flex flex-col flex-wrap">
               <li
                 onClick={() => handleOption("crea")}
@@ -164,7 +180,6 @@ export default function Sidebar() {
           {isOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
         </div>
 
-        {/* Navigazione link */}
         <nav className="nav-links">
           {links.map(({ href, label, icon }, i) => {
             const isActive = pathname === href;
@@ -220,7 +235,6 @@ export default function Sidebar() {
         />
       </div>
 
-      {/* Overlay form dinamico */}
       {formType && (
         <div className="form-overlay fixed inset-0 backdrop-blur-sm flex justify-center items-center z-50">
           <FormAdd type={formType} onClose={() => setFormType(null)} />

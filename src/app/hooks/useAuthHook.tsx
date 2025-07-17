@@ -1,3 +1,11 @@
+/**
+ * useAuthHook.ts
+ * 
+ * Hook personalizzato che gestisce l'autenticazione dell'utente.
+ * Fornisce lo stato e le funzioni per login, logout, gestione dei token di accesso e refresh,
+ * e un metodo per effettuare richieste autenticati gestendo automaticamente il refresh del token.
+ */
+
 "use client";
 
 import { useCallback, useEffect, useState, useRef } from "react";
@@ -6,32 +14,44 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
 export function useAuthHook() {
+  // Stato e riferimenti per token di accesso, nome utente e caricamento
   const [accessToken, setAccessTokenState] = useState<string | null>(null);
   const accessTokenRef = useRef<string | null>(null);
-
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState<string | null>(null);
   const router = useRouter();
 
+  // Chiavi per salvataggio in IndexedDB
   const REFRESH_TOKEN_KEY = "refreshToken";
   const USERNAME_KEY = "username";
   const ACCESS_TOKEN_KEY = "accessToken";
 
+  // Riferimenti per controllare stato del refresh e logout
   const triedRefresh = useRef(false);
   const refreshInProgress = useRef(false);
-  const logoutStartedRef = useRef(false); 
+  const logoutStartedRef = useRef(false);
 
   let refreshPromise: Promise<string> | null = null;
 
+  /**
+   * Aggiorna lo stato e il riferimento del token di accesso.
+   */
   const updateAccessToken = (token: string | null) => {
     accessTokenRef.current = token;
     setAccessTokenState(token);
   };
 
+  /**
+   * Mostra un toast di errore con un messaggio personalizzato o di default.
+   */
   const showToastError = (message?: string) => {
     toast.error(message || "Errore imprevisto, riprova più tardi");
   };
 
+  /**
+   * Effettua l'inizializzazione dello stato autenticazione recuperando i dati salvati.
+   * Se i dati non sono disponibili o sono invalidi, imposta lo stato come non autenticato.
+   */
   useEffect(() => {
     async function init() {
       setLoading(true);
@@ -62,6 +82,11 @@ export function useAuthHook() {
     init();
   }, []);
 
+  /**
+   * Esegue la richiesta per rinnovare il token di accesso usando il refresh token.
+   * Gestisce il salvataggio dei nuovi token e aggiorna lo stato.
+   * Ritorna il nuovo token di accesso.
+   */
   async function refreshAccessToken(refreshToken: string, username: string): Promise<string> {
     if (refreshPromise) {
       return refreshPromise;
@@ -78,7 +103,7 @@ export function useAuthHook() {
         });
 
         if (!res.ok) {
-          await logoutOnce(); 
+          await logoutOnce();
           throw new Error("Refresh token scaduto");
         }
 
@@ -101,6 +126,11 @@ export function useAuthHook() {
     return refreshPromise;
   }
 
+  /**
+   * Esegue il login con username e password.
+   * Salva i token e lo username in IndexedDB e aggiorna lo stato.
+   * Mostra messaggi di errore in caso di credenziali errate o errori imprevisti.
+   */
   const login = useCallback(async (usernameInput: string, password: string) => {
     setLoading(true);
     try {
@@ -142,6 +172,10 @@ export function useAuthHook() {
     }
   }, []);
 
+  /**
+   * Esegue il logout: revoca il token sul server, cancella i dati localmente,
+   * aggiorna lo stato e reindirizza alla home.
+   */
   const logout = useCallback(async () => {
     setLoading(true);
     try {
@@ -174,11 +208,15 @@ export function useAuthHook() {
     } catch (error) {
       console.warn("[logout] Errore durante revoke:", error);
     } finally {
-      logoutStartedRef.current = false; 
+      logoutStartedRef.current = false;
       setLoading(false);
     }
   }, [router]);
 
+  /**
+   * Esegue il logout solo una volta per evitare chiamate multiple.
+   * Mostra un messaggio di sessione scaduta e chiama logout.
+   */
   const logoutOnce = useCallback(async () => {
     if (logoutStartedRef.current) return;
     logoutStartedRef.current = true;
@@ -187,6 +225,11 @@ export function useAuthHook() {
     await logout();
   }, [logout]);
 
+  /**
+   * Wrapper per fetch che aggiunge il token di accesso alle richieste.
+   * In caso di errore 401, prova a rinnovare il token e ripetere la richiesta.
+   * Se il refresh fallisce, esegue il logout.
+   */
   async function fetchWithAuth(input: RequestInfo, init?: RequestInit): Promise<Response> {
     const token = accessTokenRef.current;
     const headers = new Headers(init?.headers || {});
@@ -224,6 +267,7 @@ export function useAuthHook() {
     }
   }
 
+  // Esportazione dei dati e delle funzioni principali dello hook
   return {
     accessToken,
     username,

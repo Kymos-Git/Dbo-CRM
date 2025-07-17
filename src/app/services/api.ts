@@ -2,9 +2,20 @@
 
 import * as interfaces from "@/app/interfaces/interfaces";
 
+/**
+ * Questo modulo contiene funzioni per gestire l'interazione con un'API CRM,
+ * consentendo il recupero, filtraggio e modifica di clienti, contatti e visite.
+ * Le chiamate HTTP sono effettuate tramite una funzione fetch personalizzata passata come parametro.
+ * Inoltre viene implementato un caching dell'URL base dell'API preso dal file di configurazione.
+ */
+
 // Funzione helper per recuperare BASE_API_URL da config.json
 let cachedBaseUrl: string | null = null;
 
+/**
+ * Recupera e memorizza in cache l'URL base dell'API da config.json.
+ * Restituisce l'URL base da usare per le chiamate API.
+ */
 export async function getBaseApiUrl(): Promise<string> {
   if (cachedBaseUrl !== null) {
     return cachedBaseUrl;
@@ -20,6 +31,12 @@ export async function getBaseApiUrl(): Promise<string> {
   return cachedBaseUrl;
 }
 
+/**
+ * Recupera la lista completa dei clienti tramite chiamata POST.
+ * @param fetchFn Funzione fetch personalizzata.
+ * @returns Array di clienti.
+ * @throws Errore se la chiamata non ha successo.
+ */
 export async function getClienti(
   fetchFn: (input: string, init?: RequestInit) => Promise<Response>
 ): Promise<interfaces.Cliente[]> {
@@ -36,6 +53,12 @@ export async function getClienti(
   return (await res.json()) as interfaces.Cliente[];
 }
 
+/**
+ * Recupera la lista completa dei contatti tramite chiamata POST.
+ * @param fetchFn Funzione fetch personalizzata.
+ * @returns Array di contatti.
+ * @throws Errore se la chiamata non ha successo.
+ */
 export async function getContatti(
   fetchFn: (input: string, init?: RequestInit) => Promise<Response>
 ): Promise<interfaces.Contatto[]> {
@@ -52,6 +75,12 @@ export async function getContatti(
   return (await res.json()) as interfaces.Contatto[];
 }
 
+/**
+ * Recupera la lista delle visite dell'utente tramite chiamata POST.
+ * @param fetchFn Funzione fetch personalizzata.
+ * @returns Array di visite.
+ * @throws Errore se la chiamata non ha successo.
+ */
 export async function getVisite(
   fetchFn: (input: string, init?: RequestInit) => Promise<Response>
 ): Promise<interfaces.Visita[]> {
@@ -67,6 +96,13 @@ export async function getVisite(
   return (await res.json()) as interfaces.Visita[];
 }
 
+/**
+ * Recupera visite filtrate in base a parametri passati.
+ * @param fetchFn Funzione fetch personalizzata.
+ * @param filters Oggetto contenente i filtri come coppie chiave/valore.
+ * @returns Array di visite filtrate.
+ * @throws Errore se la chiamata non ha successo.
+ */
 export async function getVisiteFiltrate(
   fetchFn: (input: string, init?: RequestInit) => Promise<Response>,
   filters: Record<string, string>
@@ -82,10 +118,17 @@ export async function getVisiteFiltrate(
   return await response.json();
 }
 
+/**
+ * Recupera contatti filtrati in base a parametri passati.
+ * @param fetchFn Funzione fetch personalizzata.
+ * @param filters Oggetto contenente i filtri come coppie chiave/valore.
+ * @returns Array di contatti filtrati.
+ * @throws Errore se la chiamata non ha successo.
+ */
 export async function getContattiFiltrati(
   fetchFn: (input: string, init?: RequestInit) => Promise<Response>,
   filters: Record<string, string>
-): Promise<interfaces.Visita[]> {
+): Promise<interfaces.Contatto[]> {
   const queryParams = new URLSearchParams(filters).toString();
   const response = await fetchFn(`/api/Contatti?=${queryParams}`, {
     headers: {
@@ -93,14 +136,21 @@ export async function getContattiFiltrati(
     },
     method: "POST",
   });
-  if (!response.ok) throw new Error("Errore nel fetch delle visite filtrate");
+  if (!response.ok) throw new Error("Errore nel fetch dei contatti filtrati");
   return await response.json();
 }
 
+/**
+ * Recupera clienti filtrati in base a parametri passati.
+ * @param fetchFn Funzione fetch personalizzata.
+ * @param filters Oggetto contenente i filtri come coppie chiave/valore.
+ * @returns Array di clienti filtrati.
+ * @throws Errore se la chiamata non ha successo.
+ */
 export async function getClientiFiltrati(
   fetchFn: (input: string, init?: RequestInit) => Promise<Response>,
   filters: Record<string, string>
-): Promise<interfaces.Visita[]> {
+): Promise<interfaces.Cliente[]> {
   const queryParams = new URLSearchParams(filters).toString();
   const response = await fetchFn(`/api/Clienti?=${queryParams}`, {
     headers: {
@@ -108,46 +158,44 @@ export async function getClientiFiltrati(
     },
     method: "POST",
   });
-  if (!response.ok) throw new Error("Errore nel fetch delle visite filtrate");
+  if (!response.ok) throw new Error("Errore nel fetch dei clienti filtrati");
   return await response.json();
 }
 
+// Funzioni di invio, aggiornamento ed eliminazione non ancora implementate
 
-export async function sendCliente(data:any){
-
+export async function sendCliente(fetchFn: (input: string, init?: RequestInit) => Promise<Response>, data: any) {
+  // da implementare
 }
 
-export async function sendContatto(data:any){
-  
+export async function sendContatto(fetchFn: (input: string, init?: RequestInit) => Promise<Response>, data: any) {
+  // da implementare
 }
 
-export async function sendVisita(data:any){
-  
+export async function sendVisita(fetchFn: (input: string, init?: RequestInit) => Promise<Response>, data: any) {
+  // da implementare
 }
 
-
-export async function UpdateCliente(data:any){
-
+export async function UpdateCliente(fetchFn: (input: string, init?: RequestInit) => Promise<Response>, data: any) {
+  // da implementare
 }
 
-export async function UpdateContatto(data:any){
-  
+export async function UpdateContatto(fetchFn: (input: string, init?: RequestInit) => Promise<Response>, data: any) {
+  // da implementare
 }
 
-export async function UpdateVisita(data:any){
-  
+export async function UpdateVisita(fetchFn: (input: string, init?: RequestInit) => Promise<Response>, data: any) {
+  // da implementare
 }
 
-
-
-export async function deleteCliente(data:any){
-
+export async function deleteCliente(fetchFn: (input: string, init?: RequestInit) => Promise<Response>, data: any) {
+  // da implementare
 }
 
-export async function deleteContatto(data:any){
-  
+export async function deleteContatto(fetchFn: (input: string, init?: RequestInit) => Promise<Response>, data: any) {
+  // da implementare
 }
 
-export async function deleteVisita(data:any){
-  
+export async function deleteVisita(fetchFn: (input: string, init?: RequestInit) => Promise<Response>, data: any) {
+  // da implementare
 }

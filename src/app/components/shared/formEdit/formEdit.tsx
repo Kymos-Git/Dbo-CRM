@@ -1,57 +1,143 @@
+/**
+ * FormEdit
+ * 
+ * Componente React che gestisce un form di modifica dati per entità di tipo "cliente", "contatto" o "visita".
+ * Riceve in input i campi con i valori attuali da modificare e un titolo per il form.
+ * Utilizza schemi Zod per la validazione dei dati aggiornati.
+ * Gestisce l'invio dei dati modificati tramite API dedicate e mostra notifiche di successo o errore.
+ * Permette di resettare i campi ai valori iniziali passati.
+ * Gestisce in modo particolare il campo "note" con un textarea a altezza dinamica.
+ */
+
+
+
+
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import Form from "../form/form";
-import { UpdateCliente, UpdateContatto, UpdateVisita } from "@/app/services/api";
-import { ZodObject } from "zod";
+import {
+  UpdateCliente,
+  UpdateContatto,
+  UpdateVisita,
+} from "@/app/services/api";
+import {
+  schemaCliente,
+  schemaContatto,
+  schemaVisita,
+} from "@/app/interfaces/schemas";
+import { useAuth } from "@/app/context/authContext";
 
-
+type Field = {
+  title: string;
+  value: string | number;
+  type: string;
+};
 
 interface Props {
   title: string;
-  fields: {
-    key: string;
-    title: string;
-    value: string;
-    type: string;
-  }[];
+  fields: Field[];
   onClose: () => void;
-  schema: ZodObject<any>;
   type: "cliente" | "contatto" | "visita";
 }
 
-export default function FormEdit({ title, fields, onClose, type, schema }: Props) {
-  const initialState: Record<string, string> = Object.fromEntries(
-    fields.map((f) => [f.key, f.value ?? ""])
+
+
+/**
+ * Funzione interna NoteField
+ * 
+ * Componente che rende un campo textarea con altezza adattiva in base al contenuto.
+ * Aggiorna il valore tramite callback onChange.
+ */
+function NoteField({
+  value,
+  name,
+  onChange,
+}: {
+  value: string;
+  name: string;
+  onChange: (key: string, value: string) => void;
+}) {
+  const ref = useRef<HTMLTextAreaElement | null>(null);
+
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.style.height = "auto";
+      ref.current.style.height = `${ref.current.scrollHeight}px`;
+    }
+  }, [value]);
+
+  return (
+    <textarea
+      ref={ref}
+      value={value}
+      className="w-full border-none rounded-xl resize-none min-h-[6rem] focus:outline-none focus:ring-0"
+      onChange={(e) => onChange(name, e.target.value)}
+    />
+  );
+}
+
+export default function FormEdit({ title, fields, onClose, type }: Props) {
+  // Stato iniziale dei campi, costruito a partire dai valori passati via props
+  const initialState: Record<string, string | number> = Object.fromEntries(
+    fields.map((f) => [f.title, f.value ?? ""])
   );
 
-  const [formState, setFormState] = useState<Record<string, string>>(initialState);
+  const { fetchWithAuth } = useAuth();
 
+  // Stato locale per i dati modificati nel form
+  const [formState, setFormState] =
+    useState<Record<string, string | number>>(initialState);
+
+  // Selezione dello schema Zod in base al tipo per la validazione
+  const schema = (() => {
+    switch (type) {
+      case "cliente":
+        return schemaCliente;
+      case "contatto":
+        return schemaContatto;
+      case "visita":
+        return schemaVisita;
+      default:
+        throw new Error("Tipo non supportato");
+    }
+  })();
+
+  /**
+   * handleChange
+   * 
+   * Aggiorna lo stato formState in risposta a modifiche sui campi input,
+   * associando il valore modificato al campo indicato dalla chiave (key).
+   */
   const handleChange = (key: string, value: string) => {
     setFormState((prev) => ({ ...prev, [key]: value }));
   };
 
+  /**
+   * sendData
+   * 
+   * Valida i dati modificati tramite lo schema Zod e invia l'aggiornamento tramite
+   * l'API corrispondente in base al tipo ("cliente", "contatto", "visita").
+   * Mostra notifiche di successo o errore e chiude il form in caso di successo.
+   */
   const sendData = async () => {
     try {
-      // parsing con schema Zod
       const parsed = schema.parse(formState);
 
-      // chiamate update in base al tipo
       switch (type) {
         case "cliente":
-          await UpdateCliente(parsed);
+          await UpdateCliente(fetchWithAuth, parsed);
           break;
         case "contatto":
-          await UpdateContatto(parsed);
+          await UpdateContatto(fetchWithAuth, parsed);
           break;
         case "visita":
-          await UpdateVisita(parsed);
+          await UpdateVisita(fetchWithAuth, parsed);
           break;
       }
 
       toast.success("Dati inviati con successo");
       onClose();
-
     } catch (err) {
       toast.error(
         "Errore nella validazione dei dati: " +
@@ -60,64 +146,61 @@ export default function FormEdit({ title, fields, onClose, type, schema }: Props
     }
   };
 
+  /**
+   * resetFields
+   * 
+   * Ripristina i valori dei campi allo stato iniziale passato in input.
+   * Mostra una notifica informativa.
+   */
   const resetFields = () => {
     setFormState(initialState);
     toast.info("Campi ripristinati");
   };
 
-  const otherFields = fields.filter((field) => field.key.toLowerCase() !== "note");
-  const noteField = fields.find((field) => field.key.toLowerCase() === "note");
+  // Separazione del campo note dagli altri campi per gestirlo con un componente specifico
+  const otherFields = fields.filter(
+    (field) => field.title.toLowerCase() !== "note"
+  );
+  const noteField = fields.find(
+    (field) => field.title.toLowerCase() === "note"
+  );
 
   return (
-    <Form visible={true} fglButtons={true} title={title} onClose={onClose}>
-      <div className="frmEd-buttons flex items-center space-x-2 ml-2 absolute -top-21 -right-5 z-50 w-40 md:-top-18">
-        <button
-          className="rounded-2xl transition w-17 h-9 cursor-pointer border-1 border-[var(--primary)]"
-          onClick={sendData}
-          name="invia"
-          type="button"
-        >
-          Salva
-        </button>
-
-        <button
-          className="rounded-2xl transition w-17 h-9 cursor-pointer border-1 border-[var(--primary)]"
-          onClick={resetFields}
-          name="reset"
-          type="button"
-        >
-          Annulla
-        </button>
-      </div>
-
-      {/* Griglia per gli altri campi */}
+    <Form
+      visible={true}
+      fglButtons={true}
+      title={title}
+      onClose={onClose}
+      buttons={["Modifica", "Annulla"]}
+      onReset={resetFields}
+      onSend={sendData}
+    >
       <form className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-x-2 auto-rows-min">
         {otherFields.map((field) => (
           <label
-            key={field.key}
-            className="frm-modal-label mb-4 text-xs font-semibold tracking-widest uppercase block text-[var(--primary)]"
+            key={field.title}
+            className="frm-modal-label mb-4 text-xs tracking-widest uppercase block text-[var(--primary)]"
           >
             {field.title}
             <input
               type={field.type}
-              value={formState[field.key] || ""}
-              onChange={(e) => handleChange(field.key, e.target.value)}
+              value={formState[field.title] || ""}
+              onChange={(e) => handleChange(field.title, e.target.value)}
               className="w-full text-sm px-2 focus:outline-none border-b-1 border-b-[var(--grey)] min-h-[44px] text-[var(--text)]"
             />
           </label>
         ))}
       </form>
 
-      {/* Campo note fuori dalla griglia */}
       {noteField && (
-        <div className="mt-4 px-1">
+        <div className="mt-4 px-1 ">
           <label className="frm-modal-label mb-1 text-xs font-semibold tracking-widest uppercase block text-[var(--primary)]">
             {noteField.title}
           </label>
-          <textarea
-            value={formState[noteField.key] || ""}
-            onChange={(e) => handleChange(noteField.key, e.target.value)}
-            className="w-full px-3 py-2 text-sm focus:outline-none border-b-1 border-b-[var(--grey)] min-h-[100px]"
+          <NoteField
+            value={(formState[noteField.title] as string) || ""}
+            onChange={handleChange}
+            name={noteField.title}
           />
         </div>
       )}

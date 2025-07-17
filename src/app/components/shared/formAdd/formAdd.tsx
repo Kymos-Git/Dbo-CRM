@@ -1,6 +1,20 @@
-import { useState, useEffect } from "react";
+/**
+ * FormAdd
+ *
+ * Componente che gestisce un form dinamico per l'inserimento di dati di tipo "cliente", "contatto" o "visita".
+ * Utilizza gli schemi Zod per generare dinamicamente i campi del form e per validare i dati inseriti.
+ * Gestisce l'invio dei dati tramite API specifiche e mostra notifiche di successo o errore.
+ * Supporta il reset dei campi e l'automatica regolazione dell'altezza dell'area note.
+ * Integra un componente Form per la visualizzazione modale con animazioni e bottoni di azione.
+ */
+
+"use client";
+
+
+
+import { useState, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
-import { z } from "zod";
+import { z, ZodObject, ZodRawShape } from "zod";
 import "react-toastify/dist/ReactToastify.css";
 
 import {
@@ -10,70 +24,91 @@ import {
 } from "@/app/interfaces/schemas";
 import { sendCliente, sendContatto, sendVisita } from "@/app/services/api";
 import Form from "../form/form";
+import { useAuth } from "@/app/context/authContext";
 
-type formProps = {
+type FormProps = {
   type: "cliente" | "contatto" | "visita";
   onClose: () => void;
 };
 
 type Field = {
   name: string;
-  type: string;
+  type: "text" | "number" | "checkbox" | "date";
 };
 
-function generateFieldsFromSchema(schema: z.ZodObject<any>): Field[] {
-  const shape = schema.shape;
-  return Object.keys(shape).map((key) => {
-    const field = shape[key];
-    let type: string;
 
-    switch (true) {
-      case field instanceof z.ZodString:
-        type = "text";
-        break;
-      case field instanceof z.ZodNumber:
-        type = "number";
-        break;
-      case field instanceof z.ZodBoolean:
-        type = "checkbox";
-        break;
-      case field instanceof z.ZodDate:
-        type = "date";
-        break;
-      default:
-        type = "text";
+
+/**
+ * generateFieldsFromSchema
+ * 
+ * Funzione ausiliaria che, data una definizione di schema Zod, genera una lista di campi con nome e tipo
+ * mappando i tipi Zod ai tipi input HTML standard (text, number, checkbox, date).
+ */
+function generateFieldsFromSchema<T extends ZodRawShape>(
+  schema: ZodObject<T>
+): Field[] {
+  const shape = schema.shape;
+  return Object.entries(shape).map(([key, field]) => {
+    let type: Field["type"];
+
+    if (field instanceof z.ZodString) {
+      type = "text";
+    } else if (field instanceof z.ZodNumber) {
+      type = "number";
+    } else if (field instanceof z.ZodBoolean) {
+      type = "checkbox";
+    } else if (field instanceof z.ZodDate) {
+      type = "date";
+    } else {
+      type = "text"; 
     }
 
-    return {
-      name: key,
-      type,
-    };
+    return { name: key, type };
   });
 }
 
-export default function FormAdd({ type, onClose }: formProps) {
-  const [schema, setSchema] = useState<z.ZodObject<any> | null>(null);
+/**
+ * getSchemaAndFields
+ * 
+ * Data una stringa che indica il tipo di form ("cliente", "contatto", "visita"),
+ * restituisce l'oggetto schema Zod corrispondente e l'elenco dei campi generati da tale schema.
+ */
+function getSchemaAndFields(type: "cliente" | "contatto" | "visita") {
+  switch (type) {
+    case "cliente":
+      return {
+        schema: schemaCliente,
+        fields: generateFieldsFromSchema(schemaCliente),
+      };
+    case "contatto":
+      return {
+        schema: schemaContatto,
+        fields: generateFieldsFromSchema(schemaContatto),
+      };
+    case "visita":
+      return {
+        schema: schemaVisita,
+        fields: generateFieldsFromSchema(schemaVisita),
+      };
+    default:
+      throw new Error(`Unknown type: ${type}`);
+  }
+}
+
+export default function FormAdd({ type, onClose }: FormProps) {
+  // Stato per schema Zod attivo
+  const [schema, setSchema] = useState<ZodObject<ZodRawShape> | null>(null);
+  // Stato per campi dinamici del form
   const [fields, setFields] = useState<Field[]>([]);
-  const [formData, setFormData] = useState<Record<string, any>>({});
+  // Stato per dati inseriti dall'utente
+  const [formData, setFormData] = useState<Record<string, string | number | boolean>>({});
 
+  /**
+   * useEffect per inizializzare schema, campi e dati form all'avvio o al cambio del tipo di form
+   */
   useEffect(() => {
-    let selectedSchema: z.ZodObject<any>;
-    switch (type) {
-      case "cliente":
-        selectedSchema = schemaCliente;
-        break;
-      case "contatto":
-        selectedSchema = schemaContatto;
-        break;
-      case "visita":
-        selectedSchema = schemaVisita;
-        break;
-      default:
-        return;
-    }
-
-    const generatedFields = generateFieldsFromSchema(selectedSchema);
-    const initialData: Record<string, any> = {};
+    const { schema: selectedSchema, fields: generatedFields } = getSchemaAndFields(type);
+    const initialData: Record<string, string | number | boolean> = {};
 
     generatedFields.forEach(({ name, type }) => {
       initialData[name] = type === "checkbox" ? false : "";
@@ -84,6 +119,12 @@ export default function FormAdd({ type, onClose }: formProps) {
     setFormData(initialData);
   }, [type]);
 
+  /**
+   * handleChange
+   * 
+   * Gestisce l'aggiornamento dello stato formData alla modifica di un campo input.
+   * Gestisce in modo specifico i checkbox per aggiornare con boolean.
+   */
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -99,19 +140,27 @@ export default function FormAdd({ type, onClose }: formProps) {
     }));
   };
 
+  const { fetchWithAuth } = useAuth();
+
+  /**
+   * sendData
+   * 
+   * Valida i dati tramite lo schema Zod e invia i dati tramite l'API corrispondente in base al tipo.
+   * Mostra notifiche di successo o errore e chiude il form in caso di successo.
+   */
   const sendData = async () => {
     if (!schema) return;
     try {
       const parsed = schema.parse(formData);
       switch (type) {
         case "cliente":
-          await sendCliente(parsed);
+          await sendCliente(fetchWithAuth, parsed);
           break;
         case "contatto":
-          await sendContatto(parsed);
+          await sendContatto(fetchWithAuth, parsed);
           break;
         case "visita":
-          await sendVisita(parsed);
+          await sendVisita(fetchWithAuth, parsed);
           break;
       }
       toast.success("Dati inviati con successo");
@@ -124,8 +173,14 @@ export default function FormAdd({ type, onClose }: formProps) {
     }
   };
 
+  /**
+   * resetFields
+   * 
+   * Reset dei valori di tutti i campi del form ai valori iniziali (checkbox a false, altri campi vuoti).
+   * Mostra una notifica informativa.
+   */
   const resetFields = () => {
-    const resetData: Record<string, any> = {};
+    const resetData: Record<string, string | number | boolean> = {};
     fields.forEach(({ name, type }) => {
       resetData[name] = type === "checkbox" ? false : "";
     });
@@ -135,13 +190,39 @@ export default function FormAdd({ type, onClose }: formProps) {
 
   if (!schema) return null;
 
+  /**
+   * NoteField
+   * 
+   * Componente interno per gestire un campo textarea "note" con altezza adattiva in base al contenuto.
+   */
+  function NoteField({ value }: { value: string | number | boolean }) {
+    const ref = useRef<HTMLTextAreaElement | null>(null);
+
+    useEffect(() => {
+      if (ref.current) {
+        ref.current.style.height = "auto";
+        ref.current.style.height = `${ref.current.scrollHeight}px`;
+      }
+    }, [value]);
+
+    return (
+      <textarea
+        ref={ref}
+        value={value as string}
+        name="note"
+        onChange={handleChange}
+        className="w-full border-none rounded-xl resize-none min-h-[6rem] focus:outline-none focus:ring-0"
+      />
+    );
+  }
+
   return (
     <Form
       visible={true}
       onClose={onClose}
       title={type}
       fglButtons={true}
-      buttons={["crea", "svuota"]}
+      buttons={["Crea", "Svuota"]}
       onSend={sendData}
       onReset={resetFields}
     >
@@ -158,7 +239,7 @@ export default function FormAdd({ type, onClose }: formProps) {
                   <input
                     name={name}
                     type={type}
-                    value={formData[name]}
+                    value={formData[name] as string | number}
                     onChange={handleChange}
                     className="w-full px-3 py-2 text-sm focus:outline-none border-b-1 border-b-[var(--grey)] min-h-[44px]"
                   />
@@ -166,7 +247,7 @@ export default function FormAdd({ type, onClose }: formProps) {
                   <input
                     type="checkbox"
                     name={name}
-                    checked={formData[name]}
+                    checked={formData[name] as boolean}
                     onChange={handleChange}
                     className="mt-2"
                   />
@@ -174,7 +255,7 @@ export default function FormAdd({ type, onClose }: formProps) {
                   <input
                     type="date"
                     name={name}
-                    value={formData[name]}
+                    value={formData[name] as string}
                     onChange={handleChange}
                     className="w-full px-3 py-2 text-sm focus:outline-none border-b-1 border-b-[var(--grey)] min-h-[44px] cursor-pointer"
                   />
@@ -188,12 +269,7 @@ export default function FormAdd({ type, onClose }: formProps) {
             <label className="frm-modal-label mb-1 text-xs font-semibold tracking-widest uppercase block text-[var(--primary)]">
               note
             </label>
-            <textarea
-              name="note"
-              value={formData["note"]}
-              onChange={handleChange}
-              className="w-full px-3 py-2 text-sm focus:outline-none border-b-1 border-b-[var(--grey)] min-h-[100px]"
-            />
+            <NoteField value={formData["note"]} />
           </div>
         )}
       </div>

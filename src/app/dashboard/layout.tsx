@@ -3,7 +3,10 @@
 /**
  * DashBoardLayout.tsx
  *
- * Layout principale per la dashboard dell'applicazione.
+ * Questo componente funge da layout principale per la dashboard dell'applicazione.
+ * Include la sidebar, il contesto per il caricamento delle route e un loader di navigazione.
+ * Gestisce inoltre il settaggio dinamico dell'altezza dell'app in base alla finestra e
+ * mostra un toast di benvenuto all’utente recuperando il nome utente da IndexedDB.
  */
 
 import { ReactNode, useEffect } from "react";
@@ -15,19 +18,29 @@ import { toast } from "react-toastify";
 import { getItem } from "../lib/indexedDB";
 
 export default function DashBoardLayout({ children }: { children: ReactNode }) {
+  
+  /**
+   * Funzione asincrona che mostra un toast di benvenuto all'utente,
+   * recuperando il nome utente da IndexedDB.
+   * Previene la duplicazione del toast tramite un ID univoco.
+   */
   async function showWelcomeToast() {
-    // ID univoco per il toast
     const toastId = 'welcome-toast';
-    
-    // Verifica se il toast è già attivo
     if (toast.isActive(toastId)) return;
-    
+
     const username = await getItem('username');
     toast.success(`Benvenuto ${username}`, {
       toastId: toastId
     });
   }
 
+  /**
+   * useEffect che al montaggio del componente:
+   * - chiama la funzione per mostrare il toast di benvenuto;
+   * - definisce e imposta la variabile CSS '--app-height' con l’altezza della finestra;
+   * - aggiunge un listener per aggiornare tale variabile al ridimensionamento della finestra;
+   * - rimuove il listener al momento dello smontaggio.
+   */
   useEffect(() => {
     showWelcomeToast();
 
@@ -35,24 +48,17 @@ export default function DashBoardLayout({ children }: { children: ReactNode }) {
       document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
     }
 
-    // Imposta all'avvio
     setAppHeight();
 
-    // Aggiorna al resize
     window.addEventListener('resize', setAppHeight);
 
-    // Cleanup evento
     return () => window.removeEventListener('resize', setAppHeight);
   }, []);
 
   return (
-    // Contenitore flex per affiancare Sidebar e area contenuti
     <RouteLoadingProvider>
       <div className="flex h-screen w-screen" style={{ height: 'var(--app-height)' }}>
-        {/* Sidebar fissa sulla sinistra */}
         <Sidebar />
-
-        {/* Area principale contenuti: cresce per occupare spazio disponibile */}
         <RouteLoader>
           <main className="overflow-hidden p-4 h-full w-full">
             {children}

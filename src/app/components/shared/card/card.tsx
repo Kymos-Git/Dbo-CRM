@@ -1,3 +1,12 @@
+/**
+ * Componente Card
+ *
+ * Questo componente gestisce la visualizzazione di una card dinamica che può rappresentare
+ * un Cliente, un Contatto o una Visita, mostrando i relativi campi e dati. 
+ * Supporta funzionalità di dettaglio, modifica e cancellazione con animazioni e gestione dei colori.
+ * Utilizza type guards per determinare il tipo di dato e caricare i campi appropriati.
+ */
+
 "use client";
 
 import Link from "next/link";
@@ -15,6 +24,14 @@ import {
   schemaVisita,
   VisitaKeys,
 } from "@/app/interfaces/schemas";
+import FormEdit from "../formEdit/formEdit";
+import {
+  deleteCliente,
+  deleteContatto,
+  deleteVisita,
+} from "@/app/services/api";
+import { useAuth } from "@/app/context/authContext";
+import { toast } from "react-toastify";
 
 type CardField = {
   title: string | React.ReactNode;
@@ -34,15 +51,25 @@ type GenericCardProps = {
   dato: Cliente | Visita | Contatto;
 };
 
-// Type guards
+let typeToUse: "cliente" | "contatto" | "visita";
+
+/**
+ * Type guard per verificare se il dato è un Cliente.
+ */
 function isCliente(dato: Cliente | Visita | Contatto): dato is Cliente {
   return (dato as Cliente).ragSocCompleta !== undefined;
 }
 
+/**
+ * Type guard per verificare se il dato è una Visita.
+ */
 function isVisita(dato: Cliente | Visita | Contatto): dato is Visita {
   return (dato as Visita).IdAttivita !== undefined;
 }
 
+/**
+ * Type guard per verificare se il dato è un Contatto.
+ */
 function isContatto(dato: Cliente | Visita | Contatto): dato is Contatto {
   return (
     (dato as Contatto).nome !== undefined &&
@@ -50,7 +77,11 @@ function isContatto(dato: Cliente | Visita | Contatto): dato is Contatto {
   );
 }
 
-function generateDetailFields(dato): Field[] {
+/**
+ * Funzione che genera dinamicamente i campi da mostrare nella visualizzazione dettagliata
+ * a seconda del tipo di dato (Cliente, Visita, Contatto).
+ */
+function generateDetailFields(dato: Cliente | Visita | Contatto): Field[] {
   let fields: Field[] = [];
   let keyMapping;
 
@@ -77,6 +108,7 @@ function generateDetailFields(dato): Field[] {
         };
       }
     );
+    typeToUse = "cliente";
   }
   if (isVisita(dato)) {
     keyMapping = {
@@ -95,16 +127,17 @@ function generateDetailFields(dato): Field[] {
         };
       }
     );
-  }if (isContatto(dato)) {
+    typeToUse = "visita";
+  }
+  if (isContatto(dato)) {
     keyMapping = {
-       nome: 'nome',
-        cognome: 'cognome',
-        Rag_Sociale: 'ragioneSociale',
-        cellulare: 'cellulare',
-        email: 'email',
-        telefono: 'telefonoElaborato',
-        paese: 'paeseClienteFornitore',
-      
+      nome: "nome",
+      cognome: "cognome",
+      Rag_Sociale: "ragioneSociale",
+      cellulare: "cellulare",
+      email: "email",
+      telefono: "telefonoElaborato",
+      paese: "paeseClienteFornitore",
     };
     fields = (Object.entries(keyMapping) as [ContattoKeys, string][]).map(
       ([schemaKey, datoKey]) => {
@@ -115,11 +148,16 @@ function generateDetailFields(dato): Field[] {
         };
       }
     );
+    typeToUse = "contatto";
   }
 
   return fields;
 }
 
+/**
+ * Componente principale Card che mostra i dati, gestisce apertura dettaglio/modifica,
+ * animazioni e conferma cancellazione.
+ */
 export default function Card({ title, fields, dato }: GenericCardProps) {
   const [showDetail, setShowDetail] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -131,15 +169,24 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
   const router = useRouter();
   const pathname = usePathname();
 
+  /**
+   * Chiude il dettaglio.
+   */
   function onCloseDetail() {
     setShowDetail(false);
   }
 
+  /**
+   * Chiude la modalità modifica e aggiorna la URL per rimuovere parametri di query.
+   */
   function onCloseEdit() {
     setShowDetail(false);
     router.replace(pathname);
   }
 
+  /**
+   * Rimuove i parametri di query relativi a editMode e deleteMode dalla URL.
+   */
   function clearQueryParams() {
     const current = new URLSearchParams(searchParams.toString());
     current.delete("deleteMode");
@@ -147,21 +194,29 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
     router.replace(`${pathname}?${current.toString()}`, { scroll: false });
   }
 
+  const { fetchWithAuth } = useAuth();
+
+  /**
+   * Gestisce la cancellazione del dato in base al tipo e aggiorna lo stato e la UI.
+   */
   async function deleteDato() {
     try {
-      console.log("Elimino:", dato);
+      if (isCliente(dato)) await deleteCliente(fetchWithAuth, dato);
+      if (isContatto(dato)) await deleteContatto(fetchWithAuth, dato);
+      if (isVisita(dato)) await deleteVisita(fetchWithAuth, dato);
 
       setShowDeleteConfirm(false);
       clearQueryParams();
     } catch (err) {
       console.error("Errore eliminazione:", err);
+      toast.error("Errore nell'eliminazione");
       clearQueryParams();
     }
   }
 
-  const numericColors = [dato.Sem1, dato.Sem2, dato.Sem3, dato.Sem4];
-  const colors = getColors(numericColors);
-
+  /**
+   * Mappa i valori numerici a colori specifici per la visualizzazione.
+   */
   function getColors(values: number[]): string[] {
     return values.map((c) => {
       switch (c) {
@@ -183,6 +238,12 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
     });
   }
 
+  const numericColors = [dato.Sem1, dato.Sem2, dato.Sem3, dato.Sem4];
+  const colors = getColors(numericColors);
+
+  /**
+   * Gestisce l'animazione della "cube grid" e apre il dettaglio o la conferma di cancellazione.
+   */
   const handleAnimation = async () => {
     await controls.start({
       rotate: [0, 360],
@@ -263,47 +324,39 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
         </motion.div>
       </div>
 
-      {showDetail && (
-        // (editMode === "true" && schemaToUse && typeToUse ? (
-        //   <FormEdit
-        //     title={`Modifica ${title}`}
-        //     fields={detailFields.map((f) => ({
-        //       ...f,
-        //       key: f.title.toString(),
-        //     }))}
-        //     onClose={onCloseEdit}
+      {showDetail &&
+        (editMode === "true" && typeToUse ? (
+          <FormEdit
+            title={`Modifica ${title}`}
+            fields={generateDetailFields(dato)}
+            onClose={onCloseEdit}
+            type={typeToUse}
+          />
+        ) : (
+          <Detail
+            title={title}
+            fields={generateDetailFields(dato)}
+            visible={showDetail}
+            onClose={onCloseDetail}
+            flgCliente={isCliente(dato)}
+            colors={colors}
+          />
+        ))}
 
-        //     type={typeToUse}
-        //   />
-        // ) :
-        <Detail
-          title={title}
-          fields={generateDetailFields(dato)}
-          visible={showDetail}
-          onClose={onCloseDetail}
-          flgCliente={isCliente(dato)}
-          colors={colors}
-        />
-        // )
-      )}
-
-      {/* Popup deleteMode */}
+      {/* Popup di conferma eliminazione */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-xl shadow-xl max-w-sm w-[90%]">
+          <div className="bg-[var(--bg)] p-6 rounded-xl shadow-xl max-w-sm w-[90%] border-1 border-red-600">
             <h2 className="text-lg font-semibold mb-4">
               Sicuro di voler eliminare{" "}
               <span className="font-bold text-red-600">{nomeDato}</span>?
             </h2>
-            <div className="flex justify-end space-x-3">
+            <div className="flex justify-end gap-4">
               <button
-                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-                onClick={() => {
-                  clearQueryParams();
-                  setShowDeleteConfirm(false);
-                }}
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                onClick={() => setShowDeleteConfirm(false)}
               >
-                No
+                Annulla
               </button>
               <button
                 className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"

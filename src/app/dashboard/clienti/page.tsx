@@ -1,3 +1,14 @@
+/**
+ * ClientiVirtualGrid
+ * 
+ * Componente principale che gestisce la visualizzazione di una griglia virtuale
+ * di clienti CRM. Utilizza filtri per cercare e filtrare i clienti,
+ * carica i dati da API protette tramite autenticazione e mostra i clienti
+ * in una griglia responsiva e virtualizzata per ottimizzare le performance.
+ * Gestisce anche il caricamento, eventuali errori e la gestione dinamica della
+ * dimensione della finestra per adattare il layout.
+ */
+
 "use client";
 
 import GenericCard from "@/app/components/shared/card/card";
@@ -15,18 +26,31 @@ import { useAuth } from "@/app/context/authContext";
 
 import "./clienti.css";
 
+
 const ClientiVirtualGrid = () => {
+  // Stato dei valori dei filtri di ricerca
   const [filtersValues, setFiltersValues] = useState<Record<string, string>>(
     {}
   );
+
+  // Stato dimensioni della finestra (altezza e larghezza)
   const [windowHeight, setWindowHeight] = useState(0);
   const [windowWidth, setWindowWidth] = useState(0);
+
+  // Stato lista clienti caricata dall'API
   const [clientiCRM, setClientiCRM] = useState<Cliente[]>([]);
+
+  // Stato di caricamento dati e gestione errori
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Hook personalizzato per autenticazione e fetch protetto
   const { fetchWithAuth, isReady } = useAuth();
 
+  /**
+   * useEffect per caricare i clienti all'avvio o quando il contesto auth è pronto.
+   * Effettua chiamata API e aggiorna lo stato clienti o errori.
+   */
   useEffect(() => {
     if (!isReady) return;
 
@@ -45,6 +69,10 @@ const ClientiVirtualGrid = () => {
     fetchClienti();
   }, [isReady]);
 
+  /**
+   * useEffect per gestire il ridimensionamento della finestra e aggiornare
+   * dinamicamente le dimensioni per il layout responsivo.
+   */
   useEffect(() => {
     const handleResize = () => {
       setWindowHeight(window.innerHeight);
@@ -55,6 +83,7 @@ const ClientiVirtualGrid = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Configurazioni per dimensioni e numero di card nella griglia
   const CARD_COUNT = windowHeight < 600 ? 2 : windowHeight < 800 ? 3 : 4;
   const isMobile = windowWidth < 768;
   const columnCount = isMobile ? 1 : 3;
@@ -64,25 +93,37 @@ const ClientiVirtualGrid = () => {
   const CARD_HEIGHT = Math.floor((windowHeight * 0.8) / CARD_COUNT);
   const rowCount = Math.ceil(clientiCRM.length / columnCount);
 
-  // Funzione per aggiornare filtri e fare fetch solo se cambiano
-    async function handleFiltersBlur(values: Record<string, string>) {
-      // Se i filtri sono identici, non fare nulla
-      if (JSON.stringify(values) === JSON.stringify(filtersValues)) return;
-  
-      setFiltersValues(values);
-      setLoading(true);
-      try {
-        const data = await getClientiFiltrati(fetchWithAuth, values);
-        setClientiCRM(data.map(mapRawToCliente));
-        setError(null);
-      } catch (err) {
-        setError("Errore nel caricamento delle visite filtrate.");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
+  /**
+   * handleFiltersBlur
+   * 
+   * Funzione asincrona chiamata quando i filtri perdono il focus (blur).
+   * Confronta i nuovi valori con quelli precedenti e, se diversi, aggiorna i filtri,
+   * ricarica i dati filtrati da API e gestisce stati di caricamento e errori.
+   */
+  async function handleFiltersBlur(values: Record<string, string>) {
+    if (JSON.stringify(values) === JSON.stringify(filtersValues)) return;
 
+    setFiltersValues(values);
+    setLoading(true);
+    try {
+      const data = await getClientiFiltrati(fetchWithAuth, values);
+      setClientiCRM(data.map(mapRawToCliente));
+      setError(null);
+    } catch (err) {
+      setError("Errore nel caricamento delle visite filtrate.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  /**
+   * Cell
+   * 
+   * Componente usato dalla griglia virtualizzata per rappresentare ogni cella,
+   * che contiene una card con i dati del cliente. Calcola l'indice e se esiste
+   * restituisce la card con informazioni di contatto e link mappe.
+   */
   const Cell = ({ columnIndex, rowIndex, style }: GridChildComponentProps) => {
     const index = rowIndex * columnCount + columnIndex;
     if (index >= clientiCRM.length) return null;
@@ -121,6 +162,12 @@ const ClientiVirtualGrid = () => {
     );
   };
 
+  /**
+   * getMapLink
+   * 
+   * Genera un URL per la ricerca su Google Maps basato sull'indirizzo fornito,
+   * codificando correttamente i dati per la query.
+   */
   function getMapLink({
     via,
     citta,
@@ -139,26 +186,30 @@ const ClientiVirtualGrid = () => {
     return `https://www.google.com/maps/search/?api=1&query=${encoded}`;
   }
 
+  /**
+   * htmlToPlainText
+   * 
+   * Converte una stringa HTML in testo semplice, sostituendo i tag di paragrafo e
+   * line break con nuovi linee e rimuovendo ogni altro markup HTML.
+   */
   function htmlToPlainText(html: string): string {
     if (!html) return "";
 
-    // Sostituisci i <br> con \n
     let text = html.replace(/<br\s*\/?>/gi, "\n");
-
-    // Sostituisci i <p> e </p> con \n\n per separare paragrafi
     text = text.replace(/<\/p>/gi, "\n\n");
     text = text.replace(/<p[^>]*>/gi, "");
-
-    // Rimuovi eventuali altri tag HTML rimanenti
     text = text.replace(/<[^>]+>/g, "");
+    text = text.replace(/\n\s*\n/g, "\n\n");
 
-    // Rimuovi spazi vuoti multipli o linee vuote extra se vuoi
-    text = text.replace(/\n\s*\n/g, "\n\n"); // doppio a capo consistente
-
-    // Trim per rimuovere spazi inutili a inizio e fine
     return text.trim();
   }
 
+  /**
+   * mapRawToCliente
+   * 
+   * Mappa un oggetto raw ricevuto dall'API in un oggetto Cliente tipizzato,
+   * applicando eventuali trasformazioni necessarie, come la conversione da HTML a testo semplice.
+   */
   function mapRawToCliente(raw: any): Cliente {
     return {
       idCliente: raw.IdCliente,
@@ -193,7 +244,7 @@ const ClientiVirtualGrid = () => {
         <div className="gr">
           <Grid
             height={windowHeight * 0.8}
-             width={isMobile?windowWidth*0.92:windowWidth}
+            width={isMobile ? windowWidth * 0.92 : windowWidth}
             columnCount={columnCount}
             columnWidth={CARD_WIDTH}
             rowCount={rowCount}

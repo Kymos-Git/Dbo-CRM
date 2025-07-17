@@ -3,58 +3,65 @@
  * 
  * Questo componente rappresenta la pagina principale di una chat AI simulata.
  * Gestisce lo stato dei messaggi scambiati tra utente e AI, visualizzandoli in ordine cronologico.
-
+ * Contiene la logica per inviare messaggi utente e simulare risposte AI.
  */
 
 import { useEffect, useRef, useState } from "react";
 import AIChatInput from "../chatInput/chatinput";
 import "./homepage.css";
 
-// Tipo TypeScript per rappresentare un messaggio
+// Definizione del tipo Message per i messaggi di chat
 type Message = {
-  id: number; // id unico del messaggio
-  text: string; // testo del messaggio
-  sender: "user" | "ai"; // mittente, utente o AI
+  id: number;             // Identificativo univoco del messaggio
+  text: string;           // Testo del messaggio
+  sender: "user" | "ai";  // Chi ha inviato il messaggio: utente o AI
 };
 
 export default function Homepage() {
-  // Stato per sapere se è stato inviato almeno un messaggio dall’utente
+  // Stato booleano che indica se l’utente ha inviato almeno un messaggio
   const [hasSentMessage, setHasSentMessage] = useState(false);
 
-  // Array di messaggi scambiati tra utente e AI
+  // Stato che mantiene la lista di tutti i messaggi scambiati
   const [messages, setMessages] = useState<Message[]>([]);
 
-  // Contatore ID incrementale per creare id unici dei messaggi
+  // Contatore per generare ID unici progressivi per i messaggi
   const [nextId, setNextId] = useState(0);
 
-  // Riferimento al div che sta in fondo alla lista messaggi,
-  // usato per scroll automatico quando arrivano nuovi messaggi
+  // Riferimento al div in fondo alla lista messaggi, usato per scroll automatico
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
-  // Effetto che fa scrollare in basso automaticamente ogni volta che
-  // cambia la lista dei messaggi (arriva un nuovo messaggio)
+  /**
+   * Effetto che si attiva ad ogni cambiamento di `messages`
+   * Fa scrollare automaticamente la lista messaggi verso il basso
+   * per mostrare l’ultimo messaggio inviato o ricevuto.
+   */
   useEffect(() => {
     if (bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
 
-  
-  // Funzione che viene chiamata quando l’utente invia un messaggio
+  /**
+   * Funzione chiamata quando l’utente invia un nuovo messaggio.
+   * Aggiunge subito il messaggio utente alla lista, poi simula
+   * una risposta AI dopo un ritardo di 1500ms.
+   * 
+   * @param msg - testo del messaggio inviato dall’utente
+   */
   const handleMessage = (msg: string) => {
     setHasSentMessage(true);
 
-    // Preparo due ID: uno per il messaggio utente, uno per la risposta AI
+    // Definisce due ID consecutivi: uno per l’utente e uno per la risposta AI
     const userId = nextId;
     const aiId = nextId + 1;
 
-    // Aggiungo immediatamente il messaggio dell’utente alla lista
+    // Aggiunge il messaggio utente alla lista messaggi
     setMessages((prev) => [...prev, { id: userId, text: msg, sender: "user" }]);
 
-    // Aggiorno nextId per i prossimi messaggi (due in più: user + AI)
+    // Aggiorna il prossimo ID disponibile (incrementa di 2)
     setNextId(aiId + 1);
 
-    // Simulo la risposta AI con un ritardo di 1500ms
+    // Simula la risposta AI con un delay di 1500ms
     setTimeout(() => {
       setMessages((prev) => [
         ...prev,
@@ -63,22 +70,18 @@ export default function Homepage() {
     }, 1500);
   };
 
-  
-
-
   return (
-    <div className={` hm-container w-full relative h-full` } >
-      {/* Contenitore messaggi con altezza dinamica a seconda se l’utente ha inviato messaggi */}
-      <div
-        className={` hm-messages flex-1 overflow-y-auto pt-8 pl-10 pr-6 text-center max-h-[80%]`}
-      >
+    <div className="hm-container w-full relative h-full">
+      
+      {/* Area visualizzazione messaggi */}
+      <div className="hm-messages flex-1 overflow-y-auto pt-8 pl-10 pr-6 text-center max-h-[80%]">
         {!hasSentMessage ? (
-          // Messaggio di benvenuto visibile solo se non è stato inviato nessun messaggio
-          <p className="hm-welcome text-lg h-[100%] w-[80%] flex items-end justify-center  absolute bottom-[60%] md:text-4xl md:bottom-[65%] md:w-[90%]">
+          // Messaggio di benvenuto se non è stato inviato alcun messaggio
+          <p className="hm-welcome text-lg h-[100%] w-[80%] flex items-end justify-center absolute bottom-[60%] md:text-4xl md:bottom-[65%] md:w-[90%]">
             Ciao come posso aiutarti?
           </p>
         ) : (
-          // Rendering della lista dei messaggi, differenziati per mittente
+          // Mappa l’array dei messaggi per mostrarli uno ad uno
           messages.map((msg) => (
             <div
               key={msg.id}
@@ -94,25 +97,28 @@ export default function Homepage() {
                       : "hm-ai-msg rounded-bl-none"
                   }`}
               >
-                {/* Tag per indicare chi ha inviato il messaggio */}
+                {/* Tag per indicare chi ha scritto il messaggio */}
                 <span className="hm-user-tag text-xs font-semibold absolute -top-4 left-2 opacity-70">
                   {msg.sender === "user" ? "Tu" : "AI"}
                 </span>
+
                 {/* Testo del messaggio */}
                 <span>{msg.text}</span>
               </div>
             </div>
           ))
         )}
-        {/* Div vuoto di riferimento per lo scroll automatico */}
+        {/* Div invisibile usato come ancora per lo scroll automatico */}
         <div ref={bottomRef} />
       </div>
 
-      {/* Wrapper dell’input, posizione relativa variabile */}
+      {/* Wrapper input messaggi */}
       <div
-        className={`hm-input-wrapper absolute h-[20%] max-h-[18%] w-full mt-5 ${hasSentMessage?'bottom-[0]':'bottom-[40%]'}`}
+        className={`hm-input-wrapper absolute h-[20%] max-h-[18%] w-full mt-5 ${
+          hasSentMessage ? "bottom-[0]" : "bottom-[40%]"
+        }`}
       >
-        {/* Componente input chat, passa handleMessage come callback onSend */}
+        {/* Componente input per inviare messaggi */}
         <AIChatInput onSend={handleMessage} />
       </div>
     </div>

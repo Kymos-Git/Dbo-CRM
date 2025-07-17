@@ -1,3 +1,15 @@
+/**
+ * Componente Detail
+ *
+ * Questo componente si occupa di mostrare una visualizzazione dettagliata e leggibile
+ * dei dati ricevuti tramite i campi (fields). È utilizzato per visualizzare informazioni
+ * come Cliente, Contatto o Visita in un form non modificabile, con un'interfaccia pulita
+ * e reattiva. Gestisce inoltre il blocco dello scroll della pagina quando è visibile e
+ * fornisce un meccanismo per navigare verso una pagina correlata (es. contatti associati),
+ * con animazioni tramite framer-motion.
+ */
+
+
 "use client";
 
 import {  useAnimation } from "framer-motion";
@@ -22,6 +34,7 @@ type DetailProps = {
   colors: string[];
 };
 
+
 export default function Detail({
   title,
   fields,
@@ -32,6 +45,10 @@ export default function Detail({
 }: DetailProps) {
   const router = useRouter();
 
+  /**
+   * Funzione che costruisce la query con la ragione sociale e naviga
+   * verso la pagina dei contatti associati.
+   */
   const onNavigate = () => {
     const ragSoc = encodeURIComponent(
       fields.find((f) => f.title === "Rag.Soc.")?.value || ""
@@ -39,6 +56,10 @@ export default function Detail({
     router.push(`/dashboard/contatti?ragSoc=${ragSoc}`);
   };
 
+  /**
+   * Effetto collaterale per bloccare lo scroll del body quando il componente è visibile,
+   * e ripristinare lo scroll quando non lo è o quando il componente viene smontato.
+   */
   useEffect(() => {
     if (visible) {
       document.body.style.overflow = "hidden";
@@ -50,13 +71,19 @@ export default function Detail({
     };
   }, [visible]);
 
+  /**
+   * Sottocomponente NoteField
+   *
+   * Mostra il campo "note" in un'area di testo che si ridimensiona
+   * dinamicamente all'altezza del contenuto, mantenendo l'input di sola lettura.
+   */
   function NoteField({ value }: { value: string }) {
     const ref = useRef<HTMLTextAreaElement | null>(null);
 
     useEffect(() => {
       if (ref.current) {
-        ref.current.style.height = "auto"; // reset height
-        ref.current.style.height = `${ref.current.scrollHeight}px`; // grow to fit
+        ref.current.style.height = "auto"; 
+        ref.current.style.height = `${ref.current.scrollHeight}px`; 
       }
     }, [value]);
     return (
@@ -68,8 +95,13 @@ export default function Detail({
       />
     );
   }
+
   const controls = useAnimation();
 
+  /**
+   * Funzione che gestisce l'animazione di scaling del bottone di navigazione,
+   * quindi esegue la funzione onNavigate e rimuove il blur dal main.
+   */
   const handleNavigation = async () => {
     await controls.start({
       scale: [1, 1.5, 1],
@@ -99,7 +131,7 @@ export default function Detail({
           ))}
       </form>
 
-      {/* Note Field */}
+    
       {fields
         .filter(({ title }) => title.toLowerCase() === "note")
         .map(({ title, value }, i) => (

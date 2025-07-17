@@ -4,7 +4,6 @@
  * Componente per la pagina di login.
  * Gestisce l'inserimento di username e password, l'autenticazione tramite hook custom useAuth,
  * la gestione dello stato di caricamento, degli errori e il redirect alla dashboard dopo login riuscito.
- *
  */
 
 "use client";
@@ -19,28 +18,31 @@ import "./login.css";
 import { toast } from "react-toastify";
 
 export function Login() {
-  // Stato per username inserito dall'utente
+  // Stato per memorizzare il valore attuale dell'username inserito dall'utente
   const [username, setUsername] = useState("");
 
-  // Stato per password inserita dall'utente
+  // Stato per memorizzare la password inserita dall'utente
   const [password, setPassword] = useState("");
 
-  // Stato per indicare se è in corso il caricamento della richiesta login
+  // Stato che indica se la richiesta di login è in corso (loading)
   const [loading, setLoading] = useState(false);
 
-  // Stato per gestire dinamicamente la sorgente dell'immagine logo in base al tema
+  // Stato per memorizzare dinamicamente la sorgente dell'immagine del logo in base al tema attuale
   const [logoSrc, setLogoSrc] = useState("/kymos-nero.png");
 
-  // Hook per gestire la navigazione (redirect)
+  // Hook di Next.js per gestire la navigazione (redirect)
   const router = useRouter();
 
-  // Hook custom per l'autenticazione, espone la funzione login
+  // Hook custom che espone la funzione di login e lo stato di readiness dell'autenticazione
   const { login, isReady } = useAuth();
 
-  // Hook per gestire il tema corrente (chiaro/scuro)
+  // Hook per accedere al tema attuale (light o dark)
   const { theme } = useTheme();
 
-  // Effetto che aggiorna il logo in base al tema corrente
+  /**
+   * Effetto che cambia dinamicamente il logo in base al tema (light/dark).
+   * Quando cambia il tema, aggiorna `logoSrc` per mostrare il logo appropriato.
+   */
   useEffect(() => {
     if (theme === "light") {
       setLogoSrc("/logo-nero.png");
@@ -49,53 +51,63 @@ export function Login() {
     }
   }, [theme]);
 
-  // Funzione async che gestisce l'invio del form di login
+  /**
+   * Funzione chiamata alla sottomissione del form.
+   * Si occupa di:
+   * - bloccare il comportamento di default del form
+   * - avviare lo stato di caricamento
+   * - chiamare la funzione login dell’hook useAuth
+   * - in caso di successo, resetta i campi e fa redirect a "/dashboard"
+   * - in caso di errore, mostra una notifica di errore e termina il caricamento
+   *
+   * @param e evento di submit del form
+   */
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault(); // Previene il comportamento di submit di default (ricarica pagina)
+    e.preventDefault();
+
+    // Se il sistema di autenticazione non è pronto, non fare nulla
     if (!isReady) {
       return;
     }
-    setLoading(true); // Attiva lo stato di loading
+
+    // Imposta lo stato di caricamento attivo
+    setLoading(true);
 
     try {
-      // Chiama la funzione login fornita da useAuth con username e password
+      // Chiamata alla funzione di login con username e password
       await login(username, password);
 
-      // Resetto i campi input
+      // Reset dei campi input
       setUsername("");
       setPassword("");
 
-      // Redirect alla pagina /dashboard
+      // Redirect alla pagina dashboard dopo login riuscito
       router.push("/dashboard");
-      
-      // NOTA: Non disattivare loading qui - rimane attivo fino al cambio rotta
-      // setLoading(false) viene chiamato solo nel catch per gestire gli errori
-      
     } catch (error: unknown) {
-      // In caso di errore creo delay di 2 secondi prima di mostrare il messaggio
+      // Attende 2 secondi prima di mostrare l'errore (effetto visivo più gradevole)
       const delay = new Promise((resolve) => setTimeout(resolve, 2000));
       await delay;
 
       // Messaggio di errore di default
       let message = "Errore sconosciuto";
 
-      // Se error è un'istanza di Error, estraggo il messaggio
+      // Se l’errore è un’istanza di Error, usa il suo messaggio
       if (error instanceof Error) message = error.message;
 
-      // Mostro alert con messaggio di errore
+      // Mostra un toast con l'errore
       toast.error(message);
-      
-      // Disattivo lo stato di loading solo in caso di errore
+
+      // Disattiva lo stato di caricamento
       setLoading(false);
     }
   }
 
   return (
     <form
-      className={`login ${loading ? "loading" : ""}`}
-      onSubmit={handleSubmit} // Gestisce submit del form
+      className={`login ${loading ? "loading" : ""}`} // Applica la classe "loading" durante il caricamento
+      onSubmit={handleSubmit}  // Associa la funzione handleSubmit al submit del form
     >
-      {/* Logo dinamico in base al tema */}
+      {/* Logo dinamico che cambia in base al tema */}
       <Image
         src={logoSrc}
         alt="Logo Kymos"
@@ -105,30 +117,31 @@ export function Login() {
         className="icon"
         priority
       />
+
       <div className="main">
-        {/* Input username */}
+        {/* Campo input per username */}
         <div className="username">
           <h3>username</h3>
           <input
             type="text"
-            value={username} // valore controllato dallo stato username
-            onChange={(e) => setUsername(e.target.value)} // aggiorna stato onChange
+            value={username}
+            onChange={(e) => setUsername(e.target.value)} // Aggiorna stato username al cambiamento input
             autoComplete="off"
           />
         </div>
 
-        {/* Input password */}
+        {/* Campo input per password */}
         <div className="password">
           <h3>password</h3>
           <input
             type="password"
-            value={password} // valore controllato dallo stato password
-            onChange={(e) => setPassword(e.target.value)} // aggiorna stato onChange
+            value={password}
+            onChange={(e) => setPassword(e.target.value)} // Aggiorna stato password al cambiamento input
             autoComplete="off"
           />
         </div>
 
-        {/* Se è in caricamento mostra componente Loading, altrimenti il pulsante submit */}
+        {/* Se in caricamento mostra loader, altrimenti bottone di login */}
         {loading ? (
           <div className="loadingComp">
             <LoadingComponent />
