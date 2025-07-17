@@ -35,7 +35,6 @@ export interface Contatto {
   ragioneSociale: string;
   cellulare: string;
   email: string;
-  disabilita: boolean;
   tipoContatto: string;
   telefonoElaborato: string;
   paeseClienteFornitore: string;

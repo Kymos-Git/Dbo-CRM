@@ -2,22 +2,25 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
 import Form from "../form/form";
+import { UpdateCliente, UpdateContatto, UpdateVisita } from "@/app/services/api";
+import { ZodObject } from "zod";
 
-type EditField = {
-  key: string;
-  title: string;
-  value: string;
-  type: string;
-};
 
-type Props = {
+
+interface Props {
   title: string;
-  fields: EditField[];
+  fields: {
+    key: string;
+    title: string;
+    value: string;
+    type: string;
+  }[];
   onClose: () => void;
-  onSave?: (updated: Record<string, string>) => void;
-};
+  schema: ZodObject<any>;
+  type: "cliente" | "contatto" | "visita";
+}
 
-export default function FormEdit({ title, fields, onClose, onSave }: Props) {
+export default function FormEdit({ title, fields, onClose, type, schema }: Props) {
   const initialState: Record<string, string> = Object.fromEntries(
     fields.map((f) => [f.key, f.value ?? ""])
   );
@@ -28,14 +31,33 @@ export default function FormEdit({ title, fields, onClose, onSave }: Props) {
     setFormState((prev) => ({ ...prev, [key]: value }));
   };
 
-  const sendData = () => {
-    if (onSave) {
-      onSave(formState);
-      toast.success("Modifiche salvate");
-    } else {
-      toast.info("Nessuna azione definita per il salvataggio");
+  const sendData = async () => {
+    try {
+      // parsing con schema Zod
+      const parsed = schema.parse(formState);
+
+      // chiamate update in base al tipo
+      switch (type) {
+        case "cliente":
+          await UpdateCliente(parsed);
+          break;
+        case "contatto":
+          await UpdateContatto(parsed);
+          break;
+        case "visita":
+          await UpdateVisita(parsed);
+          break;
+      }
+
+      toast.success("Dati inviati con successo");
+      onClose();
+
+    } catch (err) {
+      toast.error(
+        "Errore nella validazione dei dati: " +
+          (err instanceof Error ? err.message : "Errore sconosciuto")
+      );
     }
-    onClose();
   };
 
   const resetFields = () => {
@@ -43,7 +65,6 @@ export default function FormEdit({ title, fields, onClose, onSave }: Props) {
     toast.info("Campi ripristinati");
   };
 
-  // Separiamo il campo note dagli altri
   const otherFields = fields.filter((field) => field.key.toLowerCase() !== "note");
   const noteField = fields.find((field) => field.key.toLowerCase() === "note");
 

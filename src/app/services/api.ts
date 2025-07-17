@@ -124,3 +124,30 @@ export async function sendContatto(data:any){
 export async function sendVisita(data:any){
   
 }
+
+
+export async function UpdateCliente(data:any){
+
+}
+
+export async function UpdateContatto(data:any){
+  
+}
+
+export async function UpdateVisita(data:any){
+  
+}
+
+
+
+export async function deleteCliente(data:any){
+
+}
+
+export async function deleteContatto(data:any){
+  
+}
+
+export async function deleteVisita(data:any){
+  
+}

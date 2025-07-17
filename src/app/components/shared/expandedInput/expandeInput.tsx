@@ -14,9 +14,9 @@ import "./expandeInput.css";
 import { Copy } from "lucide-react";
 
 interface ExpandableInputProps {
-  label: string; // Etichetta del campo
-  value: string; // Valore da mostrare
-  type?: string; // Tipo input (default: "text")
+  label: string; 
+  value: string|number; 
+  type?: string;
 }
 
 const ExpandableInput = ({
@@ -50,7 +50,7 @@ const ExpandableInput = ({
 
   const copyText = async () => {
     try {
-      await navigator.clipboard.writeText(value);
+      await navigator.clipboard.writeText(value as string);
       alert("Copiato negli appunti!");
     } catch (err) {
       alert("Errore nella copia: " + err);

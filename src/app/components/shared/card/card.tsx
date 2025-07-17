@@ -6,29 +6,32 @@ import "./card.css";
 import Detail from "../detail/detail";
 import { Cliente, Contatto, Visita } from "@/app/interfaces/interfaces";
 import { useAnimation, motion } from "framer-motion";
-import { z, ZodObject } from "zod";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import FormEdit from "../formEdit/formEdit";
+import {
+  ClienteKeys,
+  ContattoKeys,
+  schemaCliente,
+  schemaContatto,
+  schemaVisita,
+  VisitaKeys,
+} from "@/app/interfaces/schemas";
 
-// Types
 type CardField = {
   title: string | React.ReactNode;
-  value: string;
+  value: string | number;
   href?: string;
+};
+
+type Field = {
+  title: string;
+  value: string | number;
+  type: string;
 };
 
 type GenericCardProps = {
   title: string;
   fields: CardField[];
   dato: Cliente | Visita | Contatto;
-};
-
-type FieldConfig = {
-  key: string;
-  title: string;
-  type: string;
-  formatter?: (value: any) => string;
-  condition?: (data: any) => boolean;
 };
 
 // Type guards
@@ -47,81 +50,74 @@ function isContatto(dato: Cliente | Visita | Contatto): dato is Contatto {
   );
 }
 
-// Field configurations
-const fieldConfigurations: Record<string, FieldConfig[]> = {
-  cliente: [
-    { key: "ragSocCompleta", title: "Rag.Soc.", type: "text" },
-    { key: "tel", title: "Telefono", type: "text" },
-    { key: "email", title: "Email", type: "text" },
-    { key: "indirizzo", title: "Indirizzo", type: "text" },
-    { key: "citta", title: "Città", type: "text" },
-    { key: "cap", title: "CAP", type: "text" },
-    { key: "provincia", title: "Provincia", type: "text" },
-    {
-      key: "noteCliente",
-      title: "Note",
-      type: "text",
-      condition: (data) => data.noteCliente && data.noteCliente.trim() !== "",
-    },
-  ],
-  visita: [
-    { key: "RagSoc", title: "Rag.Soc", type: "text" },
-    {
-      key: "DataAttivita",
-      title: "Data",
-      type: "text",
-      formatter: (value) => {
-        if (value instanceof Date) {
-          return value.toLocaleDateString("it-IT");
-        }
-        return value?.toString() || "";
-      },
-    },
-    { key: "DescAttivita", title: "Descrizione", type: "text" },
-    { key: "NoteAttivita", title: "Note", type: "text" },
-  ],
-  contatto: [
-    { key: "nome", title: "Nome", type: "text" },
-    { key: "cognome", title: "Cognome", type: "text" },
-    { key: "ragioneSociale", title: "Azienda", type: "text" },
-    { key: "cellulare", title: "Cellulare", type: "text" },
-    { key: "email", title: "Email", type: "text" },
-    { key: "telefonoElaborato", title: "Telefono", type: "text" },
-    { key: "paeseClienteFornitore", title: "Paese", type: "text" },
-    { key: "tipoContatto", title: "Tipo Contatto", type: "text" },
-  ],
-};
+function generateDetailFields(dato): Field[] {
+  let fields: Field[] = [];
+  let keyMapping;
 
-function generateDetailFields(
-  dato: Cliente | Visita | Contatto,
-  schema?: z.ZodSchema<any>
-): { title: string; value: string; type: string }[] {
-  let dataType: string;
-  if (isCliente(dato)) dataType = "cliente";
-  else if (isVisita(dato)) dataType = "visita";
-  else if (isContatto(dato)) dataType = "contatto";
-  else return [];
+  if (isCliente(dato)) {
+    keyMapping = {
+      ragione_sociale: "ragSocCompleta",
+      indirizzo: "indirizzo",
+      citta: "citta",
+      cap: "cap",
+      provincia: "provincia",
+      Regione: "idZona",
+      Stato: "idPaese",
+      tel: "tel",
+      email: "email",
+      note: "noteCliente",
+    };
 
-  const config = fieldConfigurations[dataType];
-  if (!config) return [];
+    fields = (Object.entries(keyMapping) as [ClienteKeys, string][]).map(
+      ([schemaKey, datoKey]) => {
+        return {
+          title: schemaKey.replace(/_/g, " ").toUpperCase(),
+          value: dato[datoKey as keyof typeof dato] || "",
+          type: schemaCliente.shape[schemaKey].constructor.name,
+        };
+      }
+    );
+  }
+  if (isVisita(dato)) {
+    keyMapping = {
+      DescAttivita: "DescAttivita",
+      DataAttivita: "DataAttivita",
+      Ragione_Sociale: "RagSoc",
+      note: "NoteAttivita",
+    };
 
-  let fieldsToProcess = config;
-  if (schema && schema instanceof ZodObject) {
-    const schemaKeys = Object.keys(schema.shape);
-    fieldsToProcess = config.filter((field) => schemaKeys.includes(field.key));
+    fields = (Object.entries(keyMapping) as [VisitaKeys, string][]).map(
+      ([schemaKey, datoKey]) => {
+        return {
+          title: schemaKey.replace(/_/g, " ").toUpperCase(),
+          value: dato[datoKey as keyof typeof dato] || "",
+          type: schemaVisita.shape[schemaKey].constructor.name,
+        };
+      }
+    );
+  }if (isContatto(dato)) {
+    keyMapping = {
+       nome: 'nome',
+        cognome: 'cognome',
+        Rag_Sociale: 'ragioneSociale',
+        cellulare: 'cellulare ',
+        email: 'email',
+        telefono: 'telefonoElaborato',
+        paese: 'paeseClienteFornitore',
+      
+    };
+    fields = (Object.entries(keyMapping) as [ContattoKeys, string][]).map(
+      ([schemaKey, datoKey]) => {
+        return {
+          title: schemaKey.replace(/_/g, " ").toUpperCase(),
+          value: dato[datoKey as keyof typeof dato] || "",
+          type: schemaContatto.shape[schemaKey].constructor.name,
+        };
+      }
+    );
   }
 
-  return fieldsToProcess
-    .filter((field) => (field.condition ? field.condition(dato) : true))
-    .map((field) => {
-      const rawValue = (dato as any)[field.key];
-      const formattedValue =
-        field.formatter?.(rawValue) ??
-        (rawValue !== undefined && rawValue !== null
-          ? rawValue.toString()
-          : "");
-      return { title: field.title, value: formattedValue, type: field.type };
-    });
+  return fields;
 }
 
 export default function Card({ title, fields, dato }: GenericCardProps) {
@@ -208,21 +204,6 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
     }
   }, [showDetail]);
 
-  
-  const schemaVisita = z.object({
-    DescAttivita: z.string(),
-    DataAttivita: z.date(),
-    RagSoc: z.string(),
-    NoteAttivita: z.string(),
-  });
-
-  let detailFields: { title: string; value: string; type: string }[] = [];
-  if (isVisita(dato)) {
-    detailFields = generateDetailFields(dato, schemaVisita);
-  } else {
-    detailFields = generateDetailFields(dato);
-  }
-
   const nomeDato = isCliente(dato)
     ? dato.ragSocCompleta
     : isContatto(dato)
@@ -282,30 +263,29 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
         </motion.div>
       </div>
 
-      {showDetail &&
-        detailFields &&
-        (editMode ? (
-          <FormEdit
-            title={`Modifica ${title}`}
-            fields={detailFields.map((f) => ({
-              ...f,
-              key: f.title.toString(),
-            }))}
-            onClose={onCloseEdit}
-            onSave={(updatedData) => {
-              console.log("Dati aggiornati:", updatedData);
-            }}
-          />
-        ) : (
-          <Detail
-            title={title}
-            fields={detailFields}
-            visible={showDetail}
-            onClose={onCloseDetail}
-            flgCliente={isCliente(dato)}
-            colors={colors}
-          />
-        ))}
+      {showDetail && (
+        // (editMode === "true" && schemaToUse && typeToUse ? (
+        //   <FormEdit
+        //     title={`Modifica ${title}`}
+        //     fields={detailFields.map((f) => ({
+        //       ...f,
+        //       key: f.title.toString(),
+        //     }))}
+        //     onClose={onCloseEdit}
+
+        //     type={typeToUse}
+        //   />
+        // ) :
+        <Detail
+          title={title}
+          fields={generateDetailFields(dato)}
+          visible={showDetail}
+          onClose={onCloseDetail}
+          flgCliente={isCliente(dato)}
+          colors={colors}
+        />
+        // )
+      )}
 
       {/* Popup deleteMode */}
       {showDeleteConfirm && (

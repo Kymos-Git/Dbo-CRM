@@ -3,9 +3,7 @@ import { toast } from "react-toastify";
 import { z } from "zod";
 import "react-toastify/dist/ReactToastify.css";
 
-import { schemaCliente } from "@/app/interfaces/schemaCliente";
-import { schemaContatto } from "@/app/interfaces/schemaContatto";
-import { schemaVisita } from "@/app/interfaces/schemaVisita";
+import { schemaCliente, schemaContatto, schemaVisita } from "@/app/interfaces/schemas";
 import { sendCliente, sendContatto, sendVisita } from "@/app/services/api";
 import Form from "../form/form";
 

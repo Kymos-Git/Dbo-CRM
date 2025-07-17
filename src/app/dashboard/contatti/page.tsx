@@ -138,7 +138,6 @@ const ContattiVirtualGrid = () => {
       ragioneSociale: raw.RagSoc,
       cellulare: raw.Cell,
       email: raw.EMail,
-      disabilita: raw.Disabilita,
       tipoContatto: raw.TipoContatto,
       telefonoElaborato: raw.TelElab,
       paeseClienteFornitore: raw.PaeseElab,

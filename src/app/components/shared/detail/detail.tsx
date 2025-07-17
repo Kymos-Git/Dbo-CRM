@@ -9,7 +9,7 @@ import Form from "../form/form";
 
 type Field = {
   title: string;
-  value: string;
+  value: string | number;
   type: string;
 };
 
@@ -107,7 +107,7 @@ export default function Detail({
             <label className="dt-note-label block mb-1 font-semibold">
               {title.toUpperCase()}
             </label>
-            <NoteField value={value} />
+            <NoteField value={value as string} />
           </div>
         ))}
     </Form>
