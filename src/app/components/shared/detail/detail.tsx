@@ -64,7 +64,7 @@ export default function Detail({
         ref={ref}
         value={value}
         readOnly
-        className="w-full border-none rounded-xl resize-none overflow-hidden min-h-[6rem] focus:outline-none focus:ring-0 "
+        className="w-full border-none rounded-xl resize-none min-h-[6rem] focus:outline-none focus:ring-0"
       />
     );
   }
@@ -103,7 +103,7 @@ export default function Detail({
       {fields
         .filter(({ title }) => title.toLowerCase() === "note")
         .map(({ title, value }, i) => (
-          <div key={`note-${i}`} className="dt-field mb-4">
+          <div key={`note-${i}`} className="dt-field mb-4 max-h-full">
             <label className="dt-note-label block mb-1 font-semibold">
               {title.toUpperCase()}
             </label>

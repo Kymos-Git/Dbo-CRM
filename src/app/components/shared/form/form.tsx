@@ -12,7 +12,10 @@ type FormProps = {
   colors?: string[];
   flgCliente?: boolean;
   onNavigate?: () => void;
-  fglButtons:boolean;
+  fglButtons: boolean;
+  buttons?: string[];
+   onSend?: () => void;   
+  onReset?: () => void;
 };
 
 export default function Form({
@@ -22,8 +25,11 @@ export default function Form({
   children,
   colors = [],
   flgCliente = false,
-  fglButtons=false,
+  fglButtons = false,
+  buttons = [],
   onNavigate,
+  onSend,
+  onReset
 }: FormProps) {
   const controls = useAnimation();
   const [mounted, setMounted] = useState(false);
@@ -43,10 +49,11 @@ export default function Form({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
-          onClick={onClose}
         >
-          {/* HEADER */}
-          <motion.div className={`frm-header relative flex items-center justify-between h-15 mb-5 ${!fglButtons ? 'w-full': 'w-[50%]'}`}>
+          <motion.div
+            className={`frm-header relative flex items-center justify-between h-15 mb-5 w-full`
+            }
+          >
             <div className="flex items-center space-x-2 w-10">
               <button
                 onClick={onClose}
@@ -70,22 +77,42 @@ export default function Form({
             <p className="text-center text-xs font-bold tracking-wide">
               {title}
             </p>
-            
 
-            {!fglButtons && (<div className="frm-semaphore flex items-center space-x-1 ml-2">
-              {colors.map((c, i) => (
+            {!fglButtons ? (
+              <div className="frm-semaphore flex items-center space-x-1 ml-2">
+                {colors.map((c, i) => (
+                  <button
+                    key={i}
+                    className="rounded-2xl transition w-3 h-3"
+                    style={{ backgroundColor: c }}
+                  ></button>
+                ))}
+              </div>
+            ) : (
+              <div className="frmAdd-buttons flex items-center space-x-2 ml-2  z-50 w-40 ">
                 <button
-                  key={i}
-                  className="rounded-2xl transition w-3 h-3"
-                  style={{ backgroundColor: c }}
-                ></button>
-              ))}
-            </div>)}
-            
+                  className="rounded-2xl transition w-17 h-9 cursor-pointer border-1 border-[var(--primary)]"
+                  onClick={onSend}
+                  name="invia"
+                  type="button"
+                >
+                  {buttons[0]}
+                </button>
+
+                <button
+                  className="rounded-2xl transition w-17 h-9 cursor-pointer border-1 border-[var(--primary)]"
+                  onClick={onReset}
+                  name="reset"
+                  type="button"
+                >
+                  {buttons[1]}
+                </button>
+              </div>
+            )}
           </motion.div>
 
           <motion.div
-            className="frm-main relative rounded-xl max-w-4xl w-full h-[85%] p-2 pt-0 md:w-full md:max-w-full overflow-scroll"
+            className="frm-main relative rounded-xl max-w-4xl w-full h-[85%] p-2 pt-0 md:w-full md:max-w-full"
             onClick={(e) => e.stopPropagation()}
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}

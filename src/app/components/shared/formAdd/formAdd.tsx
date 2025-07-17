@@ -3,7 +3,11 @@ import { toast } from "react-toastify";
 import { z } from "zod";
 import "react-toastify/dist/ReactToastify.css";
 
-import { schemaCliente, schemaContatto, schemaVisita } from "@/app/interfaces/schemas";
+import {
+  schemaCliente,
+  schemaContatto,
+  schemaVisita,
+} from "@/app/interfaces/schemas";
 import { sendCliente, sendContatto, sendVisita } from "@/app/services/api";
 import Form from "../form/form";
 
@@ -137,79 +141,62 @@ export default function FormAdd({ type, onClose }: formProps) {
       onClose={onClose}
       title={type}
       fglButtons={true}
+      buttons={["crea", "svuota"]}
+      onSend={sendData}
+      onReset={resetFields}
     >
-        <div className="frmAdd-buttons flex items-center space-x-2 ml-2 absolute -top-21 -right-5 z-50 w-40 md:-top-18">
-          <button
-            className="rounded-2xl transition w-17 h-9 cursor-pointer border-1 border-[var(--primary)]"
-            onClick={sendData}
-            name="invia"
-            type="button"
-          >
-            Crea
-          </button>
-
-          <button
-            className="rounded-2xl transition w-17 h-9 cursor-pointer border-1 border-[var(--primary)]"
-            onClick={resetFields}
-            name="reset"
-            type="button"
-          >
-            Svuota
-          </button>
+      <div className="frmAdd-container">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-x-2 auto-rows-min">
+          {fields
+            .filter(({ name }) => name !== "note")
+            .map(({ name, type }, i) => (
+              <div key={i} className="frm-field mb-4 w-full">
+                <label className="frm-modal-label mb-1 text-xs font-semibold tracking-widest uppercase block text-[var(--primary)]">
+                  {name}
+                </label>
+                {type === "text" || type === "number" ? (
+                  <input
+                    name={name}
+                    type={type}
+                    value={formData[name]}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 text-sm focus:outline-none border-b-1 border-b-[var(--grey)] min-h-[44px]"
+                  />
+                ) : type === "checkbox" ? (
+                  <input
+                    type="checkbox"
+                    name={name}
+                    checked={formData[name]}
+                    onChange={handleChange}
+                    className="mt-2"
+                  />
+                ) : type === "date" ? (
+                  <input
+                    type="date"
+                    name={name}
+                    value={formData[name]}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 text-sm focus:outline-none border-b-1 border-b-[var(--grey)] min-h-[44px] cursor-pointer"
+                  />
+                ) : null}
+              </div>
+            ))}
         </div>
 
-        <div className="frmAdd-container">
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-x-2 auto-rows-min">
-            {fields
-              .filter(({ name }) => name !== "note")
-              .map(({ name, type }, i) => (
-                <div key={i} className="frm-field mb-4 w-full">
-                  <label className="frm-modal-label mb-1 text-xs font-semibold tracking-widest uppercase block text-[var(--primary)]">
-                    {name}
-                  </label>
-                  {type === "text" || type === "number" ? (
-                    <input
-                      name={name}
-                      type={type}
-                      value={formData[name]}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 text-sm focus:outline-none border-b-1 border-b-[var(--grey)] min-h-[44px]"
-                    />
-                  ) : type === "checkbox" ? (
-                    <input
-                      type="checkbox"
-                      name={name}
-                      checked={formData[name]}
-                      onChange={handleChange}
-                      className="mt-2"
-                    />
-                  ) : type === "date" ? (
-                    <input
-                      type="date"
-                      name={name}
-                      value={formData[name]}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 text-sm focus:outline-none border-b-1 border-b-[var(--grey)] min-h-[44px] cursor-pointer"
-                    />
-                  ) : null}
-                </div>
-              ))}
+        {fields.find(({ name }) => name === "note") && (
+          <div className="FrmAdd-field mb-4 w-full">
+            <label className="frm-modal-label mb-1 text-xs font-semibold tracking-widest uppercase block text-[var(--primary)]">
+              note
+            </label>
+            <textarea
+              name="note"
+              value={formData["note"]}
+              onChange={handleChange}
+              className="w-full px-3 py-2 text-sm focus:outline-none border-b-1 border-b-[var(--grey)] min-h-[100px]"
+            />
           </div>
-
-          {fields.find(({ name }) => name === "note") && (
-            <div className="FrmAdd-field mb-4 w-full">
-              <label className="frm-modal-label mb-1 text-xs font-semibold tracking-widest uppercase block text-[var(--primary)]">
-                note
-              </label>
-              <textarea
-                name="note"
-                value={formData["note"]}
-                onChange={handleChange}
-                className="w-full px-3 py-2 text-sm focus:outline-none border-b-1 border-b-[var(--grey)] min-h-[100px]"
-              />
-            </div>
-          )}
-        </div>
+        )}
+      </div>
     </Form>
-  )
+  );
 }

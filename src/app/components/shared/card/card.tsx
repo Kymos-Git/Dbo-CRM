@@ -100,7 +100,7 @@ function generateDetailFields(dato): Field[] {
        nome: 'nome',
         cognome: 'cognome',
         Rag_Sociale: 'ragioneSociale',
-        cellulare: 'cellulare ',
+        cellulare: 'cellulare',
         email: 'email',
         telefono: 'telefonoElaborato',
         paese: 'paeseClienteFornitore',

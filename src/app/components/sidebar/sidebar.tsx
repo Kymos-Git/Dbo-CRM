@@ -46,7 +46,6 @@ export default function Sidebar() {
     { label: "Clienti", icon: <Users size={20} />, href: "/dashboard/clienti" },
   ];
 
-  // MenuButton definito correttamente come componente indipendente
   const MenuButton = ({
     label,
     href,
@@ -77,6 +76,7 @@ export default function Sidebar() {
 
       if (action === "crea") {
         onCreate(label);
+        setIsOpen(false)
       }
 
       if (action === "modifica") {
@@ -156,7 +156,6 @@ export default function Sidebar() {
   return (
     <>
       <div className={`sidebar ${isOpen ? "open" : ""}`} id="sidebar">
-        {/* Bottone per aprire/chiudere la sidebar */}
         <div
           className="button"
           id="toggleBtn"
