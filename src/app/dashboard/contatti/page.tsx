@@ -10,7 +10,7 @@
 
 "use client";
 
-import GenericCard from "@/app/components/shared/card/card";
+import Card from "@/app/components/shared/card/card";
 import GenericFilters, {
   FilterConfig,
 } from "@/app/components/shared/filters/filters";
@@ -22,7 +22,8 @@ import { Contatto } from "@/app/interfaces/interfaces";
 import { getContatti, getContattiFiltrati } from "@/app/services/api";
 import { LoadingComponent } from "@/app/components/loading/loading";
 import { useAuth } from "@/app/context/authContext";
-import { useSearchParams } from "next/navigation";
+import {  useSearchParams } from "next/navigation";
+
 
 const ContattiVirtualGrid = () => {
   const [windowHeight, setWindowHeight] = useState(0);
@@ -39,6 +40,9 @@ const ContattiVirtualGrid = () => {
   const [filtersValues, setFiltersValues] = useState<Record<string, string>>({
     "Rag.Soc.": initialRagSoc,
   });
+
+
+
 
   useEffect(() => {
     async function FetchContatti() {
@@ -102,7 +106,7 @@ const ContattiVirtualGrid = () => {
 
     return (
       <div style={{ ...style, margin: 0, padding: 0, cursor: "pointer" }}>
-        <GenericCard
+        <Card
           title={`${contatto.nome} ${contatto.cognome}`}
           fields={[
             {
@@ -137,7 +141,6 @@ const ContattiVirtualGrid = () => {
       disabilita: raw.Disabilita,
       tipoContatto: raw.TipoContatto,
       telefonoElaborato: raw.TelElab,
-      cittaClienteFornitore: "", // oppure raw.CittaClienteFornitore se presente
       paeseClienteFornitore: raw.PaeseElab,
       Sem1: raw.Sem1 || 0,
       Sem2: raw.Sem2 || 0,

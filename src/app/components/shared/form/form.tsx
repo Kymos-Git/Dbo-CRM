@@ -51,7 +51,7 @@ export default function Form({
               <button
                 onClick={onClose}
                 className="frm-close transition font-bold text-lg rounded-2xl cursor-pointer bg-red-600 w-4 h-4"
-                aria-label="Chiudi dettaglio"
+                aria-label="Chiudi form"
               ></button>
 
               {flgCliente && onNavigate && (

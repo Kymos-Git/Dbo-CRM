@@ -140,7 +140,7 @@ export default function FormAdd({ type, onClose }: formProps) {
       title={type}
       fglButtons={true}
     >
-        <div className="frm-buttons flex items-center space-x-2 ml-2 absolute -top-21 -right-5 z-50 w-40 md:-top-18">
+        <div className="frmAdd-buttons flex items-center space-x-2 ml-2 absolute -top-21 -right-5 z-50 w-40 md:-top-18">
           <button
             className="rounded-2xl transition w-17 h-9 cursor-pointer border-1 border-[var(--primary)]"
             onClick={sendData}
@@ -160,7 +160,7 @@ export default function FormAdd({ type, onClose }: formProps) {
           </button>
         </div>
 
-        <div className="dt-form">
+        <div className="frmAdd-container">
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-x-2 auto-rows-min">
             {fields
               .filter(({ name }) => name !== "note")
@@ -199,7 +199,7 @@ export default function FormAdd({ type, onClose }: formProps) {
           </div>
 
           {fields.find(({ name }) => name === "note") && (
-            <div className="frm-field mb-4 w-full">
+            <div className="FrmAdd-field mb-4 w-full">
               <label className="frm-modal-label mb-1 text-xs font-semibold tracking-widest uppercase block text-[var(--primary)]">
                 note
               </label>

@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { motion, useAnimation } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import "@/app/globals.css";
 import "@/app/components/sidebar/sidebar.css";
 import {
@@ -11,7 +10,6 @@ import {
   ChevronLeft,
   ChevronRight,
   MessageCircleMore,
-  Plus,
   User,
   Users,
 } from "lucide-react";
@@ -19,6 +17,7 @@ import ThemeToggle from "../../theme/themeToggle";
 import { useRouteLoading } from "@/app/context/routeContext";
 import Account from "../account/account";
 import FormAdd from "../shared/formAdd/formAdd";
+import { toast } from "react-toastify";
 
 type FormType = "cliente" | "visita" | "contatto" | null;
 
@@ -47,35 +46,110 @@ export default function Sidebar() {
     { label: "Clienti", icon: <Users size={20} />, href: "/dashboard/clienti" },
   ];
 
-  const PlusButton = ({
+  // MenuButton definito correttamente come componente indipendente
+  const MenuButton = ({
     label,
-    onClick,
+    href,
+    onCreate,
   }: {
     label: string;
-    onClick: (label: string) => void;
+    href: string;
+    onCreate: (label: string) => void;
   }) => {
-    const controls = useAnimation();
+    const [menuOpen, setMenuOpen] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
 
-    const handleClick = () => {
-      controls.start({
-        rotate: [0, -360],
-        transition: { duration: 1 },
-      });
+    const router = useRouter();
 
-      setTimeout(() => {
-        onClick(label);
+    const handleOption = (action: string) => {
+
+      const labelSingolari: Record<
+          string,
+          { articolo: string; nome: string }
+        > = {
+          clienti: { articolo: "il", nome: "cliente" },
+          contatti: { articolo: "il", nome: "contatto" },
+          visite: { articolo: "la", nome: "visita" },
+        };
+
+        const { articolo, nome } = labelSingolari[label];
+
+
+      if (action === "crea") {
+        onCreate(label);
+      }
+
+      if (action === "modifica") {
+        router.push(`${href}?editMode=true`);
+
+
+        
+
+        toast.info(`Apri ${articolo} ${nome} che vuoi modificare`);
         setIsOpen(false);
-      }, 1000);
+      }
+
+      if (action === "elimina") {
+        router.push(`${href}?deleteMode=true`);
+         toast.info(`Apri ${articolo} ${nome} che vuoi eliminare`);
+        setIsOpen(false);
+      }
     };
 
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (
+          menuRef.current &&
+          !menuRef.current.contains(event.target as Node)
+        ) {
+          setMenuOpen(false);
+        }
+      };
+
+      if (menuOpen) {
+        document.addEventListener("mousedown", handleClickOutside);
+      } else {
+        document.removeEventListener("mousedown", handleClickOutside);
+      }
+
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }, [menuOpen]);
+
     return (
-      <motion.button
-        className="sb-addBtn"
-        onClick={handleClick}
-        animate={controls}
-      >
-        <Plus size={25} />
-      </motion.button>
+      <div className="relative inline-block" ref={menuRef}>
+        <button
+          className="h-4 w-4 bg-[#F3A83B] rounded-2xl cursor-pointer"
+          onClick={() => setMenuOpen((prev) => !prev)}
+          title={`Azioni ${label}`}
+        ></button>
+
+        {menuOpen && (
+          <div className="absolute top-full right-0 mt-1 bg-[var(--bg)] border rounded-2xl shadow-md text-sm z-50 w-40 h-30   border-[var(--primary)]">
+            <ul className="flex flex-col flex-wrap">
+              <li
+                onClick={() => handleOption("crea")}
+                className="px-3 py-2 hover:bg-[var(--bg-alt)] cursor-pointer"
+              >
+                Crea
+              </li>
+              <li
+                onClick={() => handleOption("modifica")}
+                className="px-3 py-2 hover:bg-[var(--bg-alt)] cursor-pointer"
+              >
+                Modifica
+              </li>
+              <li
+                onClick={() => handleOption("elimina")}
+                className="px-3 py-2 hover:bg-[var(--bg-alt)] cursor-pointer"
+              >
+                Elimina
+              </li>
+            </ul>
+          </div>
+        )}
+      </div>
     );
   };
 
@@ -97,7 +171,10 @@ export default function Sidebar() {
             const isActive = pathname === href;
 
             return (
-              <div className="line" key={`line${i}`}>
+              <div
+                className="line flex items-center justify-between"
+                key={`line${i}`}
+              >
                 <Link
                   key={href}
                   href={href}
@@ -114,9 +191,10 @@ export default function Sidebar() {
                 </Link>
 
                 {label !== "Chat" && (
-                  <PlusButton
+                  <MenuButton
                     label={label.toLowerCase()}
-                    onClick={(tipo) => {
+                    href={href}
+                    onCreate={(tipo) => {
                       const map: Record<string, FormType> = {
                         clienti: "cliente",
                         contatti: "contatto",
