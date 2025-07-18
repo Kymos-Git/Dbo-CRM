@@ -2,11 +2,10 @@
  * Componente Card
  *
  * Questo componente gestisce la visualizzazione di una card dinamica che può rappresentare
- * un Cliente, un Contatto o una Visita, mostrando i relativi campi e dati. 
+ * un Cliente, un Contatto o una Visita, mostrando i relativi campi e dati.
  * Supporta funzionalità di dettaglio, modifica e cancellazione con animazioni e gestione dei colori.
  * Utilizza type guards per determinare il tipo di dato e caricare i campi appropriati.
  */
-
 "use client";
 
 import Link from "next/link";
@@ -50,8 +49,6 @@ type GenericCardProps = {
   fields: CardField[];
   dato: Cliente | Visita | Contatto;
 };
-
-let typeToUse: "cliente" | "contatto" | "visita";
 
 /**
  * Type guard per verificare se il dato è un Cliente.
@@ -108,7 +105,6 @@ function generateDetailFields(dato: Cliente | Visita | Contatto): Field[] {
         };
       }
     );
-    typeToUse = "cliente";
   }
   if (isVisita(dato)) {
     keyMapping = {
@@ -127,7 +123,6 @@ function generateDetailFields(dato: Cliente | Visita | Contatto): Field[] {
         };
       }
     );
-    typeToUse = "visita";
   }
   if (isContatto(dato)) {
     keyMapping = {
@@ -148,7 +143,6 @@ function generateDetailFields(dato: Cliente | Visita | Contatto): Field[] {
         };
       }
     );
-    typeToUse = "contatto";
   }
 
   return fields;
@@ -273,6 +267,18 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
     ? dato.RagSoc
     : "elemento";
 
+  // Calcola tipo dato localmente
+  const tipoDato = isCliente(dato)
+    ? "cliente"
+    : isContatto(dato)
+    ? "contatto"
+    : isVisita(dato)
+    ? "visita"
+    : undefined;
+
+  // Memoizza i campi per ottimizzare
+  const detailFields = React.useMemo(() => generateDetailFields(dato), [dato]);
+
   return (
     <div className="cd-page flex h-full w-full font-sans text-base justify-center items-center m-0 p-0 cursor-default visible">
       <div className="cd-card w-[75%] max-h-[90vh] rounded-lg p-[5%] pt-[1%] my-0.5 shadow-md transition-shadow hover:shadow-lg flex flex-col justify-center overflow-auto md:w-[80%] md:h-[85%] cursor-default relative">
@@ -325,17 +331,17 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
       </div>
 
       {showDetail &&
-        (editMode === "true" && typeToUse ? (
+        (editMode === "true" && tipoDato ? (
           <FormEdit
             title={`Modifica ${title}`}
-            fields={generateDetailFields(dato)}
+            fields={detailFields}
             onClose={onCloseEdit}
-            type={typeToUse}
+            type={tipoDato}
           />
         ) : (
           <Detail
             title={title}
-            fields={generateDetailFields(dato)}
+            fields={detailFields}
             visible={showDetail}
             onClose={onCloseDetail}
             flgCliente={isCliente(dato)}

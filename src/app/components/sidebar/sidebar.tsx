@@ -103,7 +103,7 @@ export default function Sidebar() {
 
       if (action === "modifica") {
         router.push(`${href}?editMode=true`);
-
+        
         toast.info(`Apri ${articolo} ${nome} che vuoi modificare`);
         setIsOpen(false);
       }
