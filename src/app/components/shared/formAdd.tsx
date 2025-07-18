@@ -11,9 +11,11 @@ import {
   schemaVisita,
 } from "@/app/interfaces/schemas";
 import { sendCliente, sendContatto, sendVisita } from "@/app/services/api";
-import Form from "../form/form";
+
 import { useAuth } from "@/app/context/authContext";
-import NoteField from "../Notefield";
+import NoteField from "./Notefield";
+import Form from "./form";
+
 
 
 type FormProps = {

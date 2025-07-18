@@ -14,7 +14,7 @@
 import GenericCard from "@/app/components/shared/card/card";
 import GenericFilters, {
   FilterConfig,
-} from "@/app/components/shared/filters/filters";
+} from "@/app/components/shared/filters";
 import { MapPin, Mail, Phone } from "lucide-react";
 import { useEffect, useState } from "react";
 import { FixedSizeGrid as Grid, GridChildComponentProps } from "react-window";
@@ -24,7 +24,6 @@ import { getClienti, getClientiFiltrati } from "@/app/services/api";
 import { LoadingComponent } from "@/app/components/loading/loading";
 import { useAuth } from "@/app/context/authContext";
 
-import "./clienti.css";
 
 
 const ClientiVirtualGrid = () => {
@@ -101,21 +100,32 @@ const ClientiVirtualGrid = () => {
    * ricarica i dati filtrati da API e gestisce stati di caricamento e errori.
    */
   async function handleFiltersBlur(values: Record<string, string>) {
-    if (JSON.stringify(values) === JSON.stringify(filtersValues)) return;
-
-    setFiltersValues(values);
-    setLoading(true);
-    try {
-      const data = await getClientiFiltrati(fetchWithAuth, values);
-      setClientiCRM(data.map(mapRawToCliente));
-      setError(null);
-    } catch (err) {
-      setError("Errore nel caricamento dei clienti filtrati.");
-      console.error(err);
-    } finally {
-      setLoading(false);
+      if (JSON.stringify(values) === JSON.stringify(filtersValues)) return;
+  
+      setFiltersValues(values);
+      setLoading(true);
+  
+      try {
+        const areAllFiltersEmpty = Object.values(values).every(
+          (v) => v.trim() === ""
+        );
+  
+        let data;
+        if (areAllFiltersEmpty) {
+          data = await getClienti(fetchWithAuth);
+        } else {
+          data = await getClientiFiltrati(fetchWithAuth, values);
+        }
+  
+        setClientiCRM(data.map(mapRawToCliente));
+        setError(null);
+      } catch (err) {
+        setError("Errore nel caricamento dei contatti.");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     }
-  }
 
   /**
    * Cell

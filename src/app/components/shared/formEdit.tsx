@@ -15,7 +15,6 @@
 "use client";
 import { useState } from "react";
 import { toast } from "react-toastify";
-import Form from "../form/form";
 import {
   UpdateCliente,
   UpdateContatto,
@@ -27,7 +26,8 @@ import {
   schemaVisita,
 } from "@/app/interfaces/schemas";
 import { useAuth } from "@/app/context/authContext";
-import NoteField from "../Notefield";
+import NoteField from "./Notefield";
+import Form from "./form";
 
 type Field = {
   title: string;

@@ -13,7 +13,7 @@ import { ProtectedRoute } from "@/app/auth/ProtectedRoute";
 import GenericCard from "@/app/components/shared/card/card";
 import GenericFilters, {
   FilterConfig,
-} from "@/app/components/shared/filters/filters";
+} from "@/app/components/shared/filters";
 import { useEffect, useState } from "react";
 import { FixedSizeGrid as Grid, GridChildComponentProps } from "react-window";
 import { Visita } from "@/app/interfaces/interfaces";
@@ -99,21 +99,32 @@ const VisiteVirtualGrid = () => {
    * Gestisce loading e errori.
    */
   async function handleFiltersBlur(values: Record<string, string>) {
-    if (JSON.stringify(values) === JSON.stringify(filtersValues)) return;
-
-    setFiltersValues(values);
-    setLoading(true);
-    try {
-      const data = await getVisiteFiltrate(fetchWithAuth, values);
-      setVisiteCRM(data.map(mapRawToVisite));
-      setError(null);
-    } catch (err) {
-      setError("Errore nel caricamento delle visite filtrate.");
-      console.error(err);
-    } finally {
-      setLoading(false);
+      if (JSON.stringify(values) === JSON.stringify(filtersValues)) return;
+  
+      setFiltersValues(values);
+      setLoading(true);
+  
+      try {
+        const areAllFiltersEmpty = Object.values(values).every(
+          (v) => v.trim() === ""
+        );
+  
+        let data;
+        if (areAllFiltersEmpty) {
+          data = await getVisite(fetchWithAuth);
+        } else {
+          data = await getVisiteFiltrate(fetchWithAuth, values);
+        }
+  
+        setVisiteCRM(data.map(mapRawToVisite));
+        setError(null);
+      } catch (err) {
+        setError("Errore nel caricamento dei contatti.");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     }
-  }
 
   /**
    * Funzione per il rendering di ogni cella della griglia.

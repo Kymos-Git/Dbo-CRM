@@ -12,9 +12,7 @@
 "use client";
 
 import Card from "@/app/components/shared/card/card";
-import GenericFilters, {
-  FilterConfig,
-} from "@/app/components/shared/filters/filters";
+import GenericFilters, { FilterConfig } from "@/app/components/shared/filters";
 import { Mail, Phone, Building } from "lucide-react";
 import { useEffect, useState } from "react";
 import { FixedSizeGrid as Grid, GridChildComponentProps } from "react-window";
@@ -56,6 +54,24 @@ const ContattiVirtualGrid = () => {
   const [filtersValues, setFiltersValues] = useState<Record<string, string>>({
     "Rag.Soc.": initialRagSoc,
   });
+  useEffect(() => {
+    if (!initialRagSoc) return;
+
+    const applyInitialFilter = async () => {
+      try {
+        const data = await getContattiFiltrati(fetchWithAuth, filtersValues);
+        setContattiCRM(data.map(mapRawToContatto));
+        setError(null);
+      } catch (err) {
+        setError("Errore nel caricamento dei contatti filtrati.");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    applyInitialFilter();
+  }, [fetchWithAuth, initialRagSoc]);
 
   /**
    * Effetto per caricare inizialmente i contatti all'avvio del componente.
@@ -63,6 +79,7 @@ const ContattiVirtualGrid = () => {
    * Mappa i dati grezzi in oggetti Contatto.
    */
   useEffect(() => {
+    if (initialRagSoc) return;
     async function FetchContatti() {
       try {
         const data = await getContatti(fetchWithAuth);
@@ -115,12 +132,23 @@ const ContattiVirtualGrid = () => {
 
     setFiltersValues(values);
     setLoading(true);
+
     try {
-      const data = await getContattiFiltrati(fetchWithAuth, values);
+      const areAllFiltersEmpty = Object.values(values).every(
+        (v) => v.trim() === ""
+      );
+
+      let data;
+      if (areAllFiltersEmpty) {
+        data = await getContatti(fetchWithAuth);
+      } else {
+        data = await getContattiFiltrati(fetchWithAuth, values);
+      }
+
       setContattiCRM(data.map(mapRawToContatto));
       setError(null);
     } catch (err) {
-      setError("Errore nel caricamento dei contatti filtrati.");
+      setError("Errore nel caricamento dei contatti.");
       console.error(err);
     } finally {
       setLoading(false);

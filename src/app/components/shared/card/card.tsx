@@ -11,7 +11,7 @@
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import "./card.css";
-import Detail from "../detail/detail";
+import Detail from "../detail";
 import { Cliente, Contatto, Visita } from "@/app/interfaces/interfaces";
 import { useAnimation, motion } from "framer-motion";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -23,7 +23,7 @@ import {
   schemaVisita,
   VisitaKeys,
 } from "@/app/interfaces/schemas";
-import FormEdit from "../formEdit/formEdit";
+
 import {
   deleteCliente,
   deleteContatto,
@@ -31,6 +31,7 @@ import {
 } from "@/app/services/api";
 import { useAuth } from "@/app/context/authContext";
 import { toast } from "react-toastify";
+import FormEdit from "../formEdit";
 
 type CardField = {
   title: string | React.ReactNode;
@@ -280,10 +281,11 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
   const detailFields = React.useMemo(() => generateDetailFields(dato), [dato]);
 
   return (
-    <div className="cd-page flex h-full w-full font-sans text-base justify-center items-center m-0 p-0 cursor-default visible">
-      <div className="cd-card w-[75%] max-h-[90vh] rounded-lg p-[5%] pt-[1%] my-0.5 shadow-md transition-shadow hover:shadow-lg flex flex-col justify-center overflow-auto md:w-[80%] md:h-[85%] cursor-default relative">
-        <h3 className="cd-title text-xl mt-[3%] mb-2 font-semibold">{title}</h3>
-        <div className="cd-fields flex flex-col gap-2 flex-grow">
+    <div className="cd-page flex h-full w-full font-sans text-base justify-center items-center m-0 p-0 cursor-default visible bg-[var(--bg)] text-[var(--text)]">
+      <div className="cd-card w-[75%] max-h-[90vh] rounded-lg p-[5%] pt-[1%] my-0.5 shadow-md transition-shadow hover:shadow-lg flex flex-col justify-center overflow-auto md:w-[80%] md:h-[85%] cursor-default relative bg-[var(--bg)] border-[2px] border-[var(--bg-alt)]">
+
+        <h3 className="cd-title text-xl mt-[3%] mb-2 font-semibold text-[var(--primary)]">{title}</h3>
+        <div className="cd-fields flex flex-col gap-2 flex-grow text-[var(--text)]">
           {fields.map((field, index) => (
             <p
               key={index}
@@ -298,7 +300,7 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
                   passHref
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="cd-field-link card-link text-inherit cursor-pointer transition-colors duration-300 truncate"
+                  className="cd-field-link card-link text-inherit cursor-pointer transition-colors duration-300 truncate hover:text-[var(--primary)] hover:underline "
                 >
                   {field.value}
                 </Link>

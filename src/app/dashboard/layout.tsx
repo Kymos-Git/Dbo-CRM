@@ -12,10 +12,10 @@
 import { ReactNode, useEffect } from "react";
 import Sidebar from "../components/sidebar/sidebar";
 import { RouteLoadingProvider } from "../context/routeContext";
-import RouteLoader from "../components/routeLoader/routeLoader";
 import "./dashboard.css"
 import { toast } from "react-toastify";
 import { getItem } from "../lib/indexedDB";
+import RouteLoader from "../components/routeLoader";
 
 export default function DashBoardLayout({ children }: { children: ReactNode }) {
   

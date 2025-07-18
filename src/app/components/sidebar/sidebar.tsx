@@ -29,9 +29,9 @@ import {
 } from "lucide-react";
 import ThemeToggle from "../../theme/themeToggle";
 import { useRouteLoading } from "@/app/context/routeContext";
-import Account from "../account/account";
-import FormAdd from "../shared/formAdd/formAdd";
+import Account from "../account";
 import { toast } from "react-toastify";
+import FormAdd from "../shared/formAdd";
 
 type FormType = "cliente" | "visita" | "contatto" | null;
 

@@ -9,7 +9,7 @@
 "use client";
 
 import { ProtectedRoute } from "../auth/ProtectedRoute";
-import Homepage from "../components/home/homepage/homepage";
+import Homepage from "../components/home/homepage";
 
 export default function Home() {
   // Ritorna il componente Homepage protetto da ProtectedRoute
