@@ -16,8 +16,9 @@ import {  useAnimation } from "framer-motion";
 import ExpandableInput from "../expandedInput/expandeInput";
 import "./detail.css";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import Form from "../form/form";
+import NoteField from "../Notefield";
 
 type Field = {
   title: string;
@@ -71,31 +72,7 @@ export default function Detail({
     };
   }, [visible]);
 
-  /**
-   * Sottocomponente NoteField
-   *
-   * Mostra il campo "note" in un'area di testo che si ridimensiona
-   * dinamicamente all'altezza del contenuto, mantenendo l'input di sola lettura.
-   */
-  function NoteField({ value }: { value: string }) {
-    const ref = useRef<HTMLTextAreaElement | null>(null);
-
-    useEffect(() => {
-      if (ref.current) {
-        ref.current.style.height = "auto"; 
-        ref.current.style.height = `${ref.current.scrollHeight}px`; 
-      }
-    }, [value]);
-    return (
-      <textarea
-        ref={ref}
-        value={value}
-        readOnly
-        className="w-full border-none rounded-xl resize-none min-h-[6rem] focus:outline-none focus:ring-0"
-      />
-    );
-  }
-
+  
   const controls = useAnimation();
 
   /**
@@ -139,7 +116,7 @@ export default function Detail({
             <label className="dt-note-label block mb-1 font-semibold">
               {title.toUpperCase()}
             </label>
-            <NoteField value={value as string} />
+            <NoteField value={value as string} readonly={true} onChange={()=>{}}/>
           </div>
         ))}
     </Form>

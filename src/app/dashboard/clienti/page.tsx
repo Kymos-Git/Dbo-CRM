@@ -110,7 +110,7 @@ const ClientiVirtualGrid = () => {
       setClientiCRM(data.map(mapRawToCliente));
       setError(null);
     } catch (err) {
-      setError("Errore nel caricamento delle visite filtrate.");
+      setError("Errore nel caricamento dei clienti filtrati.");
       console.error(err);
     } finally {
       setLoading(false);

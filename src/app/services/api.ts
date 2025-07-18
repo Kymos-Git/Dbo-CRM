@@ -1,6 +1,7 @@
 "use client";
 
 import * as interfaces from "@/app/interfaces/interfaces";
+import { body } from "framer-motion/client";
 
 /**
  * Questo modulo contiene funzioni per gestire l'interazione con un'API CRM,
@@ -165,15 +166,39 @@ export async function getClientiFiltrati(
 // Funzioni di invio, aggiornamento ed eliminazione non ancora implementate
 
 export async function sendCliente(fetchFn: (input: string, init?: RequestInit) => Promise<Response>, data: any) {
-  // da implementare
+   const res=await fetchFn('/api/StpClienti_KyMng',{
+    headers:{
+      "Content-Type":"application/json",
+    },
+    method: "POST",
+    body:JSON.stringify(data)
+  });
+  if(!res.ok)throw new Error('Errore nel invio del contatto');
+  return await res.json()
 }
 
 export async function sendContatto(fetchFn: (input: string, init?: RequestInit) => Promise<Response>, data: any) {
-  // da implementare
+  const res=await fetchFn('/api/StpContatti_KyMng',{
+    headers:{
+      "Content-Type":"application/json",
+    },
+    method: "POST",
+    body:JSON.stringify(data)
+  });
+  if(!res.ok)throw new Error('Errore nel invio del contatto');
+  return await res.json()
 }
 
 export async function sendVisita(fetchFn: (input: string, init?: RequestInit) => Promise<Response>, data: any) {
-  // da implementare
+   const res=await fetchFn('/api/StpVisite_KyMng',{
+    headers:{
+      "Content-Type":"application/json",
+    },
+    method: "POST",
+    body:JSON.stringify(data)
+  });
+  if(!res.ok)throw new Error('Errore nel invio del contatto');
+  return await res.json()
 }
 
 export async function UpdateCliente(fetchFn: (input: string, init?: RequestInit) => Promise<Response>, data: any) {

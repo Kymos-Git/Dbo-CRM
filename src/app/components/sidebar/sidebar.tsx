@@ -21,8 +21,11 @@ import {
   ChevronLeft,
   ChevronRight,
   MessageCircleMore,
+  Pencil,
+  Plus,
   User,
   Users,
+  X,
 } from "lucide-react";
 import ThemeToggle from "../../theme/themeToggle";
 import { useRouteLoading } from "@/app/context/routeContext";
@@ -142,25 +145,31 @@ export default function Sidebar() {
         ></button>
 
         {menuOpen && (
-          <div className="absolute top-full right-0 mt-1 bg-[var(--bg)] border rounded-2xl shadow-md text-sm z-50 w-40 h-27   border-[var(--primary)] overflow-hidden">
+          <div className="absolute top-full right-0 mt-1 bg-[var(--bg)] border rounded-2xl shadow-md text-sm z-50 w-45 h-27   border-[var(--primary)] overflow-hidden">
             <ul className="flex flex-col flex-wrap">
               <li
                 onClick={() => handleOption("crea")}
                 className="px-3 py-2 hover:bg-[var(--bg-alt)] cursor-pointer"
               >
-                Crea
+                <span className="flex flex-row justify-start items-center">
+                <Plus size={20} className="mr-2" />Crea
+                </span>
               </li>
               <li
                 onClick={() => handleOption("modifica")}
                 className="px-3 py-2 hover:bg-[var(--bg-alt)] cursor-pointer"
               >
-                Modifica
+              <span className="flex flex-row justify-start items-center">
+                <Pencil size={18} className="mr-2" />Modificia
+                </span>
               </li>
               <li
                 onClick={() => handleOption("elimina")}
                 className="px-3 py-2 hover:bg-[var(--bg-alt)] cursor-pointer"
               >
-                Elimina
+                <span className="flex flex-row justify-start items-center">
+                <X size={20} className="mr-2" />Elimina
+                </span>
               </li>
             </ul>
           </div>

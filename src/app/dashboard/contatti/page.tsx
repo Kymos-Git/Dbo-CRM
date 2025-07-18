@@ -120,7 +120,7 @@ const ContattiVirtualGrid = () => {
       setContattiCRM(data.map(mapRawToContatto));
       setError(null);
     } catch (err) {
-      setError("Errore nel caricamento delle visite filtrate.");
+      setError("Errore nel caricamento dei contatti filtrati.");
       console.error(err);
     } finally {
       setLoading(false);

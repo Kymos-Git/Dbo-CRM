@@ -13,7 +13,7 @@
 
 
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { toast } from "react-toastify";
 import Form from "../form/form";
 import {
@@ -27,6 +27,7 @@ import {
   schemaVisita,
 } from "@/app/interfaces/schemas";
 import { useAuth } from "@/app/context/authContext";
+import NoteField from "../Notefield";
 
 type Field = {
   title: string;
@@ -41,41 +42,6 @@ interface Props {
   type: "cliente" | "contatto" | "visita";
 }
 
-
-
-/**
- * Funzione interna NoteField
- * 
- * Componente che rende un campo textarea con altezza adattiva in base al contenuto.
- * Aggiorna il valore tramite callback onChange.
- */
-function NoteField({
-  value,
-  name,
-  onChange,
-}: {
-  value: string;
-  name: string;
-  onChange: (key: string, value: string) => void;
-}) {
-  const ref = useRef<HTMLTextAreaElement | null>(null);
-
-  useEffect(() => {
-    if (ref.current) {
-      ref.current.style.height = "auto";
-      ref.current.style.height = `${ref.current.scrollHeight}px`;
-    }
-  }, [value]);
-
-  return (
-    <textarea
-      ref={ref}
-      value={value}
-      className="w-full border-none rounded-xl resize-none min-h-[6rem] focus:outline-none focus:ring-0"
-      onChange={(e) => onChange(name, e.target.value)}
-    />
-  );
-}
 
 export default function FormEdit({ title, fields, onClose, type }: Props) {
   // Stato iniziale dei campi, costruito a partire dai valori passati via props
@@ -199,8 +165,8 @@ export default function FormEdit({ title, fields, onClose, type }: Props) {
           </label>
           <NoteField
             value={(formState[noteField.title] as string) || ""}
-            onChange={handleChange}
-            name={noteField.title}
+            onChange={(e) => handleChange(noteField.title,e)}
+            readonly={false}
           />
         </div>
       )}
