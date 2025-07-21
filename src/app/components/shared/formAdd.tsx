@@ -16,8 +16,6 @@ import { useAuth } from "@/app/context/authContext";
 import NoteField from "./Notefield";
 import Form from "./form";
 
-
-
 type FormProps = {
   type: "cliente" | "contatto" | "visita";
   onClose: () => void;
@@ -35,14 +33,14 @@ function generateFieldsFromSchema<T extends ZodRawShape>(
   return Object.entries(shape).map(([key, field]) => {
     let type: Field["type"];
 
-    if (field instanceof z.ZodString) {
+    if (key.toLowerCase().includes("data")) {
+      type = "date";
+    } else if (field instanceof z.ZodString) {
       type = "text";
     } else if (field instanceof z.ZodNumber) {
       type = "number";
     } else if (field instanceof z.ZodBoolean) {
       type = "checkbox";
-    } else if (field instanceof z.ZodDate) {
-      type = "date";
     } else {
       type = "text";
     }
@@ -115,28 +113,37 @@ export default function FormAdd({ type, onClose }: FormProps) {
     setFormData((prev) => ({ ...prev, note: value }));
   };
 
+  const transformKeys = (obj: Record<string, any>) => {
+    const newObj: Record<string, any> = {};
+    for (const key in obj) {
+      const newKey = key.replace(/_/g, ""); // Rimuove tutti gli underscore
+      newObj[newKey] = obj[key];
+    }
+    return newObj;
+  };
+
   const sendData = async () => {
     if (!schema) return;
     try {
       const parsed = schema.parse(formData);
+      const transformed = transformKeys(parsed);
+      console.log(transformed)
       switch (type) {
         case "cliente":
-          await sendCliente(fetchWithAuth, parsed);
+          await sendCliente(fetchWithAuth, transformed);
           break;
         case "contatto":
-          await sendContatto(fetchWithAuth, parsed);
+          await sendContatto(fetchWithAuth, transformed);
           break;
         case "visita":
-          await sendVisita(fetchWithAuth, parsed);
+          await sendVisita(fetchWithAuth, transformed);
           break;
       }
       toast.success("Dati inviati con successo");
       onClose();
     } catch (err) {
-      toast.error(
-        "Errore nella validazione dei dati: " +
-          (err instanceof Error ? err.message : "Errore sconosciuto")
-      );
+      console.error(err instanceof Error ? err.message : "Errore sconosciuto");
+      toast.error("errore nel invio dei dati");
     }
   };
 
@@ -150,8 +157,6 @@ export default function FormAdd({ type, onClose }: FormProps) {
   };
 
   if (!schema) return null;
-  
-
 
   return (
     <Form

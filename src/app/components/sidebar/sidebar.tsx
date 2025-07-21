@@ -205,7 +205,7 @@ export default function Sidebar() {
                   scroll={true}
                   className={`link ${isActive ? "active" : ""}`}
                   onClick={() => {
-                    setLoading(true);
+                    if(pathname!==href){setLoading(true)}
                     setIsOpen(false);
                   }}
                 >

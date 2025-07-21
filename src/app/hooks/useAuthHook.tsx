@@ -1,6 +1,6 @@
 /**
  * useAuthHook.ts
- * 
+ *
  * Hook personalizzato che gestisce l'autenticazione dell'utente.
  * Fornisce lo stato e le funzioni per login, logout, gestione dei token di accesso e refresh,
  * e un metodo per effettuare richieste autenticati gestendo automaticamente il refresh del token.
@@ -57,8 +57,12 @@ export function useAuthHook() {
       setLoading(true);
       try {
         const savedUsername = (await getItem(USERNAME_KEY)) as string | null;
-        const savedAccessToken = (await getItem(ACCESS_TOKEN_KEY)) as string | null;
-        const savedRefreshToken = (await getItem(REFRESH_TOKEN_KEY)) as string | null;
+        const savedAccessToken = (await getItem(ACCESS_TOKEN_KEY)) as
+          | string
+          | null;
+        const savedRefreshToken = (await getItem(REFRESH_TOKEN_KEY)) as
+          | string
+          | null;
 
         if (!savedUsername || !savedRefreshToken) {
           setUsername(null);
@@ -87,7 +91,10 @@ export function useAuthHook() {
    * Gestisce il salvataggio dei nuovi token e aggiorna lo stato.
    * Ritorna il nuovo token di accesso.
    */
-  async function refreshAccessToken(refreshToken: string, username: string): Promise<string> {
+  async function refreshAccessToken(
+    refreshToken: string,
+    username: string
+  ): Promise<string> {
     if (refreshPromise) {
       return refreshPromise;
     }
@@ -103,7 +110,16 @@ export function useAuthHook() {
         });
 
         if (!res.ok) {
-          await logoutOnce();
+          updateAccessToken(null);
+          setUsername(null);
+          
+          await removeItem(REFRESH_TOKEN_KEY);
+          await removeItem(USERNAME_KEY);
+          await removeItem(ACCESS_TOKEN_KEY);
+          
+          triedRefresh.current = false;
+          
+          router.push("/");
           throw new Error("Refresh token scaduto");
         }
 
@@ -230,7 +246,10 @@ export function useAuthHook() {
    * In caso di errore 401, prova a rinnovare il token e ripetere la richiesta.
    * Se il refresh fallisce, esegue il logout.
    */
-  async function fetchWithAuth(input: RequestInfo, init?: RequestInit): Promise<Response> {
+  async function fetchWithAuth(
+    input: RequestInfo,
+    init?: RequestInit
+  ): Promise<Response> {
     const token = accessTokenRef.current;
     const headers = new Headers(init?.headers || {});
     headers.set("Authorization", `Bearer ${token}`);
@@ -245,13 +264,17 @@ export function useAuthHook() {
 
     try {
       const refreshToken = (await getItem(REFRESH_TOKEN_KEY)) as string | null;
-      const currentUsername = username ?? ((await getItem(USERNAME_KEY)) as string | null);
+      const currentUsername =
+        username ?? ((await getItem(USERNAME_KEY)) as string | null);
 
       if (!refreshToken || !currentUsername) {
         throw new Error("Refresh token o username non disponibile");
       }
 
-      const newAccessToken = await refreshAccessToken(refreshToken, currentUsername);
+      const newAccessToken = await refreshAccessToken(
+        refreshToken,
+        currentUsername
+      );
 
       headers.set("Authorization", `Bearer ${newAccessToken}`);
       response = await fetch(input, { ...init, headers });

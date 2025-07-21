@@ -85,16 +85,16 @@ function generateDetailFields(dato: Cliente | Visita | Contatto): Field[] {
 
   if (isCliente(dato)) {
     keyMapping = {
-      ragione_sociale: "ragSocCompleta",
-      indirizzo: "indirizzo",
-      citta: "citta",
-      cap: "cap",
-      provincia: "provincia",
-      Regione: "idZona",
+      RagSoc: "ragSocCompleta",
+      Indirizzo: "indirizzo",
+      Citta: "citta",
+      Cap: "cap",
+      Provincia: "provincia",
+      Zona: "idZona",
       Stato: "idPaese",
-      tel: "tel",
-      email: "email",
-      note: "noteCliente",
+      Tel: "tel",
+      Email: "email",
+      Note: "noteCliente",
     };
 
     fields = (Object.entries(keyMapping) as [ClienteKeys, string][]).map(
@@ -111,8 +111,8 @@ function generateDetailFields(dato: Cliente | Visita | Contatto): Field[] {
     keyMapping = {
       DescAttivita: "DescAttivita",
       DataAttivita: "DataAttivita",
-      Ragione_Sociale: "RagSoc",
-      note: "NoteAttivita",
+      RagSoc: "RagSoc",
+      Note: "NoteAttivita",
     };
 
     fields = (Object.entries(keyMapping) as [VisitaKeys, string][]).map(
@@ -127,13 +127,13 @@ function generateDetailFields(dato: Cliente | Visita | Contatto): Field[] {
   }
   if (isContatto(dato)) {
     keyMapping = {
-      nome: "nome",
-      cognome: "cognome",
-      Rag_Sociale: "ragioneSociale",
-      cellulare: "cellulare",
-      email: "email",
-      telefono: "telefonoElaborato",
-      paese: "paeseClienteFornitore",
+      Nome: "nome",
+      Cognome: "cognome",
+      RagSoc: "ragioneSociale",
+      Cell: "cellulare",
+      Email: "email",
+      Telefono: "telefonoElaborato",
+      Paese: "paeseClienteFornitore",
     };
     fields = (Object.entries(keyMapping) as [ContattoKeys, string][]).map(
       ([schemaKey, datoKey]) => {
@@ -164,6 +164,13 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
   const router = useRouter();
   const pathname = usePathname();
 
+  const id=()=>{
+    let i=null
+    if(isCliente(dato))i=dato.idCliente;
+    if(isContatto(dato))i=dato.idContatto;
+    if(isVisita(dato))i=dato.IdAttivita;
+    return i!.toString();
+  }
   /**
    * Chiude il dettaglio.
    */
@@ -196,9 +203,9 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
    */
   async function deleteDato() {
     try {
-      if (isCliente(dato)) await deleteCliente(fetchWithAuth, dato);
-      if (isContatto(dato)) await deleteContatto(fetchWithAuth, dato);
-      if (isVisita(dato)) await deleteVisita(fetchWithAuth, dato);
+      if (isCliente(dato)) await deleteCliente(fetchWithAuth, dato.idCliente);
+      if (isContatto(dato)) await deleteContatto(fetchWithAuth, dato.idContatto);
+      if (isVisita(dato)) await deleteVisita(fetchWithAuth, dato.IdAttivita);
 
       setShowDeleteConfirm(false);
       clearQueryParams();
@@ -338,6 +345,7 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
             title={`Modifica ${title}`}
             fields={detailFields}
             onClose={onCloseEdit}
+            id={id()}
             type={tipoDato}
           />
         ) : (

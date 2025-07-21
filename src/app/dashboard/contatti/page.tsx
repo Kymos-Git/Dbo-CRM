@@ -54,46 +54,35 @@ const ContattiVirtualGrid = () => {
   const [filtersValues, setFiltersValues] = useState<Record<string, string>>({
     "Rag.Soc.": initialRagSoc,
   });
-  useEffect(() => {
-    if (!initialRagSoc) return;
 
-    const applyInitialFilter = async () => {
+
+  
+  useEffect(() => {
+    async function fetchData() {
+      setLoading(true);
       try {
-        const data = await getContattiFiltrati(fetchWithAuth, filtersValues);
+        let data;
+        if (initialRagSoc && initialRagSoc.trim() !== "") {
+          // filtro iniziale presente
+          data = await getContattiFiltrati(fetchWithAuth, {
+            "Rag.Soc.": initialRagSoc,
+          });
+        } else {
+          // nessun filtro iniziale
+          data = await getContatti(fetchWithAuth);
+        }
         setContattiCRM(data.map(mapRawToContatto));
         setError(null);
       } catch (err) {
-        setError("Errore nel caricamento dei contatti filtrati.");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    applyInitialFilter();
-  }, [fetchWithAuth, initialRagSoc]);
-
-  /**
-   * Effetto per caricare inizialmente i contatti all'avvio del componente.
-   * Chiama l'API getContatti usando la funzione fetch autenticata.
-   * Mappa i dati grezzi in oggetti Contatto.
-   */
-  useEffect(() => {
-    if (initialRagSoc) return;
-    async function FetchContatti() {
-      try {
-        const data = await getContatti(fetchWithAuth);
-        setContattiCRM(data.map(mapRawToContatto));
-        setError(null);
-      } catch (err) {
-        setError("Errore nel caricamento dei contatti ");
+        setError("Errore nel caricamento dei contatti.");
         console.error(err);
       } finally {
         setLoading(false);
       }
     }
-    FetchContatti();
-  }, []);
+
+    fetchData();
+  }, [fetchWithAuth, initialRagSoc]);
 
   /**
    * Effetto per gestire il ridimensionamento della finestra e aggiornare

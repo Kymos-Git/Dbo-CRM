@@ -1,7 +1,6 @@
 "use client";
 
 import * as interfaces from "@/app/interfaces/interfaces";
-import { body } from "framer-motion/client";
 
 /**
  * Questo modulo contiene funzioni per gestire l'interazione con un'API CRM,
@@ -163,64 +162,233 @@ export async function getClientiFiltrati(
   return await response.json();
 }
 
-// Funzioni di invio, aggiornamento ed eliminazione non ancora implementate
+// Funzioni di invio, aggiornamento ed eliminazione
 
-export async function sendCliente(fetchFn: (input: string, init?: RequestInit) => Promise<Response>, data: any) {
-   const res=await fetchFn('/api/StpClienti_KyMng',{
-    headers:{
-      "Content-Type":"application/json",
+export async function sendCliente(
+  fetchFn: (input: string, init?: RequestInit) => Promise<Response>,
+  data: any
+) {
+  const newData = {
+    ...data,
+    KYAction: "INS",
+  };
+
+  const res = await fetchFn("/api/StpClienti_KyMng", {
+    headers: {
+      "Content-Type": "application/json",
     },
     method: "POST",
-    body:JSON.stringify(data)
+    body: JSON.stringify(newData),
   });
-  if(!res.ok)throw new Error('Errore nel invio del contatto');
-  return await res.json()
+  if (!res.ok) throw new Error("Errore nel invio del cliente");
+  const parsed = await res.json();
+
+  if (parsed.KyRes === 0) {
+    throw new Error("Nessuna modifica eseguita");
+  }
+  return parsed;
 }
 
-export async function sendContatto(fetchFn: (input: string, init?: RequestInit) => Promise<Response>, data: any) {
-  const res=await fetchFn('/api/StpContatti_KyMng',{
-    headers:{
-      "Content-Type":"application/json",
+export async function sendContatto(
+  fetchFn: (input: string, init?: RequestInit) => Promise<Response>,
+  data: any
+) {
+  const newData = {
+    ...data,
+    KYAction: "INS",
+  };
+
+  const res = await fetchFn("/api/StpContatti_KyMng", {
+    headers: {
+      "Content-Type": "application/json",
     },
     method: "POST",
-    body:JSON.stringify(data)
+    body: JSON.stringify(newData),
   });
-  if(!res.ok)throw new Error('Errore nel invio del contatto');
-  return await res.json()
+  if (!res.ok) throw new Error("Errore nel invio del contatto");
+  const parsed = await res.json();
+
+  if (parsed.KyRes === 0) {
+    throw new Error("Nessuna modifica eseguita");
+  }
+  return parsed;
 }
 
-export async function sendVisita(fetchFn: (input: string, init?: RequestInit) => Promise<Response>, data: any) {
-   const res=await fetchFn('/api/StpVisite_KyMng',{
-    headers:{
-      "Content-Type":"application/json",
+export async function sendVisita(
+  fetchFn: (input: string, init?: RequestInit) => Promise<Response>,
+  data: any
+) {
+  const newData = {
+    ...data,
+    KYAction: "INS",
+  };
+
+  const res = await fetchFn("/api/StpVisite_KyMng", {
+    headers: {
+      "Content-Type": "application/json",
     },
     method: "POST",
-    body:JSON.stringify(data)
+    body: JSON.stringify(newData),
   });
-  if(!res.ok)throw new Error('Errore nel invio del contatto');
-  return await res.json()
+  if (!res.ok) throw new Error("Errore nel invio della visita");
+  const parsed = await res.json();
+
+  if (parsed.KyRes === 0) {
+    throw new Error("Nessuna modifica eseguita");
+  }
+  return parsed;
 }
 
-export async function UpdateCliente(fetchFn: (input: string, init?: RequestInit) => Promise<Response>, data: any) {
-  // da implementare
+//======update======
+
+export async function UpdateCliente(
+  fetchFn: (input: string, init?: RequestInit) => Promise<Response>,
+  data: any
+) {
+  const newData = {
+    ...data,
+    KYAction: "UPD",
+  };
+
+  const res = await fetchFn("/api/StpClienti_KyMng", {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify(newData),
+  });
+  if (!res.ok) throw new Error("Errore nel update del cliente");
+  const parsed = await res.json();
+
+  if (parsed.KyRes === '0') {
+    throw new Error("Nessuna modifica eseguita");
+  }
+  return parsed;
 }
 
-export async function UpdateContatto(fetchFn: (input: string, init?: RequestInit) => Promise<Response>, data: any) {
-  // da implementare
+export async function UpdateContatto(
+  fetchFn: (input: string, init?: RequestInit) => Promise<Response>,
+  data: any
+) {
+  const newData = {
+    ...data,
+    KYAction: "UPD",
+  };
+
+  const res = await fetchFn("/api/StpContatti_KyMng", {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify(newData),
+  });
+  if (!res.ok) throw new Error("Errore nel update del contatto");
+  const parsed = await res.json();
+
+  if (parsed.KyRes === 0) {
+    throw new Error("Nessuna modifica eseguita");
+  }
+  return parsed;
 }
 
-export async function UpdateVisita(fetchFn: (input: string, init?: RequestInit) => Promise<Response>, data: any) {
-  // da implementare
+export async function UpdateVisita(
+  fetchFn: (input: string, init?: RequestInit) => Promise<Response>,
+  data: any
+) {
+  const newData = {
+    ...data,
+    KYAction: "UPD",
+  };
+
+  const res = await fetchFn("/api/StpVisite_KyMng", {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify(newData),
+  });
+  if (!res.ok) throw new Error("Errore nel update della visita");
+  const parsed = await res.json();
+
+  if (parsed.KyRes === 0) {
+    throw new Error("Nessuna modifica eseguita");
+  }
+  return parsed;
 }
 
-export async function deleteCliente(fetchFn: (input: string, init?: RequestInit) => Promise<Response>, data: any) {
-  // da implementare
+//=========delete=======
+
+export async function deleteCliente(
+  fetchFn: (input: string, init?: RequestInit) => Promise<Response>,
+  data: any
+) {
+  const newData = {
+    ...data,
+    KYAction: "DEL",
+  };
+
+  const res = await fetchFn("/api/StpClienti_KyMng", {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify(newData),
+  });
+  if (!res.ok) throw new Error("Errore nell' eliminazione del cliente");
+  const parsed = await res.json();
+
+  if (parsed.KyRes === 0) {
+    throw new Error("Nessuna modifica eseguita");
+  }
+  return parsed;
 }
 
-export async function deleteContatto(fetchFn: (input: string, init?: RequestInit) => Promise<Response>, data: any) {
-  // da implementare
+export async function deleteContatto(
+  fetchFn: (input: string, init?: RequestInit) => Promise<Response>,
+  data: any
+) {
+  const newData = {
+    ...data,
+    KYAction: "DEL",
+  };
+
+  const res = await fetchFn("/api/StpContatti_KyMng", {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify(newData),
+  });
+  if (!res.ok) throw new Error("Errore nell' eliminazione del contatto");
+  const parsed = await res.json();
+
+  if (parsed.KyRes === 0) {
+    throw new Error("Nessuna modifica eseguita");
+  }
+  return parsed;
 }
 
-export async function deleteVisita(fetchFn: (input: string, init?: RequestInit) => Promise<Response>, data: any) {
-  // da implementare
+export async function deleteVisita(
+  fetchFn: (input: string, init?: RequestInit) => Promise<Response>,
+  data: any
+) {
+  const newData = {
+    ...data,
+    KYAction: "DEL",
+  };
+
+  const res = await fetchFn("/api/StpVisite_KyMng", {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify(newData),
+  });
+  if (!res.ok) throw new Error("Errore nell' eliminazione della visita");
+  const parsed = await res.json();
+
+  if (parsed.KyRes === 0) {
+    throw new Error("Nessuna modifica eseguita");
+  }
+  return parsed;
 }

@@ -1,16 +1,16 @@
 import { z } from "zod";
 
 export const schemaCliente = z.object({
-  ragione_sociale: z.string(),
-  indirizzo: z.string(),
-  citta: z.string(),
-  cap: z.string(),
-  provincia: z.string(),
-  Regione: z.string(),
-  Stato: z.string(),
-  tel: z.string(),
-  email: z.string().regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Email non valida"),
-  note: z.string(),
+  RagSoc: z.string(),
+  Indirizzo: z.string().nullable(),
+  Citta: z.string().nullable(),
+  Cap: z.string().nullable(),
+  Provincia: z.string().nullable(),
+  Zona: z.string().nullable(),
+  Stato: z.string().nullable(),
+  Tel: z.string().nullable(),
+  Email: z.string().regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Email non valida").nullable(),
+  Note: z.string().nullable(),
 });
 
 export type ClienteKeys = keyof typeof schemaCliente.shape;
@@ -18,13 +18,13 @@ export type ClienteKeys = keyof typeof schemaCliente.shape;
 
 
 export const schemaContatto = z.object({
-  nome: z.string(),
-  cognome: z.string(),
-  Rag_Sociale: z.string(),
-  cellulare: z.string(),
-  email: z.string().regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Email non valida"),
-  telefono: z.string(),
-  paese: z.string(),
+  Nome: z.string(),
+  Cognome: z.string(),
+  RagSoc: z.string(),
+  Cell: z.string().nullable(),
+  Email: z.string().regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Email non valida") .nullable(),
+  Telefono: z.string().nullable(),
+  Paese: z.string().nullable(),
 
 });
 export type ContattoKeys = keyof typeof schemaContatto.shape;
@@ -32,10 +32,10 @@ export type ContattoKeys = keyof typeof schemaContatto.shape;
 
 
 export const schemaVisita = z.object({
-  DescAttivita: z.string(),
-  DataAttivita: z.date(),
-  Ragione_Sociale: z.string(),
-  note: z.string(),
+  Desc_Attivita: z.string().nullable(),
+  Data_Attivita: z.string(),
+  RagSoc: z.string(),
+  Note: z.string().nullable(),
 });
 
 export type VisitaKeys = keyof typeof schemaVisita.shape;
