@@ -51,7 +51,7 @@ export default function Detail({
    */
   const onNavigate = () => {
     const ragSoc = encodeURIComponent(
-      fields.find((f) => f.title === "RAGIONE SOCIALE")?.value || ""
+      fields.find((f) => f.title === "RAGSOC")?.value || ""
     );
     router.push(`/dashboard/contatti?ragSoc=${ragSoc}`);
   };

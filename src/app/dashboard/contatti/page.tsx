@@ -55,54 +55,54 @@ const ContattiVirtualGrid = () => {
     "Rag.Soc.": initialRagSoc,
   });
 
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        let data;
+        if (initialRagSoc && initialRagSoc.trim() !== "") {
+          data = await getContattiFiltrati(fetchWithAuth, {
+            "Rag.Soc.": initialRagSoc,
+            //pulire il parametro ragSoc dal url
+          });
+        } else {
+          // Nessun filtro iniziale
+          data = await getContatti(fetchWithAuth);
+        }
 
- useEffect(() => {
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      let data;
-      if (initialRagSoc && initialRagSoc.trim() !== "") {
-        data = await getContattiFiltrati(fetchWithAuth, {
-          "Rag.Soc.": initialRagSoc,
-        });
-      } else {
-        data = await getContatti(fetchWithAuth);
+        setContattiCRM(data.map(mapRawToContatto));
+        setError(null);
+      } catch (err) {
+        setError("Errore nel caricamento dei contatti.");
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      setContattiCRM(data.map(mapRawToContatto));
-      setError(null);
-    } catch (err) {
-      setError("Errore nel caricamento dei contatti.");
-      console.error(err);
-    } finally {
-      setLoading(false);
+    const urlParams = new URLSearchParams(window.location.search);
+    const reload = urlParams.get("reload");
+
+    // Se è reload, fetch e poi pulizia URL
+    if (reload === "true") {
+      fetchData().then(() => {
+        urlParams.delete("reload");
+        const newUrl =
+          window.location.pathname +
+          (urlParams.toString() ? "?" + urlParams.toString() : "");
+        window.history.replaceState(null, "", newUrl);
+      });
+    } else {
+      // Normale primo render o cambio initialRagSoc
+      fetchData();
     }
-  };
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const reload = urlParams.get("reload");
-
-  // Se è reload, fetch e poi pulizia URL
-  if (reload === "true") {
-    fetchData().then(() => {
-      urlParams.delete("reload");
-      const newUrl =
-        window.location.pathname +
-        (urlParams.toString() ? "?" + urlParams.toString() : "");
-      window.history.replaceState(null, "", newUrl);
-    });
-  } else {
-    // Normale primo render o cambio initialRagSoc
-    fetchData();
-  }
-}, [fetchWithAuth, initialRagSoc]);
-
-
-
-
-  
-
-
+    const url = new URL(window.location.href);
+    url.searchParams.delete("ragSoc");
+    const newQuery = url.searchParams.toString();
+    const newUrl = url.pathname + (newQuery ? `?${newQuery}` : "");
+    window.history.replaceState(null, "", newUrl);
+  }, [fetchWithAuth, initialRagSoc]);
 
   /**
    * Effetto per gestire il ridimensionamento della finestra e aggiornare
