@@ -9,7 +9,7 @@ export const schemaCliente = z.object({
   Zona: z.string().nullable(),
   Stato: z.string().nullable(),
   Tel: z.string().nullable(),
-  Email: z.string().regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Email non valida").nullable(),
+  Email: z.string().nullable(),
   Note: z.string().nullable(),
 });
 
@@ -22,7 +22,7 @@ export const schemaContatto = z.object({
   Cognome: z.string(),
   RagSoc: z.string(),
   Cell: z.string().nullable(),
-  Email: z.string().regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Email non valida") .nullable(),
+  Email: z.string().nullable(),
   Telefono: z.string().nullable(),
   Paese: z.string().nullable(),
 

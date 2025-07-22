@@ -184,7 +184,7 @@ export default function FormAdd({ type, onClose }: FormProps) {
                     value={formData[name] as string | number}
                     onChange={handleChange}
                     className="w-full px-3 py-2 text-sm focus:outline-none border-b-1 border-b-[var(--grey)] min-h-[44px]"
-                  />
+                  />  
                 ) : type === "checkbox" ? (
                   <input
                     type="checkbox"

@@ -56,33 +56,53 @@ const ContattiVirtualGrid = () => {
   });
 
 
-  
-  useEffect(() => {
-    async function fetchData() {
-      setLoading(true);
-      try {
-        let data;
-        if (initialRagSoc && initialRagSoc.trim() !== "") {
-          // filtro iniziale presente
-          data = await getContattiFiltrati(fetchWithAuth, {
-            "Rag.Soc.": initialRagSoc,
-          });
-        } else {
-          // nessun filtro iniziale
-          data = await getContatti(fetchWithAuth);
-        }
-        setContattiCRM(data.map(mapRawToContatto));
-        setError(null);
-      } catch (err) {
-        setError("Errore nel caricamento dei contatti.");
-        console.error(err);
-      } finally {
-        setLoading(false);
+ useEffect(() => {
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      let data;
+      if (initialRagSoc && initialRagSoc.trim() !== "") {
+        data = await getContattiFiltrati(fetchWithAuth, {
+          "Rag.Soc.": initialRagSoc,
+        });
+      } else {
+        data = await getContatti(fetchWithAuth);
       }
-    }
 
+      setContattiCRM(data.map(mapRawToContatto));
+      setError(null);
+    } catch (err) {
+      setError("Errore nel caricamento dei contatti.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const reload = urlParams.get("reload");
+
+  // Se è reload, fetch e poi pulizia URL
+  if (reload === "true") {
+    fetchData().then(() => {
+      urlParams.delete("reload");
+      const newUrl =
+        window.location.pathname +
+        (urlParams.toString() ? "?" + urlParams.toString() : "");
+      window.history.replaceState(null, "", newUrl);
+    });
+  } else {
+    // Normale primo render o cambio initialRagSoc
     fetchData();
-  }, [fetchWithAuth, initialRagSoc]);
+  }
+}, [fetchWithAuth, initialRagSoc]);
+
+
+
+
+  
+
+
 
   /**
    * Effetto per gestire il ridimensionamento della finestra e aggiornare
@@ -171,8 +191,8 @@ const ContattiVirtualGrid = () => {
             },
             {
               title: <Phone size={16} />,
-              value: contatto.cellulare,
-              href: `tel:${contatto.telefonoElaborato}`,
+              value: contatto.tel,
+              href: `tel:${contatto.tel}`,
             },
           ]}
           dato={contatto}
@@ -194,7 +214,7 @@ const ContattiVirtualGrid = () => {
       cellulare: raw.Cell,
       email: raw.EMail,
       tipoContatto: raw.TipoContatto,
-      telefonoElaborato: raw.TelElab,
+      tel: raw.Tel,
       paeseClienteFornitore: raw.PaeseElab,
       Sem1: raw.Sem1 || 0,
       Sem2: raw.Sem2 || 0,

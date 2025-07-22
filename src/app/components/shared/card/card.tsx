@@ -109,8 +109,8 @@ function generateDetailFields(dato: Cliente | Visita | Contatto): Field[] {
   }
   if (isVisita(dato)) {
     keyMapping = {
-      DescAttivita: "DescAttivita",
-      DataAttivita: "DataAttivita",
+      Desc_Attivita: "DescAttivita",
+      Data_Attivita: "DataAttivita",
       RagSoc: "RagSoc",
       Note: "NoteAttivita",
     };
@@ -132,7 +132,7 @@ function generateDetailFields(dato: Cliente | Visita | Contatto): Field[] {
       RagSoc: "ragioneSociale",
       Cell: "cellulare",
       Email: "email",
-      Telefono: "telefonoElaborato",
+      Telefono: "tel",
       Paese: "paeseClienteFornitore",
     };
     fields = (Object.entries(keyMapping) as [ContattoKeys, string][]).map(
@@ -179,12 +179,17 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
   }
 
   /**
-   * Chiude la modalità modifica e aggiorna la URL per rimuovere parametri di query.
+   * Chiude la modalità modifica e aggiorna la URL per ricaricare la rispettiva pagina.
    */
   function onCloseEdit() {
-    setShowDetail(false);
-    router.replace(pathname);
-  }
+  setShowDetail(false);
+
+  const url = new URL(window.location.href);
+  url.searchParams.set('reload', 'true');
+  url.searchParams.delete('editMode');
+
+  router.replace(url.pathname + url.search);
+}
 
   /**
    * Rimuove i parametri di query relativi a editMode e deleteMode dalla URL.

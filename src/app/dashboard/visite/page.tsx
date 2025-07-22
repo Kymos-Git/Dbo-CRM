@@ -1,89 +1,109 @@
-/**
- * VisiteVirtualGrid.tsx
- *
- * Questo componente mostra una lista virtualizzata di visite in una griglia reattiva,
- * ottimizzando il rendering tramite react-window. Gestisce il caricamento dati da API protette,
- * filtri dinamici e il ridimensionamento della griglia in base alla finestra.
- * L’accesso è protetto da ProtectedRoute per garantire l’autenticazione.
- */
-
 "use client";
 
 import { ProtectedRoute } from "@/app/auth/ProtectedRoute";
 import GenericCard from "@/app/components/shared/card/card";
-import GenericFilters, {
-  FilterConfig,
-} from "@/app/components/shared/filters";
+import GenericFilters, { FilterConfig } from "@/app/components/shared/filters";
 import { useEffect, useState } from "react";
 import { FixedSizeGrid as Grid, GridChildComponentProps } from "react-window";
 import { Visita } from "@/app/interfaces/interfaces";
-import { getVisite } from "@/app/services/api";
+import { getVisite, getVisiteFiltrate } from "@/app/services/api";
 import { LoadingComponent } from "@/app/components/loading/loading";
 import { useAuth } from "@/app/context/authContext";
-import { getVisiteFiltrate } from "@/app/services/api";
 
 const VisiteVirtualGrid = () => {
-  /**
-   * Stato per i valori correnti dei filtri applicati.
-   */
-  const [filtersValues, setFiltersValues] = useState<Record<string, string>>({});
-
-  /**
-   * Stato per dimensioni della finestra, usate per calcolare layout responsivo.
-   */
+  const [filtersValues, setFiltersValues] = useState<Record<string, string>>(
+    {}
+  );
   const [windowHeight, setWindowHeight] = useState(0);
   const [windowWidth, setWindowWidth] = useState(0);
-
-  /**
-   * Stato contenente l’array delle visite caricate,
-   * stato di caricamento e stato di errore.
-   */
   const [visiteCRM, setVisiteCRM] = useState<Visita[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  /**
-   * Effetto per aggiornare le dimensioni della finestra in caso di resize,
-   * per permettere una griglia responsiva.
-   */
+  const { fetchWithAuth } = useAuth();
+
+  // Aggiorna dimensioni finestra per layout responsivo
   useEffect(() => {
     const handleResize = () => {
       setWindowHeight(window.innerHeight);
       setWindowWidth(window.innerWidth);
     };
-    handleResize(); 
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const { fetchWithAuth } = useAuth();
-
-  /**
-   * Effetto per caricare inizialmente la lista delle visite tramite API.
-   * Effettua fetch dei dati mappandoli in oggetti Visita.
-   * Gestisce stati loading e error.
-   */
-  useEffect(() => {
-    async function fetchVisite() {
-      setLoading(true);
-      try {
-        const data = await getVisite(fetchWithAuth);
-        setVisiteCRM(data.map(mapRawToVisite));
-        setError(null);
-      } catch (err) {
-        setError("Errore nel caricamento delle visite");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+  // Funzione per caricare visite da API
+  async function fetchVisite() {
+    setLoading(true);
+    try {
+      const data = await getVisite(fetchWithAuth);
+      setVisiteCRM(data.map(mapRawToVisite));
+      setError(null);
+    } catch (err) {
+      setError("Errore nel caricamento delle visite");
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-    fetchVisite();
+  }
+
+  useEffect(() => {
+    const checkAndFetch = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const reload = urlParams.get("reload");
+
+      if (reload === "true") {
+        await fetchVisite();
+
+        // Rimuove `reload` dall'URL
+        urlParams.delete("reload");
+        const newUrl =
+          window.location.pathname +
+          (urlParams.toString() ? "?" + urlParams.toString() : "");
+        window.history.replaceState(null, "", newUrl);
+      } else {
+        await fetchVisite(); // Primo render senza reload
+      }
+    };
+
+    checkAndFetch(); // Primo render
+
+    const handleUrlChange = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const reload = urlParams.get("reload");
+      if (reload === "true") {
+        checkAndFetch(); // Solo se c'è reload
+      }
+    };
+
+    // Intercetta cambiamenti URL
+    window.addEventListener("popstate", handleUrlChange);
+    window.addEventListener("pushstate", handleUrlChange);
+    window.addEventListener("replacestate", handleUrlChange);
+
+    // Patch temporanea per intercettare anche pushState/replaceState custom
+    const originalPushState = history.pushState;
+    const originalReplaceState = history.replaceState;
+
+    history.pushState = function (...args) {
+      originalPushState.apply(this, args);
+      window.dispatchEvent(new Event("pushstate"));
+    };
+    history.replaceState = function (...args) {
+      originalReplaceState.apply(this, args);
+      window.dispatchEvent(new Event("replacestate"));
+    };
+
+    return () => {
+      window.removeEventListener("popstate", handleUrlChange);
+      window.removeEventListener("pushstate", handleUrlChange);
+      window.removeEventListener("replacestate", handleUrlChange);
+      history.pushState = originalPushState;
+      history.replaceState = originalReplaceState;
+    };
   }, []);
 
-  /**
-   * Costanti per calcolare la configurazione della griglia,
-   * numero di colonne e dimensioni delle card in base a finestra e dispositivo.
-   */
   const CARD_COUNT = windowHeight < 700 ? 2 : 3;
   const isMobile = windowWidth < 768;
   const columnCount = isMobile ? 1 : 3;
@@ -93,44 +113,36 @@ const VisiteVirtualGrid = () => {
   const CARD_HEIGHT = Math.floor((windowHeight * 0.8) / CARD_COUNT);
   const rowCount = Math.ceil(visiteCRM.length / columnCount);
 
-  /**
-   * Funzione chiamata al blur dei filtri.
-   * Aggiorna i filtri solo se cambiati e fa fetch filtrato delle visite.
-   * Gestisce loading e errori.
-   */
+  // Gestione filtri: aggiorna dati filtrati
   async function handleFiltersBlur(values: Record<string, string>) {
-      if (JSON.stringify(values) === JSON.stringify(filtersValues)) return;
-  
-      setFiltersValues(values);
-      setLoading(true);
-  
-      try {
-        const areAllFiltersEmpty = Object.values(values).every(
-          (v) => v.trim() === ""
-        );
-  
-        let data;
-        if (areAllFiltersEmpty) {
-          data = await getVisite(fetchWithAuth);
-        } else {
-          data = await getVisiteFiltrate(fetchWithAuth, values);
-        }
-  
-        setVisiteCRM(data.map(mapRawToVisite));
-        setError(null);
-      } catch (err) {
-        setError("Errore nel caricamento dei contatti.");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
+    if (JSON.stringify(values) === JSON.stringify(filtersValues)) return;
 
-  /**
-   * Funzione per il rendering di ogni cella della griglia.
-   * Mostra una card per ogni visita, calcolata da riga e colonna,
-   * restituisce null se l’indice è fuori dall’array.
-   */
+    setFiltersValues(values);
+    setLoading(true);
+
+    try {
+      const areAllFiltersEmpty = Object.values(values).every(
+        (v) => v.trim() === ""
+      );
+
+      let data;
+      if (areAllFiltersEmpty) {
+        data = await getVisite(fetchWithAuth);
+      } else {
+        data = await getVisiteFiltrate(fetchWithAuth, values);
+      }
+
+      setVisiteCRM(data.map(mapRawToVisite));
+      setError(null);
+    } catch (err) {
+      setError("Errore nel caricamento dei contatti.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Rendering di ogni cella della griglia
   const Cell = ({ columnIndex, rowIndex, style }: GridChildComponentProps) => {
     const index = rowIndex * columnCount + columnIndex;
     if (index >= visiteCRM.length) return null;
@@ -151,11 +163,7 @@ const VisiteVirtualGrid = () => {
     );
   };
 
-  /**
-   * Funzione di mapping che trasforma un oggetto raw da API
-   * in un oggetto Visita con formato coerente.
-   * Include formattazione della data.
-   */
+  // Mappa dati raw API in formato Visita
   function mapRawToVisite(raw: any): Visita {
     return {
       IdAttivita: raw.IdAttivita,
@@ -170,9 +178,7 @@ const VisiteVirtualGrid = () => {
     };
   }
 
-  /**
-   * Funzione per formattare una data ISO in formato italiano gg/mm/aaaa.
-   */
+  // Formatta data ISO in gg/mm/aaaa
   function formatDate(isoString: string): string {
     const date = new Date(isoString);
     return new Intl.DateTimeFormat("it-IT", {

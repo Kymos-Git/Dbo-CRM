@@ -27,48 +27,16 @@ interface Props {
   fields: Field[];
   onClose: () => void;
   type: "cliente" | "contatto" | "visita";
-  id:string|null
+  id: string | null;
 }
 
-// Mappa tra etichette dei campi e le chiavi degli schema Zod
-const titleToSchemaKeyMap: Record<string, string> = {
-  RAGSOC: "RagSoc",
-  INDIRIZZO: "Indirizzo",
-  CITTA: "Citta",
-  CAP: "Cap",
-  PROVINCIA: "Provincia",
-  ZONA: "Zona",
-  STATO: "Stato",
-  TEL: "Tel",
-  EMAIL: "Email",
-  NOTE: "Note",
-  NOME: "nome",
-  COGNOME: "cognome",
-  CELLULARE: "cellulare",
-  TELEFONO: "telefono",
-  PAESE: "paese",
-  DESC_ATTIVITA: "Desc_Attivita",
-  DATA_ATTIVITA: "Data_Attivita",
-};
+// Rimuove underscore e spazi per normalizzare i titoli
+const normalize = (str: string) =>
+  str.trim().toLowerCase().replace(/[_\s]/g, "");
 
-// Funzione helper per convertire i titoli dei campi in chiavi dello schema
-function getSchemaKey(title: string): string {
-  const normalized = title.trim().toUpperCase().replace(/\s|_/g, " ");
-  return titleToSchemaKeyMap[normalized] || title;
-}
-
-export default function FormEdit({ title, fields, onClose, type,id }: Props) {
+export default function FormEdit({ title, fields, onClose, type, id }: Props) {
   const { fetchWithAuth } = useAuth();
 
-  // Stato iniziale del form, con chiavi mappate
-  const initialState: Record<string, string | number> = Object.fromEntries(
-    fields.map((f) => [getSchemaKey(f.title), f.value ?? ""])
-  );
-
-  const [formState, setFormState] =
-    useState<Record<string, string | number>>(initialState);
-
-  // Seleziona lo schema corretto
   const schema = (() => {
     switch (type) {
       case "cliente":
@@ -82,36 +50,66 @@ export default function FormEdit({ title, fields, onClose, type,id }: Props) {
     }
   })();
 
-  // Gestione modifica valori
+  // Mappa dinamica tra campo normalizzato e chiave Zod originale
+  const schemaKeyMap = Object.keys(schema.shape).reduce((acc, key) => {
+    acc[normalize(key)] = key;
+    return acc;
+  }, {} as Record<string, string>);
+
+  // Mappa i titoli dei campi in base alla corrispondenza con le chiavi dello schema
+  const getSchemaKey = (title: string): string =>
+    schemaKeyMap[normalize(title)] || title;
+
+  // Stato iniziale del form
+  const initialState: Record<string, string | number> = Object.fromEntries(
+    fields.map((f) => [getSchemaKey(f.title), f.value ?? ""])
+  );
+
+  const [formState, setFormState] = useState(initialState);
+
   const handleChange = (title: string, value: string) => {
     const schemaKey = getSchemaKey(title);
     setFormState((prev) => ({ ...prev, [schemaKey]: value }));
   };
 
-  // Invio dati
+  const transformKeys = (obj: Record<string, any>) => {
+    const newObj: Record<string, any> = {};
+    for (const key in obj) {
+      const newKey = key.replace(/_/g, "");
+      newObj[newKey] = obj[key];
+    }
+    return newObj;
+  };
+
   const sendData = async () => {
     try {
-      console.log("form", formState);
       const parsed = schema.parse(formState);
-      console.log("parsed", parsed);
+      const transformed = transformKeys(parsed);
 
       switch (type) {
         case "cliente":
-          await UpdateCliente(fetchWithAuth, {IdCliente:id,...parsed});
+          await UpdateCliente(fetchWithAuth, { IdCliente: id, ...transformed });
           break;
         case "contatto":
-          await UpdateContatto(fetchWithAuth, {IdContatto:id,...parsed});
+          await UpdateContatto(fetchWithAuth, {
+            IdContatto: id,
+            ...transformed,
+          });
           break;
         case "visita":
-          await UpdateVisita(fetchWithAuth, {IdAttivita:id,...parsed});
+          await UpdateVisita(fetchWithAuth, { IdAttivita: id, ...transformed });
           break;
       }
 
       toast.success("Dati inviati con successo");
       onClose();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      toast.error(err==='Nessuna modifica eseguita'?err:"Errore nell'invio dei dati");
+      toast.error(
+        err === "Nessuna modifica eseguita"
+          ? err
+          : "Errore nell'invio dei dati"
+      );
     }
   };
 
@@ -163,7 +161,9 @@ export default function FormEdit({ title, fields, onClose, type,id }: Props) {
             {noteField.title}
           </label>
           <NoteField
-            value={(formState[getSchemaKey(noteField.title)] as string) || ""}
+            value={
+              (formState[getSchemaKey(noteField.title)] as string) || ""
+            }
             onChange={(e) => handleChange(noteField.title, e)}
             readonly={false}
           />

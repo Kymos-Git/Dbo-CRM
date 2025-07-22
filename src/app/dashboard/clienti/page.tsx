@@ -1,6 +1,6 @@
 /**
  * ClientiVirtualGrid
- * 
+ *
  * Componente principale che gestisce la visualizzazione di una griglia virtuale
  * di clienti CRM. Utilizza filtri per cercare e filtrare i clienti,
  * carica i dati da API protette tramite autenticazione e mostra i clienti
@@ -12,9 +12,7 @@
 "use client";
 
 import GenericCard from "@/app/components/shared/card/card";
-import GenericFilters, {
-  FilterConfig,
-} from "@/app/components/shared/filters";
+import GenericFilters, { FilterConfig } from "@/app/components/shared/filters";
 import { MapPin, Mail, Phone } from "lucide-react";
 import { useEffect, useState } from "react";
 import { FixedSizeGrid as Grid, GridChildComponentProps } from "react-window";
@@ -23,8 +21,6 @@ import { Cliente } from "@/app/interfaces/interfaces";
 import { getClienti, getClientiFiltrati } from "@/app/services/api";
 import { LoadingComponent } from "@/app/components/loading/loading";
 import { useAuth } from "@/app/context/authContext";
-
-
 
 const ClientiVirtualGrid = () => {
   // Stato dei valori dei filtri di ricerca
@@ -44,29 +40,75 @@ const ClientiVirtualGrid = () => {
   const [error, setError] = useState<string | null>(null);
 
   // Hook personalizzato per autenticazione e fetch protetto
-  const { fetchWithAuth, isReady } = useAuth();
-
-  /**
-   * useEffect per caricare i clienti all'avvio o quando il contesto auth è pronto.
-   * Effettua chiamata API e aggiorna lo stato clienti o errori.
-   */
-  useEffect(() => {
-    if (!isReady) return;
-
-    async function fetchClienti() {
-      try {
-        const data = await getClienti(fetchWithAuth);
-        setClientiCRM(data.map(mapRawToCliente));
-        setError(null);
-      } catch (err) {
-        setError("Errore nel caricamento dei clienti");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+  const { fetchWithAuth } = useAuth();
+  async function fetchClienti() {
+    try {
+      const data = await getClienti(fetchWithAuth);
+      setClientiCRM(data.map(mapRawToCliente));
+      setError(null);
+    } catch (err) {
+      setError("Errore nel caricamento dei clienti");
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-    fetchClienti();
-  }, [isReady]);
+  } 
+
+  useEffect(() => {
+    const checkAndFetch = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const reload = urlParams.get("reload");
+
+      if (reload === "true") {
+        await fetchClienti();
+
+        // Rimuove `reload` dall'URL
+        urlParams.delete("reload");
+        const newUrl =
+          window.location.pathname +
+          (urlParams.toString() ? "?" + urlParams.toString() : "");
+        window.history.replaceState(null, "", newUrl);
+      } else {
+        await fetchClienti(); // Primo render senza reload
+      }
+    };
+
+    checkAndFetch(); // Primo render
+
+    const handleUrlChange = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const reload = urlParams.get("reload");
+      if (reload === "true") {
+        checkAndFetch(); // Solo se c'è reload
+      }
+    };
+
+    // Intercetta cambiamenti URL
+    window.addEventListener("popstate", handleUrlChange);
+    window.addEventListener("pushstate", handleUrlChange);
+    window.addEventListener("replacestate", handleUrlChange);
+
+    // Patch temporanea per intercettare anche pushState/replaceState custom
+    const originalPushState = history.pushState;
+    const originalReplaceState = history.replaceState;
+
+    history.pushState = function (...args) {
+      originalPushState.apply(this, args);
+      window.dispatchEvent(new Event("pushstate"));
+    };
+    history.replaceState = function (...args) {
+      originalReplaceState.apply(this, args);
+      window.dispatchEvent(new Event("replacestate"));
+    };
+
+    return () => {
+      window.removeEventListener("popstate", handleUrlChange);
+      window.removeEventListener("pushstate", handleUrlChange);
+      window.removeEventListener("replacestate", handleUrlChange);
+      history.pushState = originalPushState;
+      history.replaceState = originalReplaceState;
+    };
+  }, []);
 
   /**
    * useEffect per gestire il ridimensionamento della finestra e aggiornare
@@ -88,48 +130,48 @@ const ClientiVirtualGrid = () => {
   const columnCount = isMobile ? 1 : 3;
   const CARD_WIDTH = isMobile
     ? Math.floor((windowWidth - 30) / columnCount)
-    : Math.floor(windowWidth*0.98 / columnCount);
+    : Math.floor((windowWidth * 0.98) / columnCount);
   const CARD_HEIGHT = Math.floor((windowHeight * 0.8) / CARD_COUNT);
   const rowCount = Math.ceil(clientiCRM.length / columnCount);
 
   /**
    * handleFiltersBlur
-   * 
+   *
    * Funzione asincrona chiamata quando i filtri perdono il focus (blur).
    * Confronta i nuovi valori con quelli precedenti e, se diversi, aggiorna i filtri,
    * ricarica i dati filtrati da API e gestisce stati di caricamento e errori.
    */
   async function handleFiltersBlur(values: Record<string, string>) {
-      if (JSON.stringify(values) === JSON.stringify(filtersValues)) return;
-  
-      setFiltersValues(values);
-      setLoading(true);
-  
-      try {
-        const areAllFiltersEmpty = Object.values(values).every(
-          (v) => v.trim() === ""
-        );
-  
-        let data;
-        if (areAllFiltersEmpty) {
-          data = await getClienti(fetchWithAuth);
-        } else {
-          data = await getClientiFiltrati(fetchWithAuth, values);
-        }
-  
-        setClientiCRM(data.map(mapRawToCliente));
-        setError(null);
-      } catch (err) {
-        setError("Errore nel caricamento dei contatti.");
-        console.error(err);
-      } finally {
-        setLoading(false);
+    if (JSON.stringify(values) === JSON.stringify(filtersValues)) return;
+
+    setFiltersValues(values);
+    setLoading(true);
+
+    try {
+      const areAllFiltersEmpty = Object.values(values).every(
+        (v) => v.trim() === ""
+      );
+
+      let data;
+      if (areAllFiltersEmpty) {
+        data = await getClienti(fetchWithAuth);
+      } else {
+        data = await getClientiFiltrati(fetchWithAuth, values);
       }
+
+      setClientiCRM(data.map(mapRawToCliente));
+      setError(null);
+    } catch (err) {
+      setError("Errore nel caricamento dei contatti.");
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
+  }
 
   /**
    * Cell
-   * 
+   *
    * Componente usato dalla griglia virtualizzata per rappresentare ogni cella,
    * che contiene una card con i dati del cliente. Calcola l'indice e se esiste
    * restituisce la card con informazioni di contatto e link mappe.
@@ -174,7 +216,7 @@ const ClientiVirtualGrid = () => {
 
   /**
    * getMapLink
-   * 
+   *
    * Genera un URL per la ricerca su Google Maps basato sull'indirizzo fornito,
    * codificando correttamente i dati per la query.
    */
@@ -198,7 +240,7 @@ const ClientiVirtualGrid = () => {
 
   /**
    * htmlToPlainText
-   * 
+   *
    * Converte una stringa HTML in testo semplice, sostituendo i tag di paragrafo e
    * line break con nuovi linee e rimuovendo ogni altro markup HTML.
    */
@@ -216,7 +258,7 @@ const ClientiVirtualGrid = () => {
 
   /**
    * mapRawToCliente
-   * 
+   *
    * Mappa un oggetto raw ricevuto dall'API in un oggetto Cliente tipizzato,
    * applicando eventuali trasformazioni necessarie, come la conversione da HTML a testo semplice.
    */

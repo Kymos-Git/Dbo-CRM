@@ -36,7 +36,7 @@ export interface Contatto {
   cellulare: string;
   email: string;
   tipoContatto: string;
-  telefonoElaborato: string;
+  tel: string;
   paeseClienteFornitore: string;
   Sem1: number;
   Sem2: number;
