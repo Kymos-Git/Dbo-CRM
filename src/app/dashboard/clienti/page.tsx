@@ -18,9 +18,10 @@ import { useEffect, useState } from "react";
 import { FixedSizeGrid as Grid, GridChildComponentProps } from "react-window";
 import { ProtectedRoute } from "@/app/auth/ProtectedRoute";
 import { Cliente } from "@/app/interfaces/interfaces";
-import { getClienti, getClientiFiltrati } from "@/app/services/api";
+import { getClienti } from "@/app/services/api";
 import { LoadingComponent } from "@/app/components/loading/loading";
 import { useAuth } from "@/app/context/authContext";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 const ClientiVirtualGrid = () => {
   // Stato dei valori dei filtri di ricerca
@@ -52,63 +53,36 @@ const ClientiVirtualGrid = () => {
     } finally {
       setLoading(false);
     }
-  } 
+  }
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
-    const checkAndFetch = async () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const reload = urlParams.get("reload");
+    if (!fetchWithAuth) return;
 
+    const reload = searchParams.get("reload");
+
+    const fetchAndClean = async () => {
       if (reload === "true") {
         await fetchClienti();
 
-        // Rimuove `reload` dall'URL
-        urlParams.delete("reload");
-        const newUrl =
-          window.location.pathname +
-          (urlParams.toString() ? "?" + urlParams.toString() : "");
-        window.history.replaceState(null, "", newUrl);
+        // Ricostruisci query senza reload
+        const newParams = new URLSearchParams(searchParams.toString());
+        newParams.delete("reload");
+
+        const newQueryString = newParams.toString();
+        const newUrl = pathname + (newQueryString ? `?${newQueryString}` : "");
+
+        // Cambia URL senza ricaricare pagina e senza scroll
+        router.replace(newUrl, { scroll: false });
       } else {
-        await fetchClienti(); // Primo render senza reload
+        await fetchClienti();
       }
     };
 
-    checkAndFetch(); // Primo render
-
-    const handleUrlChange = () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const reload = urlParams.get("reload");
-      if (reload === "true") {
-        checkAndFetch(); // Solo se c'è reload
-      }
-    };
-
-    // Intercetta cambiamenti URL
-    window.addEventListener("popstate", handleUrlChange);
-    window.addEventListener("pushstate", handleUrlChange);
-    window.addEventListener("replacestate", handleUrlChange);
-
-    // Patch temporanea per intercettare anche pushState/replaceState custom
-    const originalPushState = history.pushState;
-    const originalReplaceState = history.replaceState;
-
-    history.pushState = function (...args) {
-      originalPushState.apply(this, args);
-      window.dispatchEvent(new Event("pushstate"));
-    };
-    history.replaceState = function (...args) {
-      originalReplaceState.apply(this, args);
-      window.dispatchEvent(new Event("replacestate"));
-    };
-
-    return () => {
-      window.removeEventListener("popstate", handleUrlChange);
-      window.removeEventListener("pushstate", handleUrlChange);
-      window.removeEventListener("replacestate", handleUrlChange);
-      history.pushState = originalPushState;
-      history.replaceState = originalReplaceState;
-    };
-  }, []);
+    fetchAndClean();
+  }, [fetchWithAuth, pathname, searchParams, router]);
 
   /**
    * useEffect per gestire il ridimensionamento della finestra e aggiornare
@@ -142,7 +116,7 @@ const ClientiVirtualGrid = () => {
    * ricarica i dati filtrati da API e gestisce stati di caricamento e errori.
    */
   async function handleFiltersBlur(values: Record<string, string>) {
-    if (JSON.stringify(values) === JSON.stringify(filtersValues)) return;
+   
 
     setFiltersValues(values);
     setLoading(true);
@@ -156,7 +130,8 @@ const ClientiVirtualGrid = () => {
       if (areAllFiltersEmpty) {
         data = await getClienti(fetchWithAuth);
       } else {
-        data = await getClientiFiltrati(fetchWithAuth, values);
+        console.log(values);
+        data = await getClienti(fetchWithAuth, values);
       }
 
       setClientiCRM(data.map(mapRawToCliente));

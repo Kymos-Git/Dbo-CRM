@@ -45,7 +45,7 @@ export default function Sidebar() {
   const links = [
     {
       label: "Chat",
-      icon: <MessageCircleMore size={20} />,
+      icon: <MessageCircleMore size={20}/>,
       href: "/dashboard",
     },
     {

@@ -6,9 +6,10 @@ import GenericFilters, { FilterConfig } from "@/app/components/shared/filters";
 import { useEffect, useState } from "react";
 import { FixedSizeGrid as Grid, GridChildComponentProps } from "react-window";
 import { Visita } from "@/app/interfaces/interfaces";
-import { getVisite, getVisiteFiltrate } from "@/app/services/api";
+import { getVisite } from "@/app/services/api";
 import { LoadingComponent } from "@/app/components/loading/loading";
 import { useAuth } from "@/app/context/authContext";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 const VisiteVirtualGrid = () => {
   const [filtersValues, setFiltersValues] = useState<Record<string, string>>(
@@ -48,61 +49,35 @@ const VisiteVirtualGrid = () => {
     }
   }
 
-  useEffect(() => {
-    const checkAndFetch = async () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const reload = urlParams.get("reload");
+   const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
 
+  useEffect(() => {
+    if (!fetchWithAuth) return;
+
+    const reload = searchParams.get("reload");
+
+    const fetchAndClean = async () => {
       if (reload === "true") {
         await fetchVisite();
 
-        // Rimuove `reload` dall'URL
-        urlParams.delete("reload");
-        const newUrl =
-          window.location.pathname +
-          (urlParams.toString() ? "?" + urlParams.toString() : "");
-        window.history.replaceState(null, "", newUrl);
+        // Ricostruisci query senza reload
+        const newParams = new URLSearchParams(searchParams.toString());
+        newParams.delete("reload");
+
+        const newQueryString = newParams.toString();
+        const newUrl = pathname + (newQueryString ? `?${newQueryString}` : "");
+
+        // Cambia URL senza ricaricare pagina e senza scroll
+        router.replace(newUrl, { scroll: false });
       } else {
-        await fetchVisite(); // Primo render senza reload
+        await fetchVisite();
       }
     };
 
-    checkAndFetch(); // Primo render
-
-    const handleUrlChange = () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const reload = urlParams.get("reload");
-      if (reload === "true") {
-        checkAndFetch(); // Solo se c'è reload
-      }
-    };
-
-    // Intercetta cambiamenti URL
-    window.addEventListener("popstate", handleUrlChange);
-    window.addEventListener("pushstate", handleUrlChange);
-    window.addEventListener("replacestate", handleUrlChange);
-
-    // Patch temporanea per intercettare anche pushState/replaceState custom
-    const originalPushState = history.pushState;
-    const originalReplaceState = history.replaceState;
-
-    history.pushState = function (...args) {
-      originalPushState.apply(this, args);
-      window.dispatchEvent(new Event("pushstate"));
-    };
-    history.replaceState = function (...args) {
-      originalReplaceState.apply(this, args);
-      window.dispatchEvent(new Event("replacestate"));
-    };
-
-    return () => {
-      window.removeEventListener("popstate", handleUrlChange);
-      window.removeEventListener("pushstate", handleUrlChange);
-      window.removeEventListener("replacestate", handleUrlChange);
-      history.pushState = originalPushState;
-      history.replaceState = originalReplaceState;
-    };
-  }, []);
+    fetchAndClean();
+  }, [fetchWithAuth, pathname, searchParams, router]);
 
   const CARD_COUNT = windowHeight < 700 ? 2 : 3;
   const isMobile = windowWidth < 768;
@@ -115,7 +90,7 @@ const VisiteVirtualGrid = () => {
 
   // Gestione filtri: aggiorna dati filtrati
   async function handleFiltersBlur(values: Record<string, string>) {
-    if (JSON.stringify(values) === JSON.stringify(filtersValues)) return;
+
 
     setFiltersValues(values);
     setLoading(true);
@@ -129,7 +104,8 @@ const VisiteVirtualGrid = () => {
       if (areAllFiltersEmpty) {
         data = await getVisite(fetchWithAuth);
       } else {
-        data = await getVisiteFiltrate(fetchWithAuth, values);
+        console.log(values)
+        data = await getVisite(fetchWithAuth, values);
       }
 
       setVisiteCRM(data.map(mapRawToVisite));
@@ -218,6 +194,6 @@ const VisiteVirtualGrid = () => {
 export default VisiteVirtualGrid;
 
 const filtersConfig: FilterConfig[] = [
+  { type: "text", label: "RagSoc", name: "nome", placeholder: "Cerca Ragione sociale..." },
   { type: "date", label: "Data inizio", name: "startDate" },
-  { type: "text", label: "Nome", name: "nome", placeholder: "Cerca nome..." },
 ];

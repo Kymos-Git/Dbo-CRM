@@ -18,10 +18,11 @@ import { useEffect, useState } from "react";
 import { FixedSizeGrid as Grid, GridChildComponentProps } from "react-window";
 import { ProtectedRoute } from "@/app/auth/ProtectedRoute";
 import { Contatto } from "@/app/interfaces/interfaces";
-import { getContatti, getContattiFiltrati } from "@/app/services/api";
+import { getContatti } from "@/app/services/api";
 import { LoadingComponent } from "@/app/components/loading/loading";
 import { useAuth } from "@/app/context/authContext";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const ContattiVirtualGrid = () => {
   /**
@@ -55,21 +56,29 @@ const ContattiVirtualGrid = () => {
     "Rag.Soc.": initialRagSoc,
   });
 
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const [fetchedOnce, setFetchedOnce] = useState(false);
+
   useEffect(() => {
+    if (!fetchWithAuth) return;
+
+    const reload = searchParams.get("reload");
+    const ragSoc = searchParams.get("ragSoc") || "";
+
+    // Se ho già fatto fetch una volta e non c'è reload, non rifaccio fetch
+    if (fetchedOnce && reload !== "true") return;
+
     const fetchData = async () => {
       setLoading(true);
       try {
         let data;
-        if (initialRagSoc && initialRagSoc.trim() !== "") {
-          data = await getContattiFiltrati(fetchWithAuth, {
-            "Rag.Soc.": initialRagSoc,
-            //pulire il parametro ragSoc dal url
-          });
+        if (ragSoc.trim() !== "") {
+          data = await getContatti(fetchWithAuth, { nome: ragSoc });
         } else {
-          // Nessun filtro iniziale
           data = await getContatti(fetchWithAuth);
         }
-
         setContattiCRM(data.map(mapRawToContatto));
         setError(null);
       } catch (err) {
@@ -77,32 +86,22 @@ const ContattiVirtualGrid = () => {
         console.error(err);
       } finally {
         setLoading(false);
+        setFetchedOnce(true);
       }
     };
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const reload = urlParams.get("reload");
-
-    // Se è reload, fetch e poi pulizia URL
-    if (reload === "true") {
-      fetchData().then(() => {
-        urlParams.delete("reload");
-        const newUrl =
-          window.location.pathname +
-          (urlParams.toString() ? "?" + urlParams.toString() : "");
-        window.history.replaceState(null, "", newUrl);
-      });
-    } else {
-      // Normale primo render o cambio initialRagSoc
-      fetchData();
-    }
-
-    const url = new URL(window.location.href);
-    url.searchParams.delete("ragSoc");
-    const newQuery = url.searchParams.toString();
-    const newUrl = url.pathname + (newQuery ? `?${newQuery}` : "");
-    window.history.replaceState(null, "", newUrl);
-  }, [fetchWithAuth, initialRagSoc]);
+    fetchData().then(() => {
+      if (reload === "true" || ragSoc) {
+        // Pulisce i parametri dalla URL dopo il fetch
+        const newParams = new URLSearchParams(searchParams.toString());
+        newParams.delete("reload");
+        newParams.delete("ragSoc");
+        const newQuery = newParams.toString();
+        const newUrl = pathname + (newQuery ? `?${newQuery}` : "");
+        router.replace(newUrl, { scroll: false });
+      }
+    });
+  }, [fetchWithAuth, searchParams, pathname, router, fetchedOnce]);
 
   /**
    * Effetto per gestire il ridimensionamento della finestra e aggiornare
@@ -137,8 +136,7 @@ const ContattiVirtualGrid = () => {
    * e aggiorna la lista visualizzata.
    */
   async function handleFiltersBlur(values: Record<string, string>) {
-    if (JSON.stringify(values) === JSON.stringify(filtersValues)) return;
-
+    
     setFiltersValues(values);
     setLoading(true);
 
@@ -151,7 +149,8 @@ const ContattiVirtualGrid = () => {
       if (areAllFiltersEmpty) {
         data = await getContatti(fetchWithAuth);
       } else {
-        data = await getContattiFiltrati(fetchWithAuth, values);
+        console.log(values);
+        data = await getContatti(fetchWithAuth, values);
       }
 
       setContattiCRM(data.map(mapRawToContatto));

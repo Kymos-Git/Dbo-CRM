@@ -32,11 +32,7 @@
 .line svg{
   cursor: pointer;
 }
-.line svg:hover{
-   background-color: var(--primary);
-  color: var(--bg);
-    border-radius: 25px;
-}
+
 
 .button {
   position: fixed;
@@ -92,13 +88,14 @@
   font-weight: 500;
 }
 
-.link:hover,
-.link:focus {
+.link:not(.icon):hover,
+.link:focus{
   background-color: #e8f0fe;
   color: var(--primary);
   transform: scale(1.05);
   outline: none;
 }
+
 
 .link.active {
   background-color: var(--primary);

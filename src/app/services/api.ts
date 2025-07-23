@@ -15,7 +15,7 @@ let cachedBaseUrl: string | null = null;
 /**
  * Recupera e memorizza in cache l'URL base dell'API da config.json.
  * Restituisce l'URL base da usare per le chiamate API.
- */
+ */ 
 export async function getBaseApiUrl(): Promise<string> {
   if (cachedBaseUrl !== null) {
     return cachedBaseUrl;
@@ -34,19 +34,26 @@ export async function getBaseApiUrl(): Promise<string> {
 /**
  * Recupera la lista completa dei clienti tramite chiamata POST.
  * @param fetchFn Funzione fetch personalizzata.
+ * @param data filtri
  * @returns Array di clienti.
  * @throws Errore se la chiamata non ha successo.
  */
 export async function getClienti(
-  fetchFn: (input: string, init?: RequestInit) => Promise<Response>
+  fetchFn: (input: string, init?: RequestInit) => Promise<Response>,data?:any
 ): Promise<interfaces.Cliente[]> {
   // const baseUrl = await getBaseApiUrl();
   // const res = await fetchFn(`${baseUrl}/GetCrmClienti`
-  const res = await fetchFn("/api/getCrmClienti/0", {
+  const res = await fetchFn("/api/getCrmClienti/0",!data? {
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ pageSize: 100 }),
+    method: "POST",
+  }:{
+     headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ pageSize: 100 ,FilterField:data.ragioneSociale}),
     method: "POST",
   });
   if (!res.ok) throw new Error("Errore nel caricamento dei clienti");
@@ -56,19 +63,26 @@ export async function getClienti(
 /**
  * Recupera la lista completa dei contatti tramite chiamata POST.
  * @param fetchFn Funzione fetch personalizzata.
+ *  @param data filtri
  * @returns Array di contatti.
  * @throws Errore se la chiamata non ha successo.
  */
 export async function getContatti(
-  fetchFn: (input: string, init?: RequestInit) => Promise<Response>
+  fetchFn: (input: string, init?: RequestInit) => Promise<Response>,data?:any
 ): Promise<interfaces.Contatto[]> {
   // const baseUrl = await getBaseApiUrl();
   // const res = await fetchFn(`${baseUrl}/GetCrmContatti`
-  const res = await fetchFn(`/api/GetCrmContatti/0`, {
+  const res = await fetchFn(`/api/GetCrmContatti/0`, !data?{
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ pageSize: 100 }),
+    method: "POST",
+  }:{
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ pageSize:100,FilterField:data.nome}),
     method: "POST",
   });
   if (!res.ok) throw new Error("Errore nel caricamento dei contatti");
@@ -78,89 +92,33 @@ export async function getContatti(
 /**
  * Recupera la lista delle visite dell'utente tramite chiamata POST.
  * @param fetchFn Funzione fetch personalizzata.
+ * @param data filtri
  * @returns Array di visite.
  * @throws Errore se la chiamata non ha successo.
  */
 export async function getVisite(
-  fetchFn: (input: string, init?: RequestInit) => Promise<Response>
+  fetchFn: (input: string, init?: RequestInit) => Promise<Response>,data?:any
 ): Promise<interfaces.Visita[]> {
   // const baseUrl = await getBaseApiUrl();
   // const res = await fetchFn(`${baseUrl}/GetCrmVisite`
-  const res = await fetchFn(`/api/GetCrmVisiteByUser`, {
+  const res = await fetchFn(`/api/GetCrmVisiteByUser`, !data?{
     headers: {
       "Content-Type": "application/json",
     },
     method: "POST",
+  }:{
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    body:JSON.stringify({FilterName:data.nome,FilterDate:data.startDate})
   });
   if (!res.ok) throw new Error("Errore nel caricamento delle visite");
   return (await res.json()) as interfaces.Visita[];
 }
 
-/**
- * Recupera visite filtrate in base a parametri passati.
- * @param fetchFn Funzione fetch personalizzata.
- * @param filters Oggetto contenente i filtri come coppie chiave/valore.
- * @returns Array di visite filtrate.
- * @throws Errore se la chiamata non ha successo.
- */
-export async function getVisiteFiltrate(
-  fetchFn: (input: string, init?: RequestInit) => Promise<Response>,
-  filters: Record<string, string>
-): Promise<interfaces.Visita[]> {
-  const queryParams = new URLSearchParams(filters).toString();
-  const response = await fetchFn(`/api/Visite?=${queryParams}`, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-    method: "POST",
-  });
-  if (!response.ok) throw new Error("Errore nel fetch delle visite filtrate");
-  return await response.json();
-}
 
-/**
- * Recupera contatti filtrati in base a parametri passati.
- * @param fetchFn Funzione fetch personalizzata.
- * @param filters Oggetto contenente i filtri come coppie chiave/valore.
- * @returns Array di contatti filtrati.
- * @throws Errore se la chiamata non ha successo.
- */
-export async function getContattiFiltrati(
-  fetchFn: (input: string, init?: RequestInit) => Promise<Response>,
-  filters: Record<string, string>
-): Promise<interfaces.Contatto[]> {
-  const queryParams = new URLSearchParams(filters).toString();
-  const response = await fetchFn(`/api/Contatti?=${queryParams}`, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-    method: "POST",
-  });
-  if (!response.ok) throw new Error("Errore nel fetch dei contatti filtrati");
-  return await response.json();
-}
 
-/**
- * Recupera clienti filtrati in base a parametri passati.
- * @param fetchFn Funzione fetch personalizzata.
- * @param filters Oggetto contenente i filtri come coppie chiave/valore.
- * @returns Array di clienti filtrati.
- * @throws Errore se la chiamata non ha successo.
- */
-export async function getClientiFiltrati(
-  fetchFn: (input: string, init?: RequestInit) => Promise<Response>,
-  filters: Record<string, string>
-): Promise<interfaces.Cliente[]> {
-  const queryParams = new URLSearchParams(filters).toString();
-  const response = await fetchFn(`/api/Clienti?=${queryParams}`, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-    method: "POST",
-  });
-  if (!response.ok) throw new Error("Errore nel fetch dei clienti filtrati");
-  return await response.json();
-}
 
 // Funzioni di invio, aggiornamento ed eliminazione
 
@@ -323,9 +281,11 @@ export async function deleteCliente(
   data: any
 ) {
   const newData = {
-    ...data,
+    IdCliente:data,
     KYAction: "DEL",
   };
+
+  console.log("newData:", newData);
 
   const res = await fetchFn("/api/StpClienti_KyMng", {
     headers: {
@@ -348,7 +308,7 @@ export async function deleteContatto(
   data: any
 ) {
   const newData = {
-    ...data,
+    IdContatto:data,
     KYAction: "DEL",
   };
 
@@ -373,7 +333,7 @@ export async function deleteVisita(
   data: any
 ) {
   const newData = {
-    ...data,
+    IdAttivita:data,
     KYAction: "DEL",
   };
 

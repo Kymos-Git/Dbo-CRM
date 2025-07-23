@@ -208,7 +208,8 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
    */
   async function deleteDato() {
     try {
-      if (isCliente(dato)) await deleteCliente(fetchWithAuth, dato.idCliente);
+     
+      if (isCliente(dato)){ await deleteCliente(fetchWithAuth, dato.idCliente); console.log(dato.idCliente)};
       if (isContatto(dato)) await deleteContatto(fetchWithAuth, dato.idContatto);
       if (isVisita(dato)) await deleteVisita(fetchWithAuth, dato.IdAttivita);
 
