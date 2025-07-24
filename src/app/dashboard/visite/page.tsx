@@ -12,9 +12,7 @@ import { useAuth } from "@/app/context/authContext";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 const VisiteVirtualGrid = () => {
-  const [filtersValues, setFiltersValues] = useState<Record<string, string>>(
-    {}
-  );
+
   const [windowHeight, setWindowHeight] = useState(0);
   const [windowWidth, setWindowWidth] = useState(0);
   const [visiteCRM, setVisiteCRM] = useState<Visita[]>([]);
@@ -49,9 +47,9 @@ const VisiteVirtualGrid = () => {
     }
   }
 
-   const router = useRouter();
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     if (!fetchWithAuth) return;
@@ -90,9 +88,6 @@ const VisiteVirtualGrid = () => {
 
   // Gestione filtri: aggiorna dati filtrati
   async function handleFiltersBlur(values: Record<string, string>) {
-
-
-    setFiltersValues(values);
     setLoading(true);
 
     try {
@@ -104,7 +99,7 @@ const VisiteVirtualGrid = () => {
       if (areAllFiltersEmpty) {
         data = await getVisite(fetchWithAuth);
       } else {
-        console.log(values)
+        console.log(values);
         data = await getVisite(fetchWithAuth, values);
       }
 
@@ -155,8 +150,22 @@ const VisiteVirtualGrid = () => {
   }
 
   // Formatta data ISO in gg/mm/aaaa
-  function formatDate(isoString: string): string {
-    const date = new Date(isoString);
+  function formatDate(isoString?: string): string {
+    if (!isoString || typeof isoString !== "string") {
+      console.warn("Data non valida o mancante:", isoString);
+      return "Data non valida";
+    }
+
+    const fixedIsoString = isoString.endsWith("Z")
+      ? isoString
+      : isoString + "Z";
+    const date = new Date(fixedIsoString);
+
+    if (isNaN(date.getTime())) {
+      console.warn("Formato data non valido:", fixedIsoString);
+      return "Data non valida";
+    }
+
     return new Intl.DateTimeFormat("it-IT", {
       day: "2-digit",
       month: "2-digit",
@@ -194,6 +203,11 @@ const VisiteVirtualGrid = () => {
 export default VisiteVirtualGrid;
 
 const filtersConfig: FilterConfig[] = [
-  { type: "text", label: "RagSoc", name: "nome", placeholder: "Cerca Ragione sociale..." },
+  {
+    type: "text",
+    label: "RagSoc",
+    name: "nome",
+    placeholder: "Cerca Ragione sociale...",
+  },
   { type: "date", label: "Data inizio", name: "startDate" },
 ];

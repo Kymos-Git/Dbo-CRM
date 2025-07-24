@@ -24,10 +24,7 @@ import { useAuth } from "@/app/context/authContext";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 const ClientiVirtualGrid = () => {
-  // Stato dei valori dei filtri di ricerca
-  const [filtersValues, setFiltersValues] = useState<Record<string, string>>(
-    {}
-  );
+
 
   // Stato dimensioni della finestra (altezza e larghezza)
   const [windowHeight, setWindowHeight] = useState(0);
@@ -118,7 +115,7 @@ const ClientiVirtualGrid = () => {
   async function handleFiltersBlur(values: Record<string, string>) {
    
 
-    setFiltersValues(values);
+  
     setLoading(true);
 
     try {
@@ -160,7 +157,7 @@ const ClientiVirtualGrid = () => {
     return (
       <div style={{ ...style, margin: 0, padding: 0 }}>
         <GenericCard
-          title={cliente.ragSocCompleta}
+          title={cliente.RagSocCompleta}
           fields={[
             {
               title: <MapPin size={16} />,
@@ -239,8 +236,8 @@ const ClientiVirtualGrid = () => {
    */
   function mapRawToCliente(raw: any): Cliente {
     return {
-      idCliente: raw.IdCliente,
-      ragSocCompleta: raw.RagSoc,
+      IdCliente: raw.IdCliente,
+      RagSocCompleta: raw.RagSoc,
       indirizzo: raw.Indirizzo,
       citta: raw.Citta,
       cap: raw.Cap,

@@ -1,8 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
+import Select from "react-select";
+
 import {
+  getClienti,
   UpdateCliente,
   UpdateContatto,
   UpdateVisita,
@@ -15,6 +18,7 @@ import {
 import { useAuth } from "@/app/context/authContext";
 import NoteField from "./Notefield";
 import Form from "./form";
+import { Cliente } from "@/app/interfaces/interfaces";
 
 type Field = {
   title: string;
@@ -30,7 +34,6 @@ interface Props {
   id: string | null;
 }
 
-// Rimuove underscore e spazi per normalizzare i titoli
 const normalize = (str: string) =>
   str.trim().toLowerCase().replace(/[_\s]/g, "");
 
@@ -50,26 +53,45 @@ export default function FormEdit({ title, fields, onClose, type, id }: Props) {
     }
   })();
 
-  // Mappa dinamica tra campo normalizzato e chiave Zod originale
   const schemaKeyMap = Object.keys(schema.shape).reduce((acc, key) => {
     acc[normalize(key)] = key;
     return acc;
   }, {} as Record<string, string>);
 
-  // Mappa i titoli dei campi in base alla corrispondenza con le chiavi dello schema
   const getSchemaKey = (title: string): string =>
     schemaKeyMap[normalize(title)] || title;
 
-  // Stato iniziale del form
   const initialState: Record<string, string | number> = Object.fromEntries(
     fields.map((f) => [getSchemaKey(f.title), f.value ?? ""])
   );
 
   const [formState, setFormState] = useState(initialState);
+  const [clienti, setClientiList] = useState<Cliente[]>([]);
+  const [ragioniSoc, setRagioniList] = useState<string[]>([]);
 
-  const handleChange = (title: string, value: string) => {
+  useEffect(() => {
+    if (type === "visita" || type === "contatto") {
+      getRagSoc();
+    }
+  }, [type]);
+
+  const getRagSoc = async () => {
+    try {
+      const clienti = await getClienti(fetchWithAuth);
+      const r: string[] = clienti.map((c) => c.RagSocCompleta);
+      setClientiList(clienti);
+      setRagioniList(r);
+    } catch (err) {
+      console.error(err);
+      toast.error("Errore durante il caricamento dei clienti");
+    }
+    console.log(formState)
+  };
+
+  const handleChange = (title: string, value: string | number) => {
     const schemaKey = getSchemaKey(title);
     setFormState((prev) => ({ ...prev, [schemaKey]: value }));
+    console.log(formState)
   };
 
   const transformKeys = (obj: Record<string, any>) => {
@@ -86,6 +108,19 @@ export default function FormEdit({ title, fields, onClose, type, id }: Props) {
       const parsed = schema.parse(formState);
       const transformed = transformKeys(parsed);
 
+      if (type === "visita" && typeof transformed.RagSoc === "string") {
+        const clienteSelezionato = clienti.find(
+          (c) => c.RagSocCompleta === transformed.RagSoc
+        );
+        if (clienteSelezionato) {
+          delete transformed.RagSoc;
+          transformed.IdCliente = clienteSelezionato.IdCliente;
+        } else {
+          toast.error("Cliente selezionato non valido");
+          return;
+        }
+      }
+
       switch (type) {
         case "cliente":
           await UpdateCliente(fetchWithAuth, { IdCliente: id, ...transformed });
@@ -97,7 +132,10 @@ export default function FormEdit({ title, fields, onClose, type, id }: Props) {
           });
           break;
         case "visita":
-          await UpdateVisita(fetchWithAuth, { IdAttivita: id, ...transformed });
+          await UpdateVisita(fetchWithAuth, {
+            IdAttivita: id,
+            ...transformed,
+          });
           break;
       }
 
@@ -138,6 +176,36 @@ export default function FormEdit({ title, fields, onClose, type, id }: Props) {
       <form className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-x-2 auto-rows-min">
         {otherFields.map((field) => {
           const key = getSchemaKey(field.title);
+
+          if (type!=='cliente' &&field.title.toLowerCase()==='ragsoc') {
+            return (
+              <label
+                key={field.title}
+                className="frm-modal-label mb-4 text-xs tracking-widest uppercase block text-[var(--primary)]"
+              >
+                {field.title}
+                <Select
+                  options={ragioniSoc.map((r) => ({ value: r, label: r }))}
+                  value={
+                    formState[key]
+                      ? { value: formState[key], label: formState[key] }
+                      : null
+                  }
+                  onChange={(selectedOption) => {
+                    handleChange(
+                      field.title,
+                      selectedOption ? selectedOption.value : ""
+                    );
+                  }}
+                  className="w-full"
+                  classNamePrefix="react-select"
+                  isClearable
+                  placeholder="Seleziona.."
+                />
+              </label>
+            );
+          }
+
           return (
             <label
               key={field.title}
@@ -147,7 +215,9 @@ export default function FormEdit({ title, fields, onClose, type, id }: Props) {
               <input
                 type={field.type}
                 value={formState[key] || ""}
-                onChange={(e) => handleChange(field.title, e.target.value)}
+                onChange={(e) =>
+                  handleChange(field.title, e.target.value)
+                }
                 className="w-full text-sm px-2 focus:outline-none border-b-1 border-b-[var(--grey)] min-h-[44px] text-[var(--text)]"
               />
             </label>

@@ -1,6 +1,6 @@
 export interface Cliente {
-  idCliente: number;
-  ragSocCompleta: string;
+  IdCliente: number;
+  RagSocCompleta: string;
   indirizzo: string;
   citta: string;
   cap: string;

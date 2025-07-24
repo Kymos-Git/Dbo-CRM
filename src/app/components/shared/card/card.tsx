@@ -55,7 +55,7 @@ type GenericCardProps = {
  * Type guard per verificare se il dato è un Cliente.
  */
 function isCliente(dato: Cliente | Visita | Contatto): dato is Cliente {
-  return (dato as Cliente).ragSocCompleta !== undefined;
+  return (dato as Cliente).RagSocCompleta !== undefined;
 }
 
 /**
@@ -85,7 +85,7 @@ function generateDetailFields(dato: Cliente | Visita | Contatto): Field[] {
 
   if (isCliente(dato)) {
     keyMapping = {
-      RagSoc: "ragSocCompleta",
+      RagSoc: "RagSocCompleta",
       Indirizzo: "indirizzo",
       Citta: "citta",
       Cap: "cap",
@@ -166,7 +166,7 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
 
   const id=()=>{
     let i=null
-    if(isCliente(dato))i=dato.idCliente;
+    if(isCliente(dato))i=dato.IdCliente;
     if(isContatto(dato))i=dato.idContatto;
     if(isVisita(dato))i=dato.IdAttivita;
     return i!.toString();
@@ -209,7 +209,7 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
   async function deleteDato() {
     try {
      
-      if (isCliente(dato)){ await deleteCliente(fetchWithAuth, dato.idCliente); console.log(dato.idCliente)};
+      if (isCliente(dato)){ await deleteCliente(fetchWithAuth, dato.IdCliente); console.log(dato.IdCliente)};
       if (isContatto(dato)) await deleteContatto(fetchWithAuth, dato.idContatto);
       if (isVisita(dato)) await deleteVisita(fetchWithAuth, dato.IdAttivita);
 
@@ -274,7 +274,7 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
   }, [showDetail]);
 
   const nomeDato = isCliente(dato)
-    ? dato.ragSocCompleta
+    ? dato.RagSocCompleta
     : isContatto(dato)
     ? `${dato.nome} ${dato.cognome}`
     : isVisita(dato)
@@ -371,7 +371,7 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
           <div className="bg-[var(--bg)] p-6 rounded-xl shadow-xl max-w-sm w-[90%] border-1 border-red-600">
             <h2 className="text-lg font-semibold mb-4">
               Sicuro di voler eliminare{" "}
-              <span className="font-bold text-red-600">{nomeDato}</span>?
+              <span className="font-bold text-red-600 overflow-ellipsis">{isVisita(dato)?`la visitia per il cliente ${nomeDato} `:nomeDato}</span>?
             </h2>
             <div className="flex justify-end gap-4">
               <button

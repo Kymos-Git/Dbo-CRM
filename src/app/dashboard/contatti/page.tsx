@@ -48,18 +48,12 @@ const ContattiVirtualGrid = () => {
   const searchParams = useSearchParams();
   const initialRagSoc = searchParams.get("ragSoc") || "";
 
-  /**
-   * Stato per mantenere i valori attuali dei filtri usati nella ricerca.
-   * Inizializzato con un filtro "Rag.Soc." da eventuale query string.
-   */
-  const [filtersValues, setFiltersValues] = useState<Record<string, string>>({
-    "Rag.Soc.": initialRagSoc,
-  });
+
+
 
   const router = useRouter();
   const pathname = usePathname();
 
-  const [fetchedOnce, setFetchedOnce] = useState(false);
 
   useEffect(() => {
     if (!fetchWithAuth) return;
@@ -85,7 +79,6 @@ const ContattiVirtualGrid = () => {
         console.error(err);
       } finally {
         setLoading(false);
-        setFetchedOnce(true);
       }
 
       // Ricostruisci URL senza reload e ragSoc
@@ -137,7 +130,6 @@ const ContattiVirtualGrid = () => {
    * e aggiorna la lista visualizzata.
    */
   async function handleFiltersBlur(values: Record<string, string>) {
-    setFiltersValues(values);
     setLoading(true);
 
     try {
