@@ -67,18 +67,17 @@ const ContattiVirtualGrid = () => {
     const reload = searchParams.get("reload");
     const ragSoc = searchParams.get("ragSoc") || "";
 
-    // Se ho già fatto fetch una volta e non c'è reload, non rifaccio fetch
-    if (fetchedOnce && reload !== "true") return;
-
-    const fetchData = async () => {
-      setLoading(true);
+    const fetchAndClean = async () => {
       try {
+        setLoading(true);
+
         let data;
         if (ragSoc.trim() !== "") {
           data = await getContatti(fetchWithAuth, { nome: ragSoc });
         } else {
           data = await getContatti(fetchWithAuth);
         }
+
         setContattiCRM(data.map(mapRawToContatto));
         setError(null);
       } catch (err) {
@@ -88,20 +87,22 @@ const ContattiVirtualGrid = () => {
         setLoading(false);
         setFetchedOnce(true);
       }
-    };
 
-    fetchData().then(() => {
+      // Ricostruisci URL senza reload e ragSoc
       if (reload === "true" || ragSoc) {
-        // Pulisce i parametri dalla URL dopo il fetch
         const newParams = new URLSearchParams(searchParams.toString());
         newParams.delete("reload");
         newParams.delete("ragSoc");
-        const newQuery = newParams.toString();
-        const newUrl = pathname + (newQuery ? `?${newQuery}` : "");
+
+        const newQueryString = newParams.toString();
+        const newUrl = pathname + (newQueryString ? `?${newQueryString}` : "");
+
         router.replace(newUrl, { scroll: false });
       }
-    });
-  }, [fetchWithAuth, searchParams, pathname, router, fetchedOnce]);
+    };
+
+    fetchAndClean();
+  }, [fetchWithAuth, pathname, searchParams, router]);
 
   /**
    * Effetto per gestire il ridimensionamento della finestra e aggiornare
@@ -136,7 +137,6 @@ const ContattiVirtualGrid = () => {
    * e aggiorna la lista visualizzata.
    */
   async function handleFiltersBlur(values: Record<string, string>) {
-    
     setFiltersValues(values);
     setLoading(true);
 

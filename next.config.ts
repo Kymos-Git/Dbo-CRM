@@ -10,6 +10,10 @@ const nextConfig: NextConfig = {
         source: '/api/:path*',
         destination: 'https://dbot1.dbo.cloud/dboapi/:path*', // target del backend
       },
+      {
+        source:'/dboh/:path*',
+        destination:'https://dbot1.dbo.cloud/dboh/:path*',
+      }
     ];
   },
 };

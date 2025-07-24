@@ -78,7 +78,8 @@ export default function FormAdd({ type, onClose }: FormProps) {
     Record<string, string | number | boolean>
   >({});
 
-  const { fetchWithAuth } = useAuth();
+
+  const { fetchWithAuth,username } = useAuth();
 
   useEffect(() => {
     const { schema: selectedSchema, fields: generatedFields } =
@@ -124,6 +125,7 @@ export default function FormAdd({ type, onClose }: FormProps) {
 
   const sendData = async () => {
     if (!schema) return;
+    
     try {
       const parsed = schema.parse(formData);
       const transformed = transformKeys(parsed);
@@ -136,7 +138,7 @@ export default function FormAdd({ type, onClose }: FormProps) {
           await sendContatto(fetchWithAuth, transformed);
           break;
         case "visita":
-          await sendVisita(fetchWithAuth, transformed);
+          await sendVisita(fetchWithAuth, {SysUser:username,...transformed});
           break;
       }
       toast.success("Dati inviati con successo");

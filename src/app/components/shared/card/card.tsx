@@ -145,7 +145,7 @@ function generateDetailFields(dato: Cliente | Visita | Contatto): Field[] {
       }
     );
   }
-
+  console.log(fields)
   return fields;
 }
 
@@ -294,7 +294,7 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
   const detailFields = React.useMemo(() => generateDetailFields(dato), [dato]);
 
   return (
-    <div className="cd-page flex h-full w-full font-sans text-base justify-center items-center m-0 p-0 cursor-default visible bg-[var(--bg)] text-[var(--text)]">
+    <div className="cd-page relative flex h-full w-full font-sans text-base justify-center items-center m-0 p-0 cursor-default visible bg-[var(--bg)] text-[var(--text)]">
       <div className="cd-card w-[75%] max-h-[90vh] rounded-lg p-[5%] pt-[1%] my-0.5 shadow-md transition-shadow hover:shadow-lg flex flex-col justify-center overflow-auto md:w-[80%] md:h-[85%] cursor-default relative bg-[var(--bg)] border-[2px] border-[var(--bg-alt)]">
 
         <h3 className="cd-title text-xl mt-[3%] mb-2 font-semibold text-[var(--primary)]">{title}</h3>
@@ -367,7 +367,7 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
 
       {/* Popup di conferma eliminazione */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex justify-center items-center">
+        <div className="absolute inset-0 z-50 flex justify-center items-center">
           <div className="bg-[var(--bg)] p-6 rounded-xl shadow-xl max-w-sm w-[90%] border-1 border-red-600">
             <h2 className="text-lg font-semibold mb-4">
               Sicuro di voler eliminare{" "}

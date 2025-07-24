@@ -352,3 +352,15 @@ export async function deleteVisita(
   }
   return parsed;
 }
+
+
+
+export async function sendToAi(fetchFn: (input: string, init?: RequestInit) => Promise<Response>,data: string) {
+  const res = await fetchFn("/dboh/api/assistant/chat", {
+    headers: { "Content-Type": "application/json" },
+    method: "POST",
+    body: JSON.stringify({ IsPrivate: false, ThreadId: null, Message: data }),
+  });
+  if (!res.ok) throw new Error("errore nella risposta");
+  return await res.json();
+}
