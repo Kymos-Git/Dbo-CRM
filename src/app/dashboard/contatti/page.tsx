@@ -60,6 +60,7 @@ const ContattiVirtualGrid = () => {
 
     const reload = searchParams.get("reload");
     const ragSoc = searchParams.get("ragSoc") || "";
+    const newParams = new URLSearchParams(searchParams.toString());
 
     const fetchAndClean = async () => {
       try {
@@ -67,6 +68,7 @@ const ContattiVirtualGrid = () => {
 
         let data;
         if (ragSoc.trim() !== "") {
+          newParams.delete("ragSoc");
           data = await getContatti(fetchWithAuth, { nome: ragSoc });
         } else {
           data = await getContatti(fetchWithAuth);
@@ -81,11 +83,10 @@ const ContattiVirtualGrid = () => {
         setLoading(false);
       }
 
-      // Ricostruisci URL senza reload e ragSoc
-      if (reload === "true" || ragSoc) {
-        const newParams = new URLSearchParams(searchParams.toString());
+      // Ricostruisci URL senza reload 
+      if (reload === "true") {
+        
         newParams.delete("reload");
-        newParams.delete("ragSoc");
 
         const newQueryString = newParams.toString();
         const newUrl = pathname + (newQueryString ? `?${newQueryString}` : "");
@@ -141,7 +142,7 @@ const ContattiVirtualGrid = () => {
       if (areAllFiltersEmpty) {
         data = await getContatti(fetchWithAuth);
       } else {
-        console.log(values);
+        
         data = await getContatti(fetchWithAuth, values);
       }
 

@@ -213,8 +213,11 @@ export default function FormAdd({ type, onClose }: FormProps) {
       router.replace(url.pathname + url.search);
       onClose();
     } catch (err) {
-      console.error(err instanceof Error ? err.message : "Errore sconosciuto");
-      toast.error("Errore nell'invio dei dati");
+      if (err instanceof z.ZodError) {
+        err.issues.forEach((issue) => toast.error(issue.message));
+      } else {
+        toast.error("Errore nell'invio dei dati");
+      }
     }
   };
 
@@ -273,7 +276,8 @@ export default function FormAdd({ type, onClose }: FormProps) {
                   <input
                     type="date"
                     name={name}
-                    value={formData[name] as string}
+                    min={new Date().toISOString().split("T")[0]}
+                    value={formData[name] as string||new Date().toISOString().split("T")[0]}
                     onChange={handleChange}
                     className="w-full px-3 py-2 text-sm border-b border-gray-400 focus:outline-none focus:border-blue-600 min-h-[44px] cursor-pointer"
                   />
@@ -285,6 +289,8 @@ export default function FormAdd({ type, onClose }: FormProps) {
                     value={
                       formData[name]
                         ? { value: formData[name], label: formData[name] }
+                        : ragioniSoc.length > 0
+                        ? { value: ragioniSoc[0], label: ragioniSoc[0] }
                         : null
                     }
                     onChange={(selectedOption) => {

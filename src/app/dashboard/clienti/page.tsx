@@ -127,7 +127,7 @@ const ClientiVirtualGrid = () => {
       if (areAllFiltersEmpty) {
         data = await getClienti(fetchWithAuth);
       } else {
-        console.log(values);
+        
         data = await getClienti(fetchWithAuth, values);
       }
 

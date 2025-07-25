@@ -85,13 +85,13 @@ export default function FormEdit({ title, fields, onClose, type, id }: Props) {
       console.error(err);
       toast.error("Errore durante il caricamento dei clienti");
     }
-    console.log(formState)
+    
   };
 
   const handleChange = (title: string, value: string | number) => {
     const schemaKey = getSchemaKey(title);
     setFormState((prev) => ({ ...prev, [schemaKey]: value }));
-    console.log(formState)
+    
   };
 
   const transformKeys = (obj: Record<string, any>) => {

@@ -285,7 +285,7 @@ export async function deleteCliente(
     KYAction: "DEL",
   };
 
-  console.log("newData:", newData);
+  
 
   const res = await fetchFn("/api/StpClienti_KyMng", {
     headers: {

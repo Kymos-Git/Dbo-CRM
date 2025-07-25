@@ -145,7 +145,7 @@ function generateDetailFields(dato: Cliente | Visita | Contatto): Field[] {
       }
     );
   }
-  console.log(fields)
+  
   return fields;
 }
 
@@ -210,8 +210,8 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
     try {
      
       if (isCliente(dato)){ await deleteCliente(fetchWithAuth, dato.IdCliente); console.log(dato.IdCliente)};
-      if (isContatto(dato)) await deleteContatto(fetchWithAuth, dato.idContatto);
-      if (isVisita(dato)) await deleteVisita(fetchWithAuth, dato.IdAttivita);
+      if (isContatto(dato)){await deleteContatto(fetchWithAuth, dato.idContatto);console.log(dato.idContatto)};
+      if (isVisita(dato)){ await deleteVisita(fetchWithAuth, dato.IdAttivita);console.log(dato.IdAttivita)};
 
       setShowDeleteConfirm(false);
       clearQueryParams();
@@ -371,7 +371,7 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
           <div className="bg-[var(--bg)] p-6 rounded-xl shadow-xl max-w-sm w-[90%] border-1 border-red-600">
             <h2 className="text-lg font-semibold mb-4">
               Sicuro di voler eliminare{" "}
-              <span className="font-bold text-red-600 overflow-ellipsis">{isVisita(dato)?`la visitia per il cliente ${nomeDato} `:nomeDato}</span>?
+              <span className="font-bold text-red-600 overflow-ellipsis">{isVisita(dato)?`la visita per il cliente ${nomeDato} `:nomeDato}</span>?
             </h2>
             <div className="flex justify-end gap-4">
               <button
