@@ -91,6 +91,7 @@ export default function Detail({
     <Form
       visible={visible}
       onClose={onClose}
+      formId={title}
       title={title}
       flgCliente={flgCliente}
       colors={colors}

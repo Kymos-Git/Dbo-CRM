@@ -7,6 +7,7 @@
  * Supporta la visualizzazione di un header con titolo, bottoni di chiusura, pulsanti di azione opzionali e indicatori colore.
  * Può includere una funzione di navigazione legata a un flag cliente.
  * Gestisce internamente il montaggio per evitare rendering prematuri sul server.
+ * Gestisce automaticamente gli z-index per portare in primo piano l'ultima scheda cliccata.
  */
 "use client";
 
@@ -15,6 +16,8 @@ import { AnimatePresence, motion, useAnimation } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Rnd } from "react-rnd";
 import { usePinch } from "@use-gesture/react";
+import { useZIndex } from "@/app/hooks/formHook";
+
 
 type FormProps = {
   visible: boolean;
@@ -29,8 +32,7 @@ type FormProps = {
   onSend?: () => void;
   onReset?: () => void;
   onFocus?: () => void;
-  zIndex?: number;
-
+  formId: string; // Nuovo prop obbligatorio per identificare univocamente ogni form
 };
 
 export default function Form({
@@ -46,12 +48,15 @@ export default function Form({
   onSend,
   onReset,
   onFocus,
-  zIndex = 1,
+  formId, // Nuovo prop
 }: FormProps) {
   const controls = useAnimation();
   const [mounted, setMounted] = useState(false);
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
   const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+
+  // Usa il nuovo hook per gestire gli z-index
+  const { zIndex, bringToFront, removeFromStack } = useZIndex(formId);
 
   // Aggiorna dimensione finestra
   useEffect(() => {
@@ -62,6 +67,16 @@ export default function Form({
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
+
+  // Cleanup quando il form viene chiuso o smontato
+  useEffect(() => {
+    if (!visible) {
+      removeFromStack();
+    }
+    return () => {
+      removeFromStack();
+    };
+  }, [visible, removeFromStack]);
 
   // Init dimensioni e posizione con priorità ai props forzati
   const initWidth = isMobile
@@ -131,6 +146,8 @@ export default function Form({
   }
 
   function handleFocus() {
+    // Porta questo form in primo piano
+    bringToFront();
     if (onFocus) onFocus();
   }
 
@@ -165,7 +182,7 @@ export default function Form({
             setPosition(position);
           }}
           style={{
-            zIndex,
+            zIndex, // Usa il zIndex dinamico
             borderRadius: 16,
             border: "1px solid var(--primary)",
             backgroundColor: "var(--bg)",
@@ -175,7 +192,6 @@ export default function Form({
             {...(isMobile ? bind() as any : {})}
         >
           <motion.div
-          
             className="frm-header relative flex items-center justify-between h-12 mb-5 w-[95%] md:w-full select-none px-4"
             style={{ 
               cursor: isFullscreen ? "default" : "move",
@@ -243,6 +259,7 @@ export default function Form({
                       touchAction: "manipulation",
                       pointerEvents: "auto"
                     }}
+                    
                   />
                 ))}
               </div>
@@ -253,11 +270,13 @@ export default function Form({
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
+                    handleFocus(); // Porta in primo piano quando si clicca
                     onSend?.();
                   }}
                   onTouchEnd={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
+                    handleFocus();
                     onSend?.();
                   }}
                   style={{ 
@@ -275,11 +294,13 @@ export default function Form({
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
+                    handleFocus(); // Porta in primo piano quando si clicca
                     onReset?.();
                   }}
                   onTouchEnd={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
+                    handleFocus();
                     onReset?.();
                   }}
                   style={{ 
@@ -304,7 +325,10 @@ export default function Form({
 
           <motion.div
             className="frm-main relative rounded-xl max-w-4xl w-full h-[85%] p-2 pt-0 md:w-full md:max-w-full overflow-auto"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleFocus(); // Porta in primo piano quando si clicca nel contenuto
+            }}
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
