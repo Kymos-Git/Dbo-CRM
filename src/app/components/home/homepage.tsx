@@ -6,42 +6,42 @@
  * Contiene la logica per inviare messaggi utente e simulare risposte AI.
  */
 
-import { useEffect, useRef, useState } from "react";
-// import AIChatInput from "./chatinput";
-import { sendToAi } from "@/app/services/api";
-import { useAuth } from "@/app/context/authContext";
+// import { useEffect, useRef, useState } from "react";
+// // import AIChatInput from "./chatinput";
+// import { sendToAi } from "@/app/services/api";
+// import { useAuth } from "@/app/context/authContext";
 
 // Definizione del tipo Message per i messaggi di chat
-type Message = {
-  id: number; // Identificativo univoco del messaggio
-  text: string; // Testo del messaggio
-  sender: "user" | "ai"; // Chi ha inviato il messaggio: utente o AI
-};
+// type Message = {
+//   id: number; // Identificativo univoco del messaggio
+//   text: string; // Testo del messaggio
+//   sender: "user" | "ai"; // Chi ha inviato il messaggio: utente o AI
+// };
 
 export default function Homepage() {
  
-  const [hasSentMessage, setHasSentMessage] = useState(false);
+  // const [hasSentMessage, setHasSentMessage] = useState(false);
 
-  // Stato che mantiene la lista di tutti i messaggi scambiati
-  const [messages, setMessages] = useState<Message[]>([]);
+  // // Stato che mantiene la lista di tutti i messaggi scambiati
+  // const [messages, setMessages] = useState<Message[]>([]);
 
-  // Contatore per generare ID unici progressivi per i messaggi
-  const [nextId, setNextId] = useState(0);
+  // // Contatore per generare ID unici progressivi per i messaggi
+  // const [nextId, setNextId] = useState(0);
 
-  // Riferimento al div in fondo alla lista messaggi, usato per scroll automatico
-  const bottomRef = useRef<HTMLDivElement | null>(null);
+  // // Riferimento al div in fondo alla lista messaggi, usato per scroll automatico
+  // const bottomRef = useRef<HTMLDivElement | null>(null);
 
-  const {fetchWithAuth}=useAuth()
-  /**
-   * Effetto che si attiva ad ogni cambiamento di `messages`
-   * Fa scrollare automaticamente la lista messaggi verso il basso
-   * per mostrare l’ultimo messaggio inviato o ricevuto.
-   */
-  useEffect(() => {
-    if (bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages]);
+  // const {fetchWithAuth}=useAuth()
+  // /**
+  //  * Effetto che si attiva ad ogni cambiamento di `messages`
+  //  * Fa scrollare automaticamente la lista messaggi verso il basso
+  //  * per mostrare l’ultimo messaggio inviato o ricevuto.
+  //  */
+  // useEffect(() => {
+  //   if (bottomRef.current) {
+  //     bottomRef.current.scrollIntoView({ behavior: "smooth" });
+  //   }
+  // }, [messages]);
 
   /**
    * Funzione chiamata quando l’utente invia un nuovo messaggio.
@@ -50,26 +50,26 @@ export default function Homepage() {
    *
    * @param msg - testo del messaggio inviato dall’utente
    */
-  const handleMessage = async (msg: string) => {
-    setHasSentMessage(true);
+  // const handleMessage = async (msg: string) => {
+  //   setHasSentMessage(true);
 
-    // Definisce due ID consecutivi: uno per l’utente e uno per la risposta AI
-    const userId = nextId;
-    const aiId = nextId + 1;
+    // // Definisce due ID consecutivi: uno per l’utente e uno per la risposta AI
+    // const userId = nextId;
+    // const aiId = nextId + 1;
 
-    // Aggiunge il messaggio utente alla lista messaggi
-    setMessages((prev) => [...prev, { id: userId, text: msg, sender: "user" }]);
+    // // Aggiunge il messaggio utente alla lista messaggi
+    // setMessages((prev) => [...prev, { id: userId, text: msg, sender: "user" }]);
 
-    // Aggiorna il prossimo ID disponibile (incrementa di 2)
-    setNextId(aiId + 1);
+    // // Aggiorna il prossimo ID disponibile (incrementa di 2)
+    // setNextId(aiId + 1);
 
-    //  risposta AI 
-    const aiMsg =await sendToAi(fetchWithAuth,msg);
-    setMessages((prev) => [
-      ...prev,
-      { id: aiId, text: aiMsg, sender: "ai" },
-    ]);
-  };
+    // //  risposta AI 
+    // const aiMsg =await sendToAi(fetchWithAuth,msg);
+    // setMessages((prev) => [
+    //   ...prev,
+    //   { id: aiId, text: aiMsg, sender: "ai" },
+    // ]);
+  // };
 
   // return (
   //   <div className="hm-container w-full relative h-full bg-[var(--bg)]">
@@ -125,7 +125,7 @@ export default function Homepage() {
   // );
 
   return(
-    <div className="hm-card absolute top-[50%] left-[50%] transform -translate-x-[50%] -translate-y-[50%] flex items-center justify-center bg-[var(--bg)] shadow-md h-[15vh] w-[30vw] border border-[var(--primary)] rounded-2xl">
+    <div className="hm-card absolute top-[50%] left-[50%] transform -translate-x-[50%] -translate-y-[50%] flex items-center justify-center bg-[var(--bg)] shadow-md h-[15vh] md:w-[30vw] border border-[var(--primary)] rounded-2xl w-[60vw]">
       <div className="txt text-[var(--text)]">Pagina in sviluppo</div>
     </div>
   )

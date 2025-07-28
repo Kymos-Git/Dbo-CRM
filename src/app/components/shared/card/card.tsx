@@ -261,17 +261,26 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
     else setShowDetail(true);
   };
 
-  useEffect(() => {
-    const main = document.getElementsByTagName("main")[0] as HTMLElement;
-    const grid = document.querySelector(".gr");
-    if (showDetail) {
-      grid?.classList.add("hidden");
-      main.style.filter = "blur(5px)";
-    } else {
-      grid?.classList.remove("hidden");
-      main.style.filter = "blur(0px)";
+ useEffect(() => {
+  const main = document.getElementsByTagName("main")[0] as HTMLElement;
+  const grid = document.querySelector(".gr") as HTMLElement;
+
+  if (showDetail) {
+    if (grid) {
+      grid.style.pointerEvents = "none";
+      grid.style.userSelect = "none";
+      grid.style.overflow = "hidden";
     }
-  }, [showDetail]);
+    main.style.filter = "blur(2px)";
+  } else {
+    if (grid) {
+      grid.style.pointerEvents = "auto";
+      grid.style.userSelect = "auto";
+      grid.style.overflow = "auto";
+    }
+    main.style.filter = "blur(0px)";
+  }
+}, [showDetail]);
 
   const nomeDato = isCliente(dato)
     ? dato.RagSocCompleta

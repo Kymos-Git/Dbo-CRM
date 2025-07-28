@@ -231,6 +231,7 @@ const ContattiVirtualGrid = () => {
       )}
 
       {!loading && !error && contattiCRM.length > 0 && (
+        <div className="gr">
         <Grid
           columnCount={columnCount}
           rowCount={rowCount}
@@ -241,6 +242,7 @@ const ContattiVirtualGrid = () => {
         >
           {Cell}
         </Grid>
+        </div>
       )}
     </ProtectedRoute>
   );

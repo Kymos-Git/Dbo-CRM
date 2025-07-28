@@ -245,9 +245,7 @@ export default function Sidebar() {
       </div>
 
       {formType && (
-        <div className="form-overlay fixed inset-0 backdrop-blur-sm flex justify-center items-center z-50">
           <FormAdd type={formType} onClose={() => setFormType(null)} />
-        </div>
       )}
     </>
   );

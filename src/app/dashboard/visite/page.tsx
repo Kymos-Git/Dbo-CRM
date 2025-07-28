@@ -185,6 +185,7 @@ const VisiteVirtualGrid = () => {
       )}
 
       {!loading && !error && visiteCRM.length > 0 && (
+        <div className="gr">
         <Grid
           columnCount={columnCount}
           rowCount={rowCount}
@@ -195,6 +196,7 @@ const VisiteVirtualGrid = () => {
         >
           {Cell}
         </Grid>
+        </div>
       )}
     </ProtectedRoute>
   );
