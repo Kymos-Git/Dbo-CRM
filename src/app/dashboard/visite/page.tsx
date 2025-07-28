@@ -60,7 +60,7 @@ const VisiteVirtualGrid = () => {
       if (reload === "true") {
         await fetchVisite();
 
-        // Ricostruisci query senza reload
+        // Ricostruisce query senza reload
         const newParams = new URLSearchParams(searchParams.toString());
         newParams.delete("reload");
 

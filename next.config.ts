@@ -1,19 +1,24 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-   reactStrictMode: false,
+  reactStrictMode: false,
+
+   
+  // eslint: {
+  //   ignoreDuringBuilds: true,
+  // },
+  // output: 'export',
+
   async rewrites() {
-    
     return [
       {
         source: '/api/:path*',
-        destination: 'https://dbot1.dbo.cloud/dboapi/:path*', // target del backend
+        destination: 'https://dbot1.dbo.cloud/dboapi/:path*',
       },
       {
-        source:'/dboh/:path*',
-        destination:'https://dbot1.dbo.cloud/dboh/:path*',
-      }
+        source: '/dboh/:path*',
+        destination: 'https://dbot1.dbo.cloud/dboh/:path*',
+      },
     ];
   },
 };

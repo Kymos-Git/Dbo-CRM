@@ -9,7 +9,7 @@
  * mostra un toast di benvenuto all’utente recuperando il nome utente da IndexedDB.
  */
 
-import { ReactNode, useEffect } from "react";
+import { ReactNode, Suspense, useEffect } from "react";
 import Sidebar from "../components/sidebar/sidebar";
 import { RouteLoadingProvider } from "../context/routeContext";
 import "./dashboard.css"
@@ -60,9 +60,11 @@ export default function DashBoardLayout({ children }: { children: ReactNode }) {
       <div className="flex h-screen w-screen" style={{ height: 'var(--app-height)' }}>
         <Sidebar />
         <RouteLoader>
+          <Suspense>
           <main className="overflow-hidden p-4 h-full w-full">
             {children}
           </main>
+          </Suspense>
         </RouteLoader>
       </div>
     </RouteLoadingProvider>

@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import AIChatInput from "./chatinput";
+// import AIChatInput from "./chatinput";
 import { sendToAi } from "@/app/services/api";
 import { useAuth } from "@/app/context/authContext";
 
@@ -19,7 +19,7 @@ type Message = {
 };
 
 export default function Homepage() {
-  // Stato booleano che indica se l’utente ha inviato almeno un messaggio
+ 
   const [hasSentMessage, setHasSentMessage] = useState(false);
 
   // Stato che mantiene la lista di tutti i messaggi scambiati

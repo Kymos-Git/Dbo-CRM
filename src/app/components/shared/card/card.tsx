@@ -165,7 +165,7 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
   const pathname = usePathname();
 
   const id=()=>{
-    let i=null
+    let i:number;
     if(isCliente(dato))i=dato.IdCliente;
     if(isContatto(dato))i=dato.idContatto;
     if(isVisita(dato))i=dato.IdAttivita;

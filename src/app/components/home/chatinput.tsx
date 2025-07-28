@@ -60,7 +60,7 @@ const AIChatInput: React.FC<AIChatInputProps> = ({ onSend }) => {
     };
     cycle();
 
-    // Cleanup al dismount
+
     return () => clearTimeout(timeoutId);
   }, [isActive, inputValue]);
 
@@ -162,7 +162,7 @@ const AIChatInput: React.FC<AIChatInputProps> = ({ onSend }) => {
                 rows={1}
                 className="ct-textarea w-full overflow-y-auto resize-none max-h-[20vh] px-[1.2vh] pl-[3vw] pr-[3vw] py-[1.6vh] border-none outline-none rounded-[3vw] text-[1.8vh] md:text-[2vh] placeholder:text-gray-400 bg-[var(--bg)] text-[var(--text)]"
                 onKeyDown={(e) => {
-                  // Invio senza shift invia il messaggio
+    
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
                     handleSend();

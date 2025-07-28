@@ -46,15 +46,15 @@ export default function Form({
 }: FormProps) {
   // Controlli per animazioni tramite framer-motion
   const controls = useAnimation();
-  // Stato per verificare che il componente sia montato (client-side only)
+  // Stato per verificare che il componente sia montato 
   const [mounted, setMounted] = useState(false);
 
-  // Imposta mounted a true solo dopo il primo render (per evitare problemi SSR)
+  // Imposta mounted a true solo dopo il primo render 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Se non montato, non renderizza nulla (evita problemi server-side)
+  
   if (!mounted) return null;
 
   // Ritorna il contenuto modale tramite portal sul body del documento

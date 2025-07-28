@@ -16,7 +16,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
         setAllowed(false);
         router.push("/");
       } else {
-        setAllowed(true); // Utente autenticato: autorizzato a vedere il contenuto
+        setAllowed(true); 
       }
     }
   }, [loading, accessToken, router]);

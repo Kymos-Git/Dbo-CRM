@@ -65,26 +65,25 @@ export function Login() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    // Se il sistema di autenticazione non è pronto, non fare nulla
+  
     if (!isReady) {
       return;
     }
 
-    // Imposta lo stato di caricamento attivo
     setLoading(true);
 
     try {
       // Chiamata alla funzione di login con username e password
       await login(username, password);
 
-      // Reset dei campi input
+  
       setUsername("");
       setPassword("");
 
       // Redirect alla pagina dashboard dopo login riuscito
       router.push("/dashboard");
     } catch (error: unknown) {
-      // Attende 2 secondi prima di mostrare l'errore (effetto visivo più gradevole)
+      
       const delay = new Promise((resolve) => setTimeout(resolve, 2000));
       await delay;
 
@@ -104,10 +103,10 @@ export function Login() {
 
   return (
     <form
-      className={`login ${loading ? "loading" : ""}`} // Applica la classe "loading" durante il caricamento
-      onSubmit={handleSubmit}  // Associa la funzione handleSubmit al submit del form
+      className={`login ${loading ? "loading" : ""}`}
+            onSubmit={handleSubmit}  
     >
-      {/* Logo dinamico che cambia in base al tema */}
+     
       <Image
         src={logoSrc}
         alt="Logo Kymos"
@@ -125,7 +124,7 @@ export function Login() {
           <input
             type="text"
             value={username}
-            onChange={(e) => setUsername(e.target.value)} // Aggiorna stato username al cambiamento input
+            onChange={(e) => setUsername(e.target.value)} 
             autoComplete="off"
           />
         </div>
@@ -136,7 +135,7 @@ export function Login() {
           <input
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)} // Aggiorna stato password al cambiamento input
+            onChange={(e) => setPassword(e.target.value)}
             autoComplete="off"
           />
         </div>

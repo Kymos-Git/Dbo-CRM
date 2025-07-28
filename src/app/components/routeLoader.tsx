@@ -18,7 +18,7 @@ export default function RouteLoader({ children }: { children: React.ReactNode })
   // Estrae lo stato di caricamento e la funzione per aggiornarlo dal context personalizzato
   const { loading, setLoading } = useRouteLoading();
 
-  // Recupera il pathname corrente della pagina, usato per rilevare i cambi di route
+  
   const pathname = usePathname();
 
   // Effetto che si attiva al cambiamento del pathname,
@@ -27,7 +27,7 @@ export default function RouteLoader({ children }: { children: React.ReactNode })
     setLoading(false);
   }, [pathname, setLoading]);
 
-  // Se è attivo lo stato di caricamento, mostra il componente di loading
+
   if (loading) {
     return <LoadingComponent />;
   }

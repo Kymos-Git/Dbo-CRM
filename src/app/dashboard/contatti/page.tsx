@@ -83,7 +83,7 @@ const ContattiVirtualGrid = () => {
         setLoading(false);
       }
 
-      // Ricostruisci URL senza reload 
+      // Ricostruisce URL senza reload 
       if (reload === "true") {
         
         newParams.delete("reload");

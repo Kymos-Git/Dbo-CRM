@@ -11,7 +11,7 @@
 
 "use client";
 
-import { useEffect } from "react";
+// import { useEffect } from "react";
 
 export default function ConfigLoader() {
   /**
@@ -20,16 +20,16 @@ export default function ConfigLoader() {
    * Questo effetto viene eseguito una sola volta al montaggio del componente
    * grazie all'array di dipendenze vuoto.
    */
-  useEffect(() => {
-    const loadConfig = async () => {
-      const res = await fetch("/config.json");
-      const config = await res.json();
+  // useEffect(() => {
+  //   const loadConfig = async () => {
+  //     const res = await fetch("/config.json");
+  //     const config = await res.json();
 
-      window.APP_CONFIG = config;
-    };
+  //     window.APP_CONFIG = config;
+  //   };
 
-    loadConfig();
-  }, []);
+  //   loadConfig();
+  // }, []);
 
   return <></>;
 }

@@ -11,7 +11,7 @@ import { useState } from "react";
  * Usa il contesto di autenticazione per eseguire il logout.
  */
 export default function Account() {
-  // Estrae la funzione di logout dal contesto di autenticazione
+  
   const { logout } = useAuth();
 
   /**

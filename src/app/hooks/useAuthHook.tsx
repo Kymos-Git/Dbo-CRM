@@ -10,7 +10,7 @@ const REFRESH_TOKEN_KEY = "refreshToken";
 const ACCESS_TOKEN_KEY = "accessToken";
 const USERNAME_KEY = "username";
 
-// Helper toast
+
 const handleError = (error: unknown, fallbackMessage = "Errore imprevisto") => {
   console.error(error);
   toast.error(fallbackMessage);
@@ -219,7 +219,7 @@ export function useAuthHook() {
       }
 
       return retryResponse;
-    } catch (err) {
+    } catch {
       await logoutOnce();
       throw new Error("[handle401Retry] Errore durante refresh e retry");
     }

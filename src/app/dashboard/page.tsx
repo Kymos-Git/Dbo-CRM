@@ -12,7 +12,7 @@ import { ProtectedRoute } from "../auth/ProtectedRoute";
 import Homepage from "../components/home/homepage";
 
 export default function Home() {
-  // Ritorna il componente Homepage protetto da ProtectedRoute
+  
   return (
     <ProtectedRoute>
       <Homepage />

@@ -64,7 +64,7 @@ const ClientiVirtualGrid = () => {
       if (reload === "true") {
         await fetchClienti();
 
-        // Ricostruisci query senza reload
+        // Ricostruisce query senza reload
         const newParams = new URLSearchParams(searchParams.toString());
         newParams.delete("reload");
 
