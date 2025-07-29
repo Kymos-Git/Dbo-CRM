@@ -32,7 +32,7 @@ type FormProps = {
   onSend?: () => void;
   onReset?: () => void;
   onFocus?: () => void;
-  formId: string; // Nuovo prop obbligatorio per identificare univocamente ogni form
+  formId: string; 
 };
 
 export default function Form({
@@ -48,7 +48,7 @@ export default function Form({
   onSend,
   onReset,
   onFocus,
-  formId, // Nuovo prop
+  formId,
 }: FormProps) {
   const controls = useAnimation();
   const [mounted, setMounted] = useState(false);
@@ -184,7 +184,8 @@ export default function Form({
           style={{
             zIndex, // Usa il zIndex dinamico
             borderRadius: 16,
-            border: "1px solid var(--primary)",
+            // border: "1px solid var(--primary)",
+             boxShadow:"0px 1px 5px var(--text)",
             backgroundColor: "var(--bg)",
             overflow: "hidden",
           }}
@@ -192,7 +193,7 @@ export default function Form({
             {...(isMobile ? bind() as any : {})}
         >
           <motion.div
-            className="frm-header relative flex items-center justify-between h-12 mb-5 w-[95%] md:w-full select-none px-4"
+            className="frm-header relative flex items-center justify-between h-12 mb-5 w-full select-none px-4"
             style={{ 
               cursor: isFullscreen ? "default" : "move",
               touchAction: "none" 
@@ -244,7 +245,7 @@ export default function Form({
               )}
             </div>
 
-            <p className="text-center text-xs font-bold tracking-wide pointer-events-none">
+            <p className="text-center  text-base md:text-xl  font-bold tracking-wide pointer-events-none">
               {title}
             </p>
 

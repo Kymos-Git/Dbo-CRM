@@ -9,7 +9,7 @@
 "use client";
 
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React, {  useState } from "react";
 import "./card.css";
 import Detail from "../detail";
 import { Cliente, Contatto, Visita } from "@/app/interfaces/interfaces";
@@ -82,7 +82,7 @@ function isContatto(dato: Cliente | Visita | Contatto): dato is Contatto {
 function generateDetailFields(dato: Cliente | Visita | Contatto): Field[] {
   let fields: Field[] = [];
   let keyMapping;
-
+ 
   if (isCliente(dato)) {
     keyMapping = {
       RagSoc: "RagSocCompleta",
@@ -209,9 +209,9 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
   async function deleteDato() {
     try {
      
-      if (isCliente(dato)){ await deleteCliente(fetchWithAuth, dato.IdCliente); console.log(dato.IdCliente)};
-      if (isContatto(dato)){await deleteContatto(fetchWithAuth, dato.idContatto);console.log(dato.idContatto)};
-      if (isVisita(dato)){ await deleteVisita(fetchWithAuth, dato.IdAttivita);console.log(dato.IdAttivita)};
+      if (isCliente(dato))await deleteCliente(fetchWithAuth, dato.IdCliente);
+      if (isContatto(dato))await deleteContatto(fetchWithAuth, dato.idContatto);
+      if (isVisita(dato)) await deleteVisita(fetchWithAuth, dato.IdAttivita);
 
       setShowDeleteConfirm(false);
       clearQueryParams();
@@ -261,26 +261,7 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
     else setShowDetail(true);
   };
 
- useEffect(() => {
-  const main = document.getElementsByTagName("main")[0] as HTMLElement;
-  const grid = document.querySelector(".gr") as HTMLElement;
 
-  if (showDetail) {
-    if (grid) {
-      grid.style.pointerEvents = "none";
-      grid.style.userSelect = "none";
-      grid.style.overflow = "hidden";
-    }
-    main.style.filter = "blur(2px)";
-  } else {
-    if (grid) {
-      grid.style.pointerEvents = "auto";
-      grid.style.userSelect = "auto";
-      grid.style.overflow = "auto";
-    }
-    main.style.filter = "blur(0px)";
-  }
-}, [showDetail]);
 
   const nomeDato = isCliente(dato)
     ? dato.RagSocCompleta
@@ -301,6 +282,7 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
 
   // Memoizza i campi per ottimizzare
   const detailFields = React.useMemo(() => generateDetailFields(dato), [dato]);
+ 
 
   return (
     <div className="cd-page relative flex h-full w-full font-sans text-base justify-center items-center m-0 p-0 cursor-default visible bg-[var(--bg)] text-[var(--text)]">

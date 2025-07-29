@@ -246,7 +246,7 @@ const ClientiVirtualGrid = () => {
       idPaese: raw.IdPaese,
       tel: raw.Tel,
       email: raw.EMail,
-      noteCliente: htmlToPlainText(raw.NoteCrmElab),
+      noteCliente: htmlToPlainText(raw.NoteCrmElab)|| raw.NoteCliente,
       Sem1: raw.Sem1 || 0,
       Sem2: raw.Sem2 || 0,
       Sem3: raw.Sem3 || 0,

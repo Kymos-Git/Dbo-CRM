@@ -99,7 +99,7 @@ const VisiteVirtualGrid = () => {
       if (areAllFiltersEmpty) {
         data = await getVisite(fetchWithAuth);
       } else {
-        console.log(values);
+        
         data = await getVisite(fetchWithAuth, values);
       }
 

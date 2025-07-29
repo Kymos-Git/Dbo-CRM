@@ -114,7 +114,8 @@ const ExpandableInput = ({
           >
             <motion.div
               onClick={(e) => e.stopPropagation()} 
-              className="ex-modal w-[90%] rounded-lg p-4 max-w-4xl shadow-lg bg-[var(--bg)] border-[1px] border-[var(--primary)]"
+              //border-[1px] border-[var(--primary)]
+              className="ex-modal w-[90%] rounded-lg p-4 max-w-4xl  bg-[var(--bg)] shadow-[0_1px_6px_var(--text)]"
               style={{ height: textareaHeight ? textareaHeight + 110 : "auto" }}  
               initial={{ y: -20 }}
               animate={{ y: 0 }}
@@ -167,7 +168,7 @@ const ExpandableInput = ({
                   onClick={copyText}
                   title="Copia"
                 >
-                  <Copy className="es-copy w-5 h-5 transition" />
+                  <Copy className="es-copy w-5 h-5 transition mt-2" />
                 </span>
               )}
             </motion.div>

@@ -44,7 +44,7 @@ export default function Detail({
   colors,
 }: DetailProps) {
   const router = useRouter();
-
+  
   /**
    * Funzione che costruisce la query con la ragione sociale e naviga
    * verso la pagina dei contatti associati.

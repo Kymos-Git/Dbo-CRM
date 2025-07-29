@@ -34,7 +34,7 @@ export type ContattoKeys = keyof typeof schemaContatto.shape;
 export const schemaVisita = z.object({
   Desc_Attivita: z.string().nullable(),
   Data_Attivita: z.string().min(1, "Data obbligatoria"),
-  RagSoc: z.string(),
+  RagSoc: z.string().min(1, "Cliente obbligatorio"),
   Note: z.string().nullable(),
 });
 

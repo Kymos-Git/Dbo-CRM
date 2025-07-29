@@ -131,13 +131,28 @@ export default function FormAdd({ type, onClose }: FormProps) {
 
     const initialData: Record<string, string | number | boolean> = {};
     modifiedFields.forEach(({ name, type }) => {
-      initialData[name] = type === "checkbox" ? false : "";
+      if (type === "checkbox") {
+        initialData[name] = false;
+      } else if (type === "date") {
+        initialData[name] = new Date().toISOString().split("T")[0];
+      } else {
+        initialData[name] = "";
+      }
     });
 
     setSchema(selectedSchema);
     setFields(modifiedFields);
     setFormData(initialData);
   }, [type]);
+
+  useEffect(() => {
+  if ((type === "visita" || type === "contatto") && ragioniSoc.length > 0) {
+    setFormData((prev) => ({
+      ...prev,
+      RagSoc: prev.RagSoc || ragioniSoc[0],
+    }));
+  }
+}, [ragioniSoc, type]);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -173,6 +188,7 @@ export default function FormAdd({ type, onClose }: FormProps) {
   };
 
   const sendData = async () => {
+    
     if (!schema) return;
 
     try {
@@ -241,6 +257,7 @@ export default function FormAdd({ type, onClose }: FormProps) {
       buttons={["Crea", "Svuota"]}
       onSend={sendData}
       onReset={resetFields}
+      formId={type}
     >
       <div className="frmAdd-container">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -277,9 +294,12 @@ export default function FormAdd({ type, onClose }: FormProps) {
                     type="date"
                     name={name}
                     min={new Date().toISOString().split("T")[0]}
-                    value={formData[name] as string||new Date().toISOString().split("T")[0]}
+                    value={
+                      (formData[name] as string) ||
+                      new Date().toISOString().split("T")[0]
+                    }
                     onChange={handleChange}
-                    className="w-full px-3 py-2 text-sm border-b border-gray-400 focus:outline-none focus:border-blue-600 min-h-[44px] cursor-pointer"
+                    className="w-full px-3 py-2 text-sm border-b border-gray-400 focus:outline-none focus:[var--(primary)] min-h-[44px] cursor-pointer"
                   />
                 )}
 
