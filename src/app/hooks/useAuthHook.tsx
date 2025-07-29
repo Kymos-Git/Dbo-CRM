@@ -1,3 +1,12 @@
+/**
+ * useAuthHook.ts
+ *
+ * Questo hook personalizzato gestisce l'autenticazione lato client in un'app Next.js.
+ * Fornisce funzionalità di login, logout, refresh del token di accesso,
+ * gestione dello stato di autenticazione e integrazione con IndexedDB per la persistenza.
+ * È pensato per essere usato in tutta l'app come sistema centralizzato di auth.
+ */
+
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -5,12 +14,12 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { getItem, setItem, removeItem } from "../lib/indexedDB";
 
-// Costanti chiave per IndexedDB
+// Chiavi di salvataggio in IndexedDB
 const REFRESH_TOKEN_KEY = "refreshToken";
 const ACCESS_TOKEN_KEY = "accessToken";
 const USERNAME_KEY = "username";
 
-
+// Funzione per mostrare toast di errore e loggare l'errore
 const handleError = (error: unknown, fallbackMessage = "Errore imprevisto") => {
   console.error(error);
   toast.error(fallbackMessage);
@@ -24,17 +33,21 @@ export function useAuthHook() {
 
   const router = useRouter();
 
-  // Flag interni
+  // Riferimenti interni per evitare chiamate multiple o cicli infiniti
   const logoutStartedRef = useRef(false);
   const refreshInProgress = useRef(false);
   const triedRefresh = useRef(false);
   let refreshPromise: Promise<string> | null = null;
 
+  // Sincronizza accessToken nello state e nel ref
   const updateAccessToken = (token: string | null) => {
     accessTokenRef.current = token;
     setAccessTokenState(token);
   };
 
+  /**
+   * Inizializza i dati auth da IndexedDB al primo mount del componente.
+   */
   useEffect(() => {
     const initAuth = async () => {
       setLoading(true);
@@ -66,6 +79,9 @@ export function useAuthHook() {
     initAuth();
   }, []);
 
+  /**
+   * Effettua login utente, salva token/accesso in IndexedDB e aggiorna lo stato.
+   */
   const login = useCallback(
     async (usernameInput: string, password: string): Promise<void> => {
       setLoading(true);
@@ -103,6 +119,9 @@ export function useAuthHook() {
     []
   );
 
+  /**
+   * Logout completo: rimuove dati da IndexedDB, resetta lo stato e redirige.
+   */
   const logout = useCallback(async () => {
     setLoading(true);
     try {
@@ -134,6 +153,9 @@ export function useAuthHook() {
     }
   }, [router]);
 
+  /**
+   * Logout che si attiva una sola volta (es. se riceviamo un 401 multiplo).
+   */
   const logoutOnce = useCallback(async () => {
     if (logoutStartedRef.current) return;
     logoutStartedRef.current = true;
@@ -141,6 +163,10 @@ export function useAuthHook() {
     await logout();
   }, [logout]);
 
+  /**
+   * Richiede un nuovo accessToken a partire dal refreshToken.
+   * Salva eventuali nuovi token in IndexedDB e aggiorna lo stato.
+   */
   const refreshAccessToken = async (
     refreshToken: string,
     username: string
@@ -184,6 +210,9 @@ export function useAuthHook() {
     return refreshPromise;
   };
 
+  /**
+   * Retry automatico di una richiesta che ha restituito 401, dopo tentato refresh del token.
+   */
   const handle401Retry = async (
     input: RequestInfo,
     init?: RequestInit
@@ -225,12 +254,16 @@ export function useAuthHook() {
     }
   };
 
+  /**
+   * Wrapper per fetch con autorizzazione.
+   * Gestisce automaticamente il token e fa retry in caso di 401.
+   */
   const fetchWithAuth = async (
     input: RequestInfo,
     init?: RequestInit
   ): Promise<Response> => {
     if (loading || !triedRefresh.current) {
-      // Aspetta che l'hook abbia caricato i token da IndexedDB
+      // Aspetta caricamento iniziale auth
       await new Promise((resolve) => {
         const check = () => {
           if (!loading && triedRefresh.current) return resolve(null);
@@ -242,7 +275,7 @@ export function useAuthHook() {
 
     let token = accessTokenRef.current;
 
-    // Se ancora null, prova a recuperarlo da IndexedDB
+    // Recupera token da IndexedDB se non presente
     if (!token) {
       token = (await getItem(ACCESS_TOKEN_KEY)) as string | null;
       if (token) updateAccessToken(token);
@@ -250,7 +283,6 @@ export function useAuthHook() {
 
     const headers = new Headers(init?.headers || {});
     headers.set("Authorization", `Bearer ${token}`);
-
     if (!headers.has("Content-Type")) {
       headers.set("Content-Type", "application/json");
     }

@@ -1,30 +1,27 @@
 /**
- * Componente Detail
+ * Componente React "Detail"
  *
- * Questo componente si occupa di mostrare una visualizzazione dettagliata e leggibile
- * dei dati ricevuti tramite i campi (fields). È utilizzato per visualizzare informazioni
- * come Cliente, Contatto o Visita in un form non modificabile, con un'interfaccia pulita
- * e reattiva. Gestisce inoltre il blocco dello scroll della pagina quando è visibile e
- * fornisce un meccanismo per navigare verso una pagina correlata (es. contatti associati),
- * con animazioni tramite framer-motion.
+ * Mostra una visualizzazione dettagliata in sola lettura di un'entità come Cliente, Contatto o Visita.
+ * Blocca lo scroll del body quando è visibile. Permette anche di navigare verso una pagina collegata
+ * (es. contatti associati) con animazione. Il contenuto viene suddiviso tra campi semplici e campo note.
  */
-
-
 "use client";
 
-import {  useAnimation } from "framer-motion";
+import { useAnimation } from "framer-motion";
 import ExpandableInput from "./expandeInput";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Form from "./form";
 import NoteField from "./Notefield";
 
+// Tipo per rappresentare un singolo campo visualizzato nella card
 type Field = {
   title: string;
   value: string | number;
   type: string;
 };
 
+// Props del componente Detail
 type DetailProps = {
   title: string;
   fields: Field[];
@@ -33,7 +30,6 @@ type DetailProps = {
   flgCliente: boolean;
   colors: string[];
 };
-
 
 export default function Detail({
   title,
@@ -44,10 +40,10 @@ export default function Detail({
   colors,
 }: DetailProps) {
   const router = useRouter();
-  
+  const controls = useAnimation();
+
   /**
-   * Funzione che costruisce la query con la ragione sociale e naviga
-   * verso la pagina dei contatti associati.
+   * Naviga verso la pagina dei contatti associati al cliente, utilizzando la Ragione Sociale come query param.
    */
   const onNavigate = () => {
     const ragSoc = encodeURIComponent(
@@ -57,26 +53,18 @@ export default function Detail({
   };
 
   /**
-   * Effetto collaterale per bloccare lo scroll del body quando il componente è visibile,
-   * e ripristinare lo scroll quando non lo è o quando il componente viene smontato.
+   * Blocca lo scroll del body quando il dettaglio è visibile.
+   * Rimuove il blocco quando non visibile o quando il componente viene smontato.
    */
   useEffect(() => {
-    if (visible) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    document.body.style.overflow = visible ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
   }, [visible]);
 
-  
-  const controls = useAnimation();
-
   /**
-   * Funzione che gestisce l'animazione di scaling del bottone di navigazione,
-   * quindi esegue la funzione onNavigate e rimuove il blur dal main.
+   * Esegue l'animazione del bottone di navigazione, poi reindirizza alla pagina dei contatti.
    */
   const handleNavigation = async () => {
     await controls.start({
@@ -98,6 +86,7 @@ export default function Detail({
       onNavigate={handleNavigation}
       fglButtons={false}
     >
+      {/* Campi esclusi "Note" */}
       <form className="dt-form grid grid-cols-2 sm:grid-cols-1 md:grid-cols-3 gap-x-2 auto-rows-min">
         {fields
           .filter(({ title }) => title.toLowerCase() !== "note")
@@ -108,7 +97,7 @@ export default function Detail({
           ))}
       </form>
 
-    
+      {/* Campo Note separato e non modificabile */}
       {fields
         .filter(({ title }) => title.toLowerCase() === "note")
         .map(({ title, value }, i) => (
@@ -116,7 +105,7 @@ export default function Detail({
             <label className="dt-note-label block mb-1 font-semibold text-[var(--primary)]">
               {title.toUpperCase()}
             </label>
-            <NoteField value={value as string} readonly={true} onChange={()=>{}}/>
+            <NoteField value={value as string} readonly={true} onChange={() => {}} />
           </div>
         ))}
     </Form>

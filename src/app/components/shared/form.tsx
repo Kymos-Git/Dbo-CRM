@@ -18,7 +18,6 @@ import { Rnd } from "react-rnd";
 import { usePinch } from "@use-gesture/react";
 import { useZIndex } from "@/app/hooks/formHook";
 
-
 type FormProps = {
   visible: boolean;
   onClose: () => void;
@@ -55,10 +54,10 @@ export default function Form({
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
   const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
-  // Usa il nuovo hook per gestire gli z-index
+  // Gestione z-index tramite hook personalizzato
   const { zIndex, bringToFront, removeFromStack } = useZIndex(formId);
 
-  // Aggiorna dimensione finestra
+  // Aggiorna dimensioni finestra
   useEffect(() => {
     function onResize() {
       setWindowSize({ width: window.innerWidth, height: window.innerHeight });
@@ -68,37 +67,22 @@ export default function Form({
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  // Cleanup quando il form viene chiuso o smontato
+  // Cleanup z-index quando form chiuso o smontato
   useEffect(() => {
-    if (!visible) {
-      removeFromStack();
-    }
-    return () => {
-      removeFromStack();
-    };
+    if (!visible) removeFromStack();
+    return () => removeFromStack();
   }, [visible, removeFromStack]);
 
-  // Init dimensioni e posizione con priorità ai props forzati
-  const initWidth = isMobile
-    ?  windowSize.width * 0.9
-    : windowSize.width *0.75;
-    
-  const initHeight = isMobile
-    ?  windowSize.height * 0.8
-    :  windowSize.height *0.7;
-
-  const initX = isMobile
-    ? windowSize.width * 0.05
-    : windowSize.width *0.12;
-    
-  const initY = isMobile
-    ?  windowSize.height * 0.1
-    :  windowSize.height *0.1;
+  // Dimensioni e posizione iniziali (diversificate per mobile/desktop)
+  const initWidth = isMobile ? windowSize.width * 0.9 : windowSize.width * 0.75;
+  const initHeight = isMobile ? windowSize.height * 0.8 : windowSize.height * 0.7;
+  const initX = isMobile ? windowSize.width * 0.05 : windowSize.width * 0.12;
+  const initY = isMobile ? windowSize.height * 0.1 : windowSize.height * 0.1;
 
   const [size, setSize] = useState({ width: initWidth, height: initHeight });
   const [position, setPosition] = useState({ x: initX, y: initY });
 
-  // Per toggle fullscreen e ripristino
+  // Gestione fullscreen e ripristino
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [savedSize, setSavedSize] = useState<{ width: number; height: number } | null>(null);
   const [savedPosition, setSavedPosition] = useState<{ x: number; y: number } | null>(null);
@@ -107,7 +91,7 @@ export default function Form({
     setMounted(true);
   }, []);
 
-  // Quando cambia la finestra, aggiorna dimensioni e posizione se NON fullscreen
+  // Aggiorna dimensioni e posizione al resize solo se NON fullscreen
   useEffect(() => {
     if (!isFullscreen) {
       setSize({ width: initWidth, height: initHeight });
@@ -115,23 +99,22 @@ export default function Form({
     }
   }, [windowSize.width, windowSize.height, isFullscreen]);
 
-  // Gestione pinch per mobile
+  // Gesture pinch per mobile: attiva toggle fullscreen se scala > 1.2
   const bind = usePinch(
-  (state) => {
-    const { last, offset } = state;
-    const scale = offset[1];
-    if (isMobile && last && scale > 1.2) {
-      toggleFullscreen();
+    (state) => {
+      const { last, offset } = state;
+      const scale = offset[1];
+      if (isMobile && last && scale > 1.2) {
+        toggleFullscreen();
+      }
+    },
+    {
+      scaleBounds: { min: 0.5, max: 3 },
+      rubberband: true,
     }
-  },
-  {
-    scaleBounds: { min: 0.5, max: 3 },
-    rubberband: true,
-  }
-);
+  );
 
-  if (!mounted) return null;
-  if (!visible) return null;
+  if (!mounted || !visible) return null;
 
   function toggleFullscreen() {
     if (!isFullscreen) {
@@ -146,25 +129,22 @@ export default function Form({
   }
 
   function handleFocus() {
-    // Porta questo form in primo piano
-    bringToFront();
+    bringToFront(); // Porta questo form in primo piano
     if (onFocus) onFocus();
   }
 
+  // Dimensioni e posizione fullscreen
   const fullscreenSize = isMobile
-    ? {
-        width: windowSize.width - 16,
-        height: windowSize.height - 80,
-      }
-    : { width: "98vw", height: "96vh"};
+    ? { width: windowSize.width - 16, height: windowSize.height - 80 }
+    : { width: "98vw", height: "96vh" };
 
-  const fullscreenPosition = isMobile ? { x: 8, y: 40 } : { x: 20, y:20 };
+  const fullscreenPosition = isMobile ? { x: 8, y: 40 } : { x: 20, y: 20 };
 
   return createPortal(
     <AnimatePresence>
       {visible && (
         <Rnd
-         dragHandleClassName="frm-header"
+          dragHandleClassName="frm-header"
           size={isFullscreen ? fullscreenSize : size}
           position={isFullscreen ? fullscreenPosition : position}
           minWidth={300}
@@ -182,21 +162,20 @@ export default function Form({
             setPosition(position);
           }}
           style={{
-            zIndex, // Usa il zIndex dinamico
+            zIndex, // zIndex dinamico dal hook
             borderRadius: 16,
-            // border: "1px solid var(--primary)",
-             boxShadow:"0px 1px 5px var(--text)",
+            boxShadow: "0px 1px 5px var(--text)",
             backgroundColor: "var(--bg)",
             overflow: "hidden",
           }}
           className="frm-container p-2"
-            {...(isMobile ? bind() as any : {})}
+          {...(isMobile ? (bind() as any) : {})}
         >
           <motion.div
             className="frm-header relative flex items-center justify-between h-12 mb-5 w-full select-none px-4"
-            style={{ 
+            style={{
               cursor: isFullscreen ? "default" : "move",
-              touchAction: "none" 
+              touchAction: "none",
             }}
             onDoubleClick={!isMobile ? toggleFullscreen : undefined}
             onMouseDown={!isMobile ? handleFocus : undefined}
@@ -215,9 +194,9 @@ export default function Form({
                   onClose();
                 }}
                 className="frm-close transition font-bold rounded-2xl cursor-pointer bg-red-600 w-4 h-4 z-50"
-                style={{ 
+                style={{
                   touchAction: "manipulation",
-                  pointerEvents: "auto"
+                  pointerEvents: "auto",
                 }}
                 aria-label="Chiudi form"
               />
@@ -235,9 +214,9 @@ export default function Form({
                     onNavigate();
                   }}
                   className="frm-cnt absolute left-10 md:left-10 top-5.3 rounded-2xl transition cursor-pointer md:hover:scale-105 w-4 h-4 bg-green-400"
-                  style={{ 
+                  style={{
                     touchAction: "manipulation",
-                    pointerEvents: "auto"
+                    pointerEvents: "auto",
                   }}
                   title="Vai ai contatti"
                   animate={controls}
@@ -245,7 +224,7 @@ export default function Form({
               )}
             </div>
 
-            <p className="text-center  text-base md:text-xl  font-bold tracking-wide pointer-events-none">
+            <p className="text-center text-base md:text-xl font-bold tracking-wide pointer-events-none">
               {title}
             </p>
 
@@ -255,12 +234,11 @@ export default function Form({
                   <button
                     key={i}
                     className="rounded-2xl transition w-3 h-3"
-                    style={{ 
+                    style={{
                       backgroundColor: c,
                       touchAction: "manipulation",
-                      pointerEvents: "auto"
+                      pointerEvents: "auto",
                     }}
-                    
                   />
                 ))}
               </div>
@@ -271,7 +249,7 @@ export default function Form({
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    handleFocus(); // Porta in primo piano quando si clicca
+                    handleFocus(); // Porta in primo piano
                     onSend?.();
                   }}
                   onTouchEnd={(e) => {
@@ -280,9 +258,9 @@ export default function Form({
                     handleFocus();
                     onSend?.();
                   }}
-                  style={{ 
+                  style={{
                     touchAction: "manipulation",
-                    pointerEvents: "auto"
+                    pointerEvents: "auto",
                   }}
                   name="invia"
                   type="button"
@@ -295,7 +273,7 @@ export default function Form({
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    handleFocus(); // Porta in primo piano quando si clicca
+                    handleFocus(); // Porta in primo piano
                     onReset?.();
                   }}
                   onTouchEnd={(e) => {
@@ -304,40 +282,35 @@ export default function Form({
                     handleFocus();
                     onReset?.();
                   }}
-                  style={{ 
+                  style={{
                     touchAction: "manipulation",
-                    pointerEvents: "auto"
+                    pointerEvents: "auto",
                   }}
                   name="reset"
                   type="button"
-                >     
+                >
                   {buttons[1]}
                 </button>
               </div>
             )}
 
-            {/* Indicatore pinch per mobile */}
-            {isMobile && (
-              <div className="absolute top-1 right-1 text-xs opacity-50 pointer-events-none">
-                📏
-              </div>
-            )}
+            
           </motion.div>
 
           <motion.div
             className="frm-main relative rounded-xl max-w-4xl w-full h-[85%] p-2 pt-0 md:w-full md:max-w-full overflow-auto"
             onClick={(e) => {
               e.stopPropagation();
-              handleFocus(); // Porta in primo piano quando si clicca nel contenuto
+              handleFocus(); // Porta in primo piano cliccando contenuto
             }}
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.5 }}
-            style={{ 
-                  touchAction: "manipulation",
-                  pointerEvents: "auto"
-                }}
+            style={{
+              touchAction: "manipulation",
+              pointerEvents: "auto",
+            }}
           >
             {children}
           </motion.div>

@@ -1,10 +1,10 @@
 /**
  * ExpandableInput.tsx
  *
- * Componente per mostrare un input o textarea che inizialmente è "compresso" (readonly).
- * Al click o focus, si apre un modal con l'input espanso per una visualizzazione più comoda.
- * Supporta la copia del valore per alcuni tipi di campi (Telefono, Email, Cellulare).
- * Gestisce l'altezza dinamica del textarea per adattarsi al contenuto.
+ * Componente che mostra un input o textarea in forma compressa (readonly).
+ * Al click o focus si apre un modal espanso per una lettura/modifica più comoda.
+ * Supporta la copia del valore per campi specifici (Telefono, Email, Cellulare).
+ * Gestisce dinamicamente l'altezza del textarea per adattarsi al contenuto.
  */
 
 "use client";
@@ -14,8 +14,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Copy } from "lucide-react";
 
 interface ExpandableInputProps {
-  label: string; 
-  value: string|number; 
+  label: string;
+  value: string | number;
   type?: string;
 }
 
@@ -24,44 +24,42 @@ const ExpandableInput = ({
   value,
   type = "text",
 }: ExpandableInputProps) => {
-  // Stato che indica se il modal espanso è aperto o chiuso
+  // Stato per tracciare se il modal espanso è aperto o no
   const [isOpen, setIsOpen] = useState(false);
 
-  // Stato per memorizzare l'altezza dinamica del textarea espanso
-  const [textareaHeight, setTextareaHeight] = useState<number | undefined>(
-    undefined
-  ); 
+  // Altezza dinamica per il textarea espanso, inizialmente indefinita
+  const [textareaHeight, setTextareaHeight] = useState<number | undefined>(undefined);
 
-  // Ref al textarea per calcolare l'altezza del contenuto
+  // Ref al textarea per misurare l'altezza del contenuto
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   /**
-   * useEffect che aggiorna l'altezza del textarea ogni volta che il modal si apre
-   * o cambia il valore, per adattarsi dinamicamente al contenuto.
+   * Aggiorna l'altezza del textarea ogni volta che il modal si apre
+   * o cambia il valore, per adattare dinamicamente l'altezza al contenuto.
    */
   useEffect(() => {
     if (isOpen && textareaRef.current) {
       const el = textareaRef.current;
-      el.style.height = "auto"; 
+      el.style.height = "auto"; // reset height per rilevare correttamente scrollHeight
       el.style.height = el.scrollHeight + "px";
-      setTextareaHeight(el.scrollHeight)
+      setTextareaHeight(el.scrollHeight);
     }
   }, [isOpen, value]);
 
   /**
-   * Funzione chiamata all'input del textarea per aggiornare l'altezza
-   * del campo in base al contenuto digitato, mantenendo il resize automatico.
+   * Aggiorna l'altezza del textarea durante la digitazione,
+   * mantenendo il resize automatico dinamico.
    */
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const el = e.target;
-    el.style.height = "auto";
+    el.style.height = "auto"; // reset height per calcolare nuovo scrollHeight
     el.style.height = el.scrollHeight + "px";
     setTextareaHeight(el.scrollHeight);
   };
 
   /**
-   * Funzione che copia il valore del campo negli appunti,
-   * mostrando alert di conferma o errore.
+   * Copia il valore del campo negli appunti.
+   * Visualizza alert di conferma o errore.
    */
   const copyText = async () => {
     try {
@@ -77,7 +75,7 @@ const ExpandableInput = ({
       {/* Input compresso, cliccabile per aprire il modal */}
       <div
         className="ex-wrapper cursor-pointer"
-        onClick={() => setIsOpen(true)} 
+        onClick={() => setIsOpen(true)}
         title="Clicca per espandere"
       >
         <label
@@ -110,13 +108,12 @@ const ExpandableInput = ({
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.25 }}
             className="ex-backdrop fixed inset-0 backdrop-blur-xs bg-opacity-40 flex items-center justify-center z-50"
-            onClick={() => setIsOpen(false)} 
+            onClick={() => setIsOpen(false)} // chiude il modal cliccando fuori
           >
             <motion.div
-              onClick={(e) => e.stopPropagation()} 
-              //border-[1px] border-[var(--primary)]
-              className="ex-modal w-[90%] rounded-lg p-4 max-w-4xl  bg-[var(--bg)] shadow-[0_1px_6px_var(--text)]"
-              style={{ height: textareaHeight ? textareaHeight + 110 : "auto" }}  
+              onClick={(e) => e.stopPropagation()} // impedisce la chiusura cliccando dentro il modal
+              className="ex-modal w-[90%] rounded-lg p-4 max-w-4xl bg-[var(--bg)] shadow-[0_1px_6px_var(--text)]"
+              style={{ height: textareaHeight ? textareaHeight + 110 : "auto" }} // altezza dinamica
               initial={{ y: -20 }}
               animate={{ y: 0 }}
               exit={{ y: -20 }}
@@ -128,7 +125,7 @@ const ExpandableInput = ({
                 {label}
               </label>
 
-              {/* Se il tipo è text, mostra un textarea espandibile, altrimenti un input */}
+              {/* Se il tipo è text, mostra textarea espandibile, altrimenti input readonly */}
               {type === "text" ? (
                 <textarea
                   id={`${label}-expanded`}
@@ -141,7 +138,7 @@ const ExpandableInput = ({
                     text-s sm:text-base
                     focus:outline-none
                     min-h-[44px] resize-none overflow-hidden mt-4 mb-2 bg-[var(--bg)] text-[var(--text)] border-b-1 border-b-[var(--bg-alt)]"
-                  onBlur={() => setIsOpen(false)} 
+                  onBlur={() => setIsOpen(false)} // chiude il modal alla perdita di focus
                   rows={1}
                 />
               ) : (
@@ -155,11 +152,11 @@ const ExpandableInput = ({
                     text-sm sm:text-base placeholder:text-[#a1cde8]
                     focus:outline-none transition-shadow
                     min-h-[44px] border-b-1 border-b-[var(--primary)]"
-                  onBlur={() => setIsOpen(false)}
+                  onBlur={() => setIsOpen(false)} // chiude il modal alla perdita di focus
                 />
               )}
 
-              {/* Icona copia per alcuni label specifici */}
+              {/* Icona copia per label specifici */}
               {(label === "TELEFONO" ||
                 label === "EMAIL" ||
                 label === "CELLULARE") && (

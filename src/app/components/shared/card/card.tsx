@@ -1,10 +1,7 @@
 /**
- * Componente Card
- *
- * Questo componente gestisce la visualizzazione di una card dinamica che può rappresentare
- * un Cliente, un Contatto o una Visita, mostrando i relativi campi e dati.
- * Supporta funzionalità di dettaglio, modifica e cancellazione con animazioni e gestione dei colori.
- * Utilizza type guards per determinare il tipo di dato e caricare i campi appropriati.
+ * Componente React "Card" per la visualizzazione dinamica e interattiva di una scheda informativa.
+ * Gestisce clienti, contatti e visite tramite type guards, rendering condizionale e animazioni.
+ * Include funzionalità per apertura dettagli, modifica e cancellazione con conferma.
  */
 "use client";
 
@@ -76,8 +73,7 @@ function isContatto(dato: Cliente | Visita | Contatto): dato is Contatto {
 }
 
 /**
- * Funzione che genera dinamicamente i campi da mostrare nella visualizzazione dettagliata
- * a seconda del tipo di dato (Cliente, Visita, Contatto).
+ * Genera i campi da mostrare nel dettaglio, in base al tipo del dato.
  */
 function generateDetailFields(dato: Cliente | Visita | Contatto): Field[] {
   let fields: Field[] = [];
@@ -164,13 +160,13 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const id=()=>{
-    let i:number;
-    if(isCliente(dato))i=dato.IdCliente;
-    if(isContatto(dato))i=dato.idContatto;
-    if(isVisita(dato))i=dato.IdAttivita;
-    return i!.toString();
-  }
+  // Ritorna l'ID del dato in base al tipo, utile per modifica o eliminazione
+const id = () => {
+  if (isCliente(dato)) return dato.IdCliente.toString();
+  if (isContatto(dato)) return dato.idContatto.toString();
+  if (isVisita(dato)) return dato.IdAttivita.toString();
+  return "";
+};
   /**
    * Chiude il dettaglio.
    */
@@ -203,9 +199,10 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
 
   const { fetchWithAuth } = useAuth();
 
-  /**
-   * Gestisce la cancellazione del dato in base al tipo e aggiorna lo stato e la UI.
-   */
+/**
+ * Esegue la cancellazione del dato corrispondente (cliente, contatto o visita)
+ * e aggiorna lo stato e la UI, gestendo anche eventuali errori.
+ */
   async function deleteDato() {
     try {
      
@@ -250,8 +247,8 @@ export default function Card({ title, fields, dato }: GenericCardProps) {
   const colors = getColors(numericColors);
 
   /**
-   * Gestisce l'animazione della "cube grid" e apre il dettaglio o la conferma di cancellazione.
-   */
+ * Avvia l'animazione di rotazione della "cube grid" e mostra il dettaglio o il popup di conferma.
+ */
   const handleAnimation = async () => {
     await controls.start({
       rotate: [0, 360],

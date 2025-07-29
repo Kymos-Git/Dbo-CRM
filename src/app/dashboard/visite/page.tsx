@@ -1,3 +1,15 @@
+/**
+ * VisiteVirtualGrid.tsx
+ * 
+ * Questo componente mostra una lista di "visite" in una griglia virtualizzata usando `react-window`
+ * per ottimizzare il rendering anche con grandi quantità di dati.
+ * 
+ * La griglia è responsive: si adatta dinamicamente alla dimensione della finestra.
+ * I dati vengono caricati da un'API protetta tramite autenticazione.
+ * Sono presenti dei filtri per la ricerca e visualizzazione condizionale del caricamento, errori, o risultati vuoti.
+ * L'accesso è protetto dal componente `ProtectedRoute`.
+ */
+
 "use client";
 
 import { ProtectedRoute } from "@/app/auth/ProtectedRoute";
@@ -12,16 +24,24 @@ import { useAuth } from "@/app/context/authContext";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 const VisiteVirtualGrid = () => {
-
+  // Stati per dimensioni finestra (per la responsività della griglia)
   const [windowHeight, setWindowHeight] = useState(0);
   const [windowWidth, setWindowWidth] = useState(0);
+
+  // Stato dati, caricamento ed errori
   const [visiteCRM, setVisiteCRM] = useState<Visita[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const { fetchWithAuth } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  // Aggiorna dimensioni finestra per layout responsivo
+  /**
+   * Effetto per aggiornare le dimensioni della finestra in tempo reale.
+   * Serve a rendere la griglia reattiva e adattabile al viewport.
+   */
   useEffect(() => {
     const handleResize = () => {
       setWindowHeight(window.innerHeight);
@@ -32,7 +52,10 @@ const VisiteVirtualGrid = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Funzione per caricare visite da API
+  /**
+   * Funzione che carica le visite dall'API.
+   * Viene richiamata inizialmente e quando si applicano i filtri.
+   */
   async function fetchVisite() {
     setLoading(true);
     try {
@@ -47,36 +70,33 @@ const VisiteVirtualGrid = () => {
     }
   }
 
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
+  /**
+   * Effetto che esegue fetch dei dati iniziali.
+   * Se c'è il parametro `reload` nell'URL, rimuove il parametro dalla query una volta eseguita la fetch.
+   */
   useEffect(() => {
     if (!fetchWithAuth) return;
 
     const reload = searchParams.get("reload");
 
     const fetchAndClean = async () => {
-      if (reload === "true") {
-        await fetchVisite();
+      await fetchVisite();
 
-        // Ricostruisce query senza reload
+      if (reload === "true") {
         const newParams = new URLSearchParams(searchParams.toString());
         newParams.delete("reload");
 
         const newQueryString = newParams.toString();
         const newUrl = pathname + (newQueryString ? `?${newQueryString}` : "");
 
-        // Cambia URL senza ricaricare pagina e senza scroll
         router.replace(newUrl, { scroll: false });
-      } else {
-        await fetchVisite();
       }
     };
 
     fetchAndClean();
   }, [fetchWithAuth, pathname, searchParams, router]);
 
+  // Configurazioni responsive per la griglia virtuale
   const CARD_COUNT = windowHeight < 700 ? 2 : 3;
   const isMobile = windowWidth < 768;
   const columnCount = isMobile ? 1 : 3;
@@ -86,10 +106,12 @@ const VisiteVirtualGrid = () => {
   const CARD_HEIGHT = Math.floor((windowHeight * 0.8) / CARD_COUNT);
   const rowCount = Math.ceil(visiteCRM.length / columnCount);
 
-  // Gestione filtri: aggiorna dati filtrati
+  /**
+   * Funzione richiamata alla perdita del focus dal filtro.
+   * Esegue la ricerca filtrata richiamando l'API con i parametri passati.
+   */
   async function handleFiltersBlur(values: Record<string, string>) {
     setLoading(true);
-
     try {
       const areAllFiltersEmpty = Object.values(values).every(
         (v) => v.trim() === ""
@@ -99,7 +121,6 @@ const VisiteVirtualGrid = () => {
       if (areAllFiltersEmpty) {
         data = await getVisite(fetchWithAuth);
       } else {
-        
         data = await getVisite(fetchWithAuth, values);
       }
 
@@ -113,7 +134,10 @@ const VisiteVirtualGrid = () => {
     }
   }
 
-  // Rendering di ogni cella della griglia
+  /**
+   * Componente che disegna ogni cella della griglia.
+   * Ogni cella mostra una `GenericCard` con le informazioni della visita.
+   */
   const Cell = ({ columnIndex, rowIndex, style }: GridChildComponentProps) => {
     const index = rowIndex * columnCount + columnIndex;
     if (index >= visiteCRM.length) return null;
@@ -134,7 +158,10 @@ const VisiteVirtualGrid = () => {
     );
   };
 
-  // Mappa dati raw API in formato Visita
+  /**
+   * Funzione che mappa i dati grezzi ricevuti dall’API
+   * in un oggetto `Visita` coerente con l’interfaccia tipizzata.
+   */
   function mapRawToVisite(raw: any): Visita {
     return {
       IdAttivita: raw.IdAttivita,
@@ -149,7 +176,10 @@ const VisiteVirtualGrid = () => {
     };
   }
 
-  // Formatta data ISO in gg/mm/aaaa
+  /**
+   * Formatta una data ISO in formato leggibile: gg/mm/aaaa
+   * Gestisce date non valide o stringhe mal formattate.
+   */
   function formatDate(isoString?: string): string {
     if (!isoString || typeof isoString !== "string") {
       console.warn("Data non valida o mancante:", isoString);
@@ -173,6 +203,7 @@ const VisiteVirtualGrid = () => {
     }).format(date);
   }
 
+  // Rendering del componente
   return (
     <ProtectedRoute>
       <GenericFilters filters={filtersConfig} onBlur={handleFiltersBlur} />
@@ -186,16 +217,16 @@ const VisiteVirtualGrid = () => {
 
       {!loading && !error && visiteCRM.length > 0 && (
         <div className="gr">
-        <Grid
-          columnCount={columnCount}
-          rowCount={rowCount}
-          columnWidth={CARD_WIDTH}
-          rowHeight={CARD_HEIGHT}
-          height={windowHeight * 0.8}
-          width={isMobile ? windowWidth * 0.92 : windowWidth}
-        >
-          {Cell}
-        </Grid>
+          <Grid
+            columnCount={columnCount}
+            rowCount={rowCount}
+            columnWidth={CARD_WIDTH}
+            rowHeight={CARD_HEIGHT}
+            height={windowHeight * 0.8}
+            width={isMobile ? windowWidth * 0.92 : windowWidth}
+          >
+            {Cell}
+          </Grid>
         </div>
       )}
     </ProtectedRoute>
@@ -204,6 +235,7 @@ const VisiteVirtualGrid = () => {
 
 export default VisiteVirtualGrid;
 
+// Configurazione dei filtri usati nel componente
 const filtersConfig: FilterConfig[] = [
   {
     type: "text",

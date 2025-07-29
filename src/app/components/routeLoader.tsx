@@ -1,10 +1,10 @@
 /**
  * RouteLoader.tsx
  * 
- * Questo componente funge da wrapper per la gestione dello stato di caricamento durante i cambi di route
- * in un'app Next.js. Utilizza un context custom per tracciare se la navigazione è in corso (loading)
- * e mostra un componente di caricamento finché il caricamento è attivo. Quando la route cambia,
- * disattiva automaticamente il loader.
+ * Wrapper componente che gestisce lo stato di caricamento durante i cambi di route in Next.js.
+ * Utilizza un context personalizzato (useRouteLoading) per tracciare se una navigazione è in corso.
+ * Mostra un componente di caricamento fintanto che lo stato "loading" è true.
+ * Quando la route cambia, disattiva automaticamente il loader.
  */
 
 "use client";
@@ -15,23 +15,29 @@ import { useRouteLoading } from "@/app/context/routeContext";
 import { LoadingComponent } from "./loading/loading";
 
 export default function RouteLoader({ children }: { children: React.ReactNode }) {
-  // Estrae lo stato di caricamento e la funzione per aggiornarlo dal context personalizzato
+  // Estrae dallo useRouteLoading il valore booleano "loading" e la funzione per aggiornarlo
   const { loading, setLoading } = useRouteLoading();
 
-  
+  // Ottiene il pathname corrente dalla navigazione Next.js
   const pathname = usePathname();
 
-  // Effetto che si attiva al cambiamento del pathname,
-  // utilizzato per disattivare il loader una volta completata la navigazione
+  /**
+   * Effetto che si attiva al cambio del pathname.
+   * Serve a disattivare lo stato di caricamento al completamento della navigazione.
+   * 
+   * Dipendenze:
+   * - pathname: quando cambia indica che la route è cambiata
+   * - setLoading: funzione per aggiornare lo stato loading nel context
+   */
   useEffect(() => {
     setLoading(false);
   }, [pathname, setLoading]);
 
-
+ 
   if (loading) {
     return <LoadingComponent />;
   }
 
-  // Altrimenti renderizza normalmente i contenuti figli passati
+ 
   return <>{children}</>;
 }

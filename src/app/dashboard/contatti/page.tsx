@@ -1,12 +1,12 @@
 /**
  * ContattiVirtualGrid.tsx
  *
- * Questo componente mostra una lista di contatti in una griglia virtualizzata utilizzando react-window
- * per ottimizzare il rendering di molte card contemporaneamente. Permette di filtrare i contatti
- * tramite un componente di filtri e carica i dati tramite API protette da autenticazione.
- * L'interfaccia si adatta dinamicamente alla dimensione della finestra e supporta una visualizzazione
- * responsive per dispositivi mobili. È protetto da ProtectedRoute per garantire che solo utenti autenticati
- * possano accedervi.
+ * Questo componente mostra una lista di contatti in una griglia virtualizzata 
+ * utilizzando react-window per ottimizzare il rendering di molte card contemporaneamente.
+ * Permette di filtrare i contatti tramite un componente di filtri e carica i dati tramite
+ * API protette da autenticazione. L'interfaccia si adatta dinamicamente alla dimensione
+ * della finestra e supporta una visualizzazione responsive per dispositivi mobili.
+ * È protetto da ProtectedRoute per garantire che solo utenti autenticati possano accedervi.
  */
 
 "use client";
@@ -26,35 +26,33 @@ import { useRouter } from "next/navigation";
 
 const ContattiVirtualGrid = () => {
   /**
-   * Gestisce lo stato della dimensione della finestra per adattare
-   * dinamicamente la griglia di visualizzazione delle card.
+   * Stato per dimensioni della finestra, usato per calcolare layout responsivo
    */
   const [windowHeight, setWindowHeight] = useState(0);
   const [windowWidth, setWindowWidth] = useState(0);
 
   /**
-   * Stato per memorizzare i dati dei contatti caricati dal backend,
-   * stato di caricamento e stato di errore.
+   * Stato per lista contatti, caricamento e eventuali errori
    */
   const [contattiCRM, setContattiCRM] = useState<Contatto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   /**
-   * Hook per ottenere la funzione fetch autenticata e i parametri di ricerca
-   * passati tramite URL, ad esempio un filtro iniziale su ragione sociale.
+   * Hook di autenticazione per fetch protetto e gestione parametri query URL
    */
   const { fetchWithAuth } = useAuth();
   const searchParams = useSearchParams();
   const initialRagSoc = searchParams.get("ragSoc") || "";
 
-
-
-
   const router = useRouter();
   const pathname = usePathname();
 
-
+  /**
+   * useEffect per fetch iniziale e on reload URL param
+   * - Se parametro "reload" è true, ricarica dati e rimuove "reload" dall'URL
+   * - Se parametro "ragSoc" è presente, filtra i contatti per nome (ragione sociale)
+   */
   useEffect(() => {
     if (!fetchWithAuth) return;
 
@@ -68,7 +66,7 @@ const ContattiVirtualGrid = () => {
 
         let data;
         if (ragSoc.trim() !== "") {
-          newParams.delete("ragSoc");
+          newParams.delete("ragSoc"); // Rimuove filtro dalla query dopo fetch
           data = await getContatti(fetchWithAuth, { nome: ragSoc });
         } else {
           data = await getContatti(fetchWithAuth);
@@ -83,14 +81,11 @@ const ContattiVirtualGrid = () => {
         setLoading(false);
       }
 
-      // Ricostruisce URL senza reload 
+      // Se reload=true, rimuove parametro dall'URL senza ricaricare pagina
       if (reload === "true") {
-        
         newParams.delete("reload");
-
         const newQueryString = newParams.toString();
         const newUrl = pathname + (newQueryString ? `?${newQueryString}` : "");
-
         router.replace(newUrl, { scroll: false });
       }
     };
@@ -99,22 +94,21 @@ const ContattiVirtualGrid = () => {
   }, [fetchWithAuth, pathname, searchParams, router]);
 
   /**
-   * Effetto per gestire il ridimensionamento della finestra e aggiornare
-   * gli stati di larghezza e altezza in modo da adattare dinamicamente la griglia.
+   * useEffect per aggiornare larghezza e altezza finestra in stato al resize
+   * Usato per adattare dimensioni e numero card nella griglia
    */
   useEffect(() => {
     const handleResize = () => {
       setWindowHeight(window.innerHeight);
       setWindowWidth(window.innerWidth);
     };
-    handleResize();
+    handleResize(); // Inizializza subito dimensioni
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   /**
-   * Costanti per configurare la griglia virtuale in base alla dimensione della finestra,
-   * decidendo numero di colonne, dimensioni delle card e righe totali.
+   * Calcolo numero colonne, righe e dimensioni card basato su larghezza e altezza finestra
    */
   const CARD_COUNT = windowHeight < 600 ? 2 : windowHeight < 800 ? 3 : 4;
   const isMobile = windowWidth < 768;
@@ -126,9 +120,10 @@ const ContattiVirtualGrid = () => {
   const rowCount = Math.ceil(contattiCRM.length / columnCount);
 
   /**
-   * Funzione chiamata quando si esce dal campo filtro per aggiornare
-   * la lista filtrata di contatti. Richiama l'API con i filtri correnti
-   * e aggiorna la lista visualizzata.
+   * handleFiltersBlur
+   * 
+   * Aggiorna la lista dei contatti filtrati quando i filtri perdono il focus.
+   * Richiama l'API con i filtri e aggiorna lo stato dei dati visualizzati.
    */
   async function handleFiltersBlur(values: Record<string, string>) {
     setLoading(true);
@@ -142,7 +137,6 @@ const ContattiVirtualGrid = () => {
       if (areAllFiltersEmpty) {
         data = await getContatti(fetchWithAuth);
       } else {
-        
         data = await getContatti(fetchWithAuth, values);
       }
 
@@ -157,9 +151,9 @@ const ContattiVirtualGrid = () => {
   }
 
   /**
-   * Funzione componente per il rendering di ogni cella della griglia virtualizzata.
-   * Calcola l'indice corretto in base a riga e colonna, esclude celle fuori range,
-   * e mostra i dati del contatto in una Card con icone e link attivi.
+   * Componente Cell
+   * Renderizza ogni cella della griglia virtualizzata,
+   * mostrando i dati di un contatto in una Card con icone e link.
    */
   const Cell = ({ columnIndex, rowIndex, style }: GridChildComponentProps) => {
     const index = rowIndex * columnCount + columnIndex;
@@ -194,8 +188,7 @@ const ContattiVirtualGrid = () => {
   };
 
   /**
-   * Funzione di utilità per mappare un oggetto raw proveniente dall'API
-   * in un oggetto Contatto conforme all'interfaccia usata nel componente.
+   * Funzione helper per mappare dati raw dall'API nel formato Contatto utilizzato dal componente
    */
   function mapRawToContatto(raw: any): Contatto {
     return {
@@ -232,16 +225,16 @@ const ContattiVirtualGrid = () => {
 
       {!loading && !error && contattiCRM.length > 0 && (
         <div className="gr">
-        <Grid
-          columnCount={columnCount}
-          rowCount={rowCount}
-          columnWidth={CARD_WIDTH}
-          rowHeight={CARD_HEIGHT}
-          height={windowHeight * 0.8}
-          width={isMobile ? windowWidth * 0.92 : windowWidth}
-        >
-          {Cell}
-        </Grid>
+          <Grid
+            columnCount={columnCount}
+            rowCount={rowCount}
+            columnWidth={CARD_WIDTH}
+            rowHeight={CARD_HEIGHT}
+            height={windowHeight * 0.8}
+            width={isMobile ? windowWidth * 0.92 : windowWidth}
+          >
+            {Cell}
+          </Grid>
         </div>
       )}
     </ProtectedRoute>

@@ -1,12 +1,11 @@
 /**
- * ClientiVirtualGrid
- *
- * Componente principale che gestisce la visualizzazione di una griglia virtuale
- * di clienti CRM. Utilizza filtri per cercare e filtrare i clienti,
- * carica i dati da API protette tramite autenticazione e mostra i clienti
- * in una griglia responsiva e virtualizzata per ottimizzare le performance.
- * Gestisce anche il caricamento, eventuali errori e la gestione dinamica della
- * dimensione della finestra per adattare il layout.
+ * ClientiVirtualGrid.tsx
+ * 
+ * Componente principale per visualizzare una griglia virtuale di clienti CRM.
+ * Permette di filtrare i clienti tramite input, carica dati da API protette 
+ * con autenticazione, gestisce stati di caricamento ed errori.
+ * Utilizza una griglia virtualizzata (react-window) per ottimizzare le performance,
+ * e si adatta dinamicamente alle dimensioni della finestra per il layout responsivo.
  */
 
 "use client";
@@ -24,21 +23,26 @@ import { useAuth } from "@/app/context/authContext";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 const ClientiVirtualGrid = () => {
-
-
-  // Stato dimensioni della finestra (altezza e larghezza)
+  // Stati per memorizzare dimensioni della finestra
   const [windowHeight, setWindowHeight] = useState(0);
   const [windowWidth, setWindowWidth] = useState(0);
 
-  // Stato lista clienti caricata dall'API
+  // Lista clienti caricata dall’API
   const [clientiCRM, setClientiCRM] = useState<Cliente[]>([]);
 
-  // Stato di caricamento dati e gestione errori
+  // Stati per gestione caricamento e errori
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Hook personalizzato per autenticazione e fetch protetto
+  // Hook personalizzato per fetch con autenticazione
   const { fetchWithAuth } = useAuth();
+
+  /**
+   * fetchClienti
+   * 
+   * Funzione asincrona per recuperare clienti da API usando fetch autenticato,
+   * mappa i dati raw nel formato Cliente, gestisce errori e stato caricamento.
+   */
   async function fetchClienti() {
     try {
       const data = await getClienti(fetchWithAuth);
@@ -51,10 +55,17 @@ const ClientiVirtualGrid = () => {
       setLoading(false);
     }
   }
+
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  /**
+   * useEffect per eseguire fetch clienti al caricamento del componente,
+   * o quando cambia fetchWithAuth, pathname o query string.
+   * Se è presente il parametro reload=true nei parametri URL,
+   * ricarica i dati e rimuove il parametro reload dall'URL senza ricaricare la pagina.
+   */
   useEffect(() => {
     if (!fetchWithAuth) return;
 
@@ -64,14 +75,12 @@ const ClientiVirtualGrid = () => {
       if (reload === "true") {
         await fetchClienti();
 
-        // Ricostruisce query senza reload
+        // Rimuove parametro reload dall’URL mantenendo gli altri
         const newParams = new URLSearchParams(searchParams.toString());
         newParams.delete("reload");
-
         const newQueryString = newParams.toString();
         const newUrl = pathname + (newQueryString ? `?${newQueryString}` : "");
 
-        // Cambia URL senza ricaricare pagina e senza scroll
         router.replace(newUrl, { scroll: false });
       } else {
         await fetchClienti();
@@ -82,20 +91,20 @@ const ClientiVirtualGrid = () => {
   }, [fetchWithAuth, pathname, searchParams, router]);
 
   /**
-   * useEffect per gestire il ridimensionamento della finestra e aggiornare
-   * dinamicamente le dimensioni per il layout responsivo.
+   * useEffect per aggiornare le dimensioni della finestra quando viene ridimensionata,
+   * usato per calcolare layout responsivo della griglia.
    */
   useEffect(() => {
     const handleResize = () => {
       setWindowHeight(window.innerHeight);
       setWindowWidth(window.innerWidth);
     };
-    handleResize();
+    handleResize(); // inizializza subito
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Configurazioni per dimensioni e numero di card nella griglia
+  // Calcolo numero di righe e colonne e dimensioni card in base alla finestra
   const CARD_COUNT = windowHeight < 600 ? 2 : windowHeight < 800 ? 3 : 4;
   const isMobile = windowWidth < 768;
   const columnCount = isMobile ? 1 : 3;
@@ -107,15 +116,11 @@ const ClientiVirtualGrid = () => {
 
   /**
    * handleFiltersBlur
-   *
-   * Funzione asincrona chiamata quando i filtri perdono il focus (blur).
-   * Confronta i nuovi valori con quelli precedenti e, se diversi, aggiorna i filtri,
-   * ricarica i dati filtrati da API e gestisce stati di caricamento e errori.
+   * 
+   * Funzione chiamata quando i filtri perdono il focus (blur).
+   * Ricarica i dati clienti filtrati tramite API, gestisce stati di caricamento ed errori.
    */
   async function handleFiltersBlur(values: Record<string, string>) {
-   
-
-  
     setLoading(true);
 
     try {
@@ -123,13 +128,9 @@ const ClientiVirtualGrid = () => {
         (v) => v.trim() === ""
       );
 
-      let data;
-      if (areAllFiltersEmpty) {
-        data = await getClienti(fetchWithAuth);
-      } else {
-        
-        data = await getClienti(fetchWithAuth, values);
-      }
+      const data = areAllFiltersEmpty
+        ? await getClienti(fetchWithAuth)
+        : await getClienti(fetchWithAuth, values);
 
       setClientiCRM(data.map(mapRawToCliente));
       setError(null);
@@ -143,10 +144,10 @@ const ClientiVirtualGrid = () => {
 
   /**
    * Cell
-   *
-   * Componente usato dalla griglia virtualizzata per rappresentare ogni cella,
-   * che contiene una card con i dati del cliente. Calcola l'indice e se esiste
-   * restituisce la card con informazioni di contatto e link mappe.
+   * 
+   * Componente per ogni cella della griglia virtualizzata.
+   * Calcola indice cliente da riga e colonna, se valido mostra la card con dati cliente,
+   * inclusi link a mappe, mail e telefono.
    */
   const Cell = ({ columnIndex, rowIndex, style }: GridChildComponentProps) => {
     const index = rowIndex * columnCount + columnIndex;
@@ -188,9 +189,8 @@ const ClientiVirtualGrid = () => {
 
   /**
    * getMapLink
-   *
-   * Genera un URL per la ricerca su Google Maps basato sull'indirizzo fornito,
-   * codificando correttamente i dati per la query.
+   * 
+   * Crea URL Google Maps per la ricerca dell'indirizzo cliente, codificando i parametri.
    */
   function getMapLink({
     via,
@@ -212,9 +212,9 @@ const ClientiVirtualGrid = () => {
 
   /**
    * htmlToPlainText
-   *
-   * Converte una stringa HTML in testo semplice, sostituendo i tag di paragrafo e
-   * line break con nuovi linee e rimuovendo ogni altro markup HTML.
+   * 
+   * Converte una stringa HTML in testo semplice, sostituendo <br>, <p> con
+   * newline e rimuovendo altri tag HTML.
    */
   function htmlToPlainText(html: string): string {
     if (!html) return "";
@@ -230,9 +230,9 @@ const ClientiVirtualGrid = () => {
 
   /**
    * mapRawToCliente
-   *
-   * Mappa un oggetto raw ricevuto dall'API in un oggetto Cliente tipizzato,
-   * applicando eventuali trasformazioni necessarie, come la conversione da HTML a testo semplice.
+   * 
+   * Converte un oggetto raw ricevuto dall’API in un oggetto Cliente tipizzato,
+   * eseguendo conversioni necessarie come da HTML a testo.
    */
   function mapRawToCliente(raw: any): Cliente {
     return {
@@ -246,7 +246,7 @@ const ClientiVirtualGrid = () => {
       idPaese: raw.IdPaese,
       tel: raw.Tel,
       email: raw.EMail,
-      noteCliente: htmlToPlainText(raw.NoteCrmElab)|| raw.NoteCliente,
+      noteCliente: htmlToPlainText(raw.NoteCrmElab) || raw.NoteCliente,
       Sem1: raw.Sem1 || 0,
       Sem2: raw.Sem2 || 0,
       Sem3: raw.Sem3 || 0,

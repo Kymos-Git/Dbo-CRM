@@ -1,3 +1,10 @@
+
+/**
+ * Componente FormAdd permette di creare un form dinamico per
+ * l'inserimento di "cliente", "contatto" o "visita".
+ * Gestisce validazione dati, caricamento clienti, invio e reset form.
+ */
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -24,6 +31,7 @@ import Form from "./form";
 import { Cliente } from "@/app/interfaces/interfaces";
 import { useRouter } from "next/navigation";
 
+
 type FormProps = {
   type: "cliente" | "contatto" | "visita";
   onClose: () => void;
@@ -34,6 +42,10 @@ type Field = {
   type: "text" | "number" | "checkbox" | "date" | "select";
 };
 
+/**
+ * Genera un array di campi a partire dallo schema Zod,
+ * mappando i tipi Zod in tipi HTML input adeguati.
+ */
 function generateFieldsFromSchema<T extends ZodRawShape>(
   schema: ZodObject<T>
 ): Field[] {
@@ -59,6 +71,9 @@ function generateFieldsFromSchema<T extends ZodRawShape>(
   });
 }
 
+/**
+ * Seleziona lo schema e i relativi campi generati in base al tipo di form.
+ */
 function getSchemaAndFields(type: "cliente" | "contatto" | "visita") {
   switch (type) {
     case "cliente":
@@ -82,6 +97,7 @@ function getSchemaAndFields(type: "cliente" | "contatto" | "visita") {
 }
 
 export default function FormAdd({ type, onClose }: FormProps) {
+  // Stato per schema, campi form e dati inseriti
   const [schema, setSchema] = useState<ZodObject<ZodRawShape> | null>(null);
   const [fields, setFields] = useState<Field[]>([]);
   const [formData, setFormData] = useState<
@@ -89,11 +105,16 @@ export default function FormAdd({ type, onClose }: FormProps) {
   >({});
   const router = useRouter();
 
+  // Stato per lista clienti e ragioni sociali (per select)
   const [clienti, setClientiList] = useState<Cliente[]>([]);
   const [ragioniSoc, setRagioniList] = useState<string[]>([]);
 
   const { fetchWithAuth, username } = useAuth();
 
+  /**
+   * Carica lista clienti dal backend e ne estrae le ragioni sociali
+   * per popolare il campo select.
+   */
   const getRagSoc = async () => {
     try {
       const clienti = await getClienti(fetchWithAuth);
@@ -109,26 +130,25 @@ export default function FormAdd({ type, onClose }: FormProps) {
     }
   };
 
+  // Effetto che aggiorna schema, campi e dati iniziali ogni volta che cambia il tipo di form
   useEffect(() => {
     const { schema: selectedSchema, fields: generatedFields } =
       getSchemaAndFields(type);
 
+    // Per il tipo "cliente" convertiamo campi select in text per uniformità
     let modifiedFields = generatedFields;
-
-    // Se il tipo è cliente, cambia i campi con tipo select in text
     if (type === "cliente") {
-      modifiedFields = generatedFields.map((field) => {
-        if (field.type === "select") {
-          return { ...field, type: "text" };
-        }
-        return field;
-      });
+      modifiedFields = generatedFields.map((field) =>
+        field.type === "select" ? { ...field, type: "text" } : field
+      );
     }
 
+    // Per "visita" e "contatto" carichiamo le ragioni sociali da backend
     if (type === "visita" || type === "contatto") {
       getRagSoc();
     }
 
+    // Inizializziamo dati del form con valori di default (false per checkbox, oggi per date, stringa vuota altrove)
     const initialData: Record<string, string | number | boolean> = {};
     modifiedFields.forEach(({ name, type }) => {
       if (type === "checkbox") {
@@ -145,15 +165,23 @@ export default function FormAdd({ type, onClose }: FormProps) {
     setFormData(initialData);
   }, [type]);
 
+  /**
+   * Se la lista ragioni sociali è caricata,
+   * imposta di default la prima come valore di RagSoc.
+   */
   useEffect(() => {
-  if ((type === "visita" || type === "contatto") && ragioniSoc.length > 0) {
-    setFormData((prev) => ({
-      ...prev,
-      RagSoc: prev.RagSoc || ragioniSoc[0],
-    }));
-  }
-}, [ragioniSoc, type]);
+    if ((type === "visita" || type === "contatto") && ragioniSoc.length > 0) {
+      setFormData((prev) => ({
+        ...prev,
+        RagSoc: prev.RagSoc || ragioniSoc[0],
+      }));
+    }
+  }, [ragioniSoc, type]);
 
+  /**
+   * Gestore generico delle modifiche nei campi del form.
+   * Converte correttamente checkbox e number.
+   */
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -174,10 +202,17 @@ export default function FormAdd({ type, onClose }: FormProps) {
     }));
   };
 
+  /**
+   * Specifico handler per il campo note.
+   */
   const handleNoteChange = (value: string) => {
     setFormData((prev) => ({ ...prev, note: value }));
   };
 
+  /**
+   * Trasforma le chiavi degli oggetti rimuovendo underscore
+   * per adeguare i nomi ai campi del backend.
+   */
   const transformKeys = (obj: Record<string, any>) => {
     const newObj: Record<string, any> = {};
     for (const key in obj) {
@@ -187,14 +222,19 @@ export default function FormAdd({ type, onClose }: FormProps) {
     return newObj;
   };
 
+  /**
+   * Funzione per inviare i dati al backend.
+   * Valida dati con schema Zod, gestisce casi speciali per visita,
+   * mostra notifiche e resetta il form.
+   */
   const sendData = async () => {
-    
     if (!schema) return;
 
     try {
       const parsed = schema.parse(formData);
       const transformed = transformKeys(parsed);
 
+      // Per visite, sostituisce RagSoc con IdCliente
       if (type === "visita" && typeof transformed.RagSoc === "string") {
         const clienteSelezionato = clienti.find(
           (c) => c.RagSocCompleta === transformed.RagSoc
@@ -208,6 +248,7 @@ export default function FormAdd({ type, onClose }: FormProps) {
         }
       }
 
+      // Invio dati secondo tipo
       switch (type) {
         case "cliente":
           await sendCliente(fetchWithAuth, transformed);
@@ -224,6 +265,8 @@ export default function FormAdd({ type, onClose }: FormProps) {
       }
 
       toast.success("Dati inviati con successo");
+
+      // Forza reload pagina aggiungendo query param e chiude form
       const url = new URL(window.location.href);
       url.searchParams.set("reload", "true");
       router.replace(url.pathname + url.search);
@@ -237,6 +280,9 @@ export default function FormAdd({ type, onClose }: FormProps) {
     }
   };
 
+  /**
+   * Reset dei campi del form a valori iniziali (false per checkbox, vuoto altrove).
+   */
   const resetFields = () => {
     const resetData: Record<string, string | number | boolean> = {};
     fields.forEach(({ name, type }) => {

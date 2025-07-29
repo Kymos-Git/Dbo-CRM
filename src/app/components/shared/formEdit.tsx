@@ -1,3 +1,9 @@
+
+/**
+ * Componente per modificare un'entità (cliente, contatto, visita).
+ * Visualizza un form con i campi ricevuti, supporta selezione per ragione sociale,
+ * valida i dati con gli schemi Zod e invia l'aggiornamento via API.
+ */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -34,12 +40,15 @@ interface Props {
   id: string | null;
 }
 
+// Funzione di utilità per normalizzare le stringhe: rimuove spazi, underscore e minuscola
 const normalize = (str: string) =>
   str.trim().toLowerCase().replace(/[_\s]/g, "");
+
 
 export default function FormEdit({ title, fields, onClose, type, id }: Props) {
   const { fetchWithAuth } = useAuth();
 
+  // Seleziona lo schema di validazione in base al tipo
   const schema = (() => {
     switch (type) {
       case "cliente":
@@ -53,28 +62,40 @@ export default function FormEdit({ title, fields, onClose, type, id }: Props) {
     }
   })();
 
+  /**
+   * Crea una mappa per convertire i titoli (normalizzati) nei nomi chiave degli schemi,
+   * utile per abbinare i campi passati alle proprietà corrette dello schema.
+   */
   const schemaKeyMap = Object.keys(schema.shape).reduce((acc, key) => {
     acc[normalize(key)] = key;
     return acc;
   }, {} as Record<string, string>);
 
+  // Funzione che recupera la chiave corretta dello schema dato un titolo campo
   const getSchemaKey = (title: string): string =>
     schemaKeyMap[normalize(title)] || title;
 
+  // Stato iniziale del form, basato sui campi passati ma con chiavi allineate allo schema
   const initialState: Record<string, string | number> = Object.fromEntries(
     fields.map((f) => [getSchemaKey(f.title), f.value ?? ""])
   );
 
+  // Stato per i dati del form, lista clienti e ragioni sociali (per select)
   const [formState, setFormState] = useState(initialState);
   const [clienti, setClientiList] = useState<Cliente[]>([]);
   const [ragioniSoc, setRagioniList] = useState<string[]>([]);
 
+  // Carica le ragioni sociali se tipo è visita o contatto
   useEffect(() => {
     if (type === "visita" || type === "contatto") {
       getRagSoc();
     }
   }, [type]);
 
+  /**
+   * Recupera i clienti tramite API, estrae le ragioni sociali e aggiorna gli stati.
+   * Gestisce errori mostrando un toast.
+   */
   const getRagSoc = async () => {
     try {
       const clienti = await getClienti(fetchWithAuth);
@@ -85,15 +106,20 @@ export default function FormEdit({ title, fields, onClose, type, id }: Props) {
       console.error(err);
       toast.error("Errore durante il caricamento dei clienti");
     }
-    
   };
 
+  /**
+   * Gestisce il cambiamento di un campo del form aggiornando lo stato.
+   * Converte il titolo campo in chiave schema per mantenere consistenza.
+   */
   const handleChange = (title: string, value: string | number) => {
     const schemaKey = getSchemaKey(title);
     setFormState((prev) => ({ ...prev, [schemaKey]: value }));
-    
   };
 
+  /**
+   * Rimuove underscore dalle chiavi di un oggetto per conformarsi ai requisiti API.
+   */
   const transformKeys = (obj: Record<string, any>) => {
     const newObj: Record<string, any> = {};
     for (const key in obj) {
@@ -103,6 +129,11 @@ export default function FormEdit({ title, fields, onClose, type, id }: Props) {
     return newObj;
   };
 
+  /**
+   * Valida i dati, trasforma le chiavi e invia i dati aggiornati tramite API.
+   * Gestisce la conversione della ragione sociale in IdCliente per visita.
+   * Mostra messaggi di successo o errore.
+   */
   const sendData = async () => {
     try {
       const parsed = schema.parse(formState);
@@ -151,18 +182,21 @@ export default function FormEdit({ title, fields, onClose, type, id }: Props) {
     }
   };
 
+  /**
+   * Resetta i campi del form allo stato iniziale e mostra un toast di info.
+   */
   const resetFields = () => {
     setFormState(initialState);
     toast.info("Campi ripristinati");
   };
 
+  // Separa i campi "note" dagli altri per visualizzazione differenziata
   const otherFields = fields.filter(
     (field) => field.title.toLowerCase() !== "note"
   );
   const noteField = fields.find(
     (field) => field.title.toLowerCase() === "note"
   );
-
   return (
     <Form
       visible={true}
@@ -172,6 +206,7 @@ export default function FormEdit({ title, fields, onClose, type, id }: Props) {
       buttons={["Modifica", "Annulla"]}
       onReset={resetFields}
       onSend={sendData}
+      formId={title}
     >
       <form className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-x-2 auto-rows-min">
         {otherFields.map((field) => {
