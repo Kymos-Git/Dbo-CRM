@@ -1,0 +1,41 @@
+import { z } from "zod";
+
+export const schemaCliente = z.object({
+  RagSoc: z.string().min(1, "Ragione Sociale obbligatoria"),
+  Indirizzo: z.string().nullable(),
+  Citta: z.string().nullable(),
+  Cap: z.string().nullable(),
+  Provincia: z.string().nullable(),
+  Zona: z.string().nullable(),
+  Stato: z.string().nullable(),
+  Tel: z.string().nullable(),
+  Email: z.string().nullable(),
+  Note: z.string().nullable(),
+});
+
+export type ClienteKeys = keyof typeof schemaCliente.shape;
+
+
+
+export const schemaContatto = z.object({
+  Nome: z.string().min(1, "Nome obbligatorio"),
+  Cognome: z.string().min(1, "Cognome obbligatorio"),
+  RagSoc: z.string(),
+  Cell: z.string().nullable(),
+  Email: z.string().nullable(),
+  Telefono: z.string().nullable(),
+  Paese: z.string().nullable(),
+
+});
+export type ContattoKeys = keyof typeof schemaContatto.shape;
+
+
+
+export const schemaVisita = z.object({
+  Desc_Attivita: z.string().nullable(),
+  Data_Attivita: z.string().min(1, "Data obbligatoria"),
+  RagSoc: z.string().min(1, "Cliente obbligatorio"),
+  Note: z.string().nullable(),
+});
+
+export type VisitaKeys = keyof typeof schemaVisita.shape;

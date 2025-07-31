@@ -1,22 +1,3 @@
-.cd-page {
-    background-color: var(--bg);
-    color: var(--text);
-}
-.cd-card {
-    background-color: var(--bg);
-    border: 2px solid var(--bg-alt);
-}
-.cd-title {
-    color: var(--primary);
-}
-.cd-fields {
-    color: var(--text);
-}
-
-.cd-field-link:hover {
-    color: var(--primary);
-    text-decoration: underline;
-}
 
 
 .cd-cube{

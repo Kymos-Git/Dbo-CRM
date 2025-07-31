@@ -1,6 +1,6 @@
 export interface Cliente {
-  idCliente: number;
-  ragSocCompleta: string;
+  IdCliente: number;
+  RagSocCompleta: string;
   indirizzo: string;
   citta: string;
   cap: string;
@@ -35,10 +35,8 @@ export interface Contatto {
   ragioneSociale: string;
   cellulare: string;
   email: string;
-  disabilita: boolean;
   tipoContatto: string;
-  telefonoElaborato: string;
-  cittaClienteFornitore: string;
+  tel: string;
   paeseClienteFornitore: string;
   Sem1: number;
   Sem2: number;
