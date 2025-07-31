@@ -12,7 +12,6 @@
 import { ReactNode, Suspense, useEffect } from "react";
 import Sidebar from "../components/sidebar/sidebar";
 import { RouteLoadingProvider } from "../context/routeContext";
-import "./dashboard.css"
 import { toast } from "react-toastify";
 import { getItem } from "../lib/indexedDB";
 import RouteLoader from "../components/routeLoader";
@@ -61,7 +60,7 @@ export default function DashBoardLayout({ children }: { children: ReactNode }) {
         <Sidebar />
         <RouteLoader>
           <Suspense>
-          <main className="overflow-hidden p-4 h-full w-full">
+          <main className="overflow-hidden p-4 h-full w-full bg-[var(--bg)]">
             {children}
           </main>
           </Suspense>

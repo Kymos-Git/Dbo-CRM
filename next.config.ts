@@ -4,10 +4,8 @@ const nextConfig: NextConfig = {
   reactStrictMode: false,
 
    
-  // eslint: {
-  //   ignoreDuringBuilds: true,
-  // },
-  // output: 'export',
+  
+  output: 'export',
 
   async rewrites() {
     return [
