@@ -88,9 +88,9 @@
   font-weight: 500;
 }
 
-.link:not(.icon):hover,
+.link:not(.active):hover,
 .link:focus{
-  background-color: #e8f0fe;
+  background-color: var(--bg-alt);
   color: var(--primary);
   transform: scale(1.05);
   outline: none;

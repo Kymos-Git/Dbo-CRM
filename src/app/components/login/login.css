@@ -33,8 +33,8 @@
 }
 
 .icon {
-  height: 30%;
-  width: 30%;
+  height:50%!important;
+  width: 30%!important;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -5,7 +5,6 @@ const nextConfig: NextConfig = {
 
    
   
-  output: 'export',
 
   async rewrites() {
     return [
