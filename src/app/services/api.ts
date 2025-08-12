@@ -1,5 +1,13 @@
 "use client";
 
+/*
+
+    IN CASO DI RIMOZIONE DEL REWRITE IN next.config.json USARE LA FUNZIONE getBaseApiUrl() COME NEI COMMENTI
+ 
+*/
+
+
+
 import * as interfaces from "@/app/interfaces/interfaces";
 
 /**
@@ -42,7 +50,7 @@ export async function getClienti(
   fetchFn: (input: string, init?: RequestInit) => Promise<Response>,data?:any
 ): Promise<interfaces.Cliente[]> {
   // const baseUrl = await getBaseApiUrl();
-  // const res = await fetchFn(`${baseUrl}/GetCrmClienti`
+  // const res = await fetchFn(`${baseUrl}/getCrmClienti/0`
   const res = await fetchFn("/api/getCrmClienti/0",!data? {
     headers: {
       "Content-Type": "application/json",
@@ -71,7 +79,7 @@ export async function getContatti(
   fetchFn: (input: string, init?: RequestInit) => Promise<Response>,data?:any
 ): Promise<interfaces.Contatto[]> {
   // const baseUrl = await getBaseApiUrl();
-  // const res = await fetchFn(`${baseUrl}/GetCrmContatti`
+  // const res = await fetchFn(`${baseUrl}/GetCrmContatti/0`
   const res = await fetchFn(`/api/GetCrmContatti/0`, !data?{
     headers: {
       "Content-Type": "application/json",
@@ -100,7 +108,7 @@ export async function getVisite(
   fetchFn: (input: string, init?: RequestInit) => Promise<Response>,data?:any
 ): Promise<interfaces.Visita[]> {
   // const baseUrl = await getBaseApiUrl();
-  // const res = await fetchFn(`${baseUrl}/GetCrmVisite`
+  // const res = await fetchFn(`${baseUrl}/GetCrmVisiteByUser`
   const res = await fetchFn(`/api/GetCrmVisiteByUser`, !data?{
     headers: {
       "Content-Type": "application/json",
