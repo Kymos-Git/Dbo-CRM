@@ -12,6 +12,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Copy } from "lucide-react";
+import { toast } from "react-toastify";
 
 interface ExpandableInputProps {
   label: string;
@@ -64,9 +65,9 @@ const ExpandableInput = ({
   const copyText = async () => {
     try {
       await navigator.clipboard.writeText(value as string);
-      alert("Copiato negli appunti!");
+      toast.info("Copiato negli appunti!");
     } catch (err) {
-      alert("Errore nella copia: " + err);
+      toast.error("Errore nella copia: " + err);
     }
   };
 
