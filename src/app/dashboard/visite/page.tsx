@@ -1,9 +1,9 @@
 /**
  * VisiteVirtualGrid.tsx
- * 
+ *
  * Questo componente mostra una lista di "visite" in una griglia virtualizzata usando `react-window`
  * per ottimizzare il rendering anche con grandi quantità di dati.
- * 
+ *
  * La griglia è responsive: si adatta dinamicamente alla dimensione della finestra.
  * I dati vengono caricati da un'API protetta tramite autenticazione.
  * Sono presenti dei filtri per la ricerca e visualizzazione condizionale del caricamento, errori, o risultati vuoti.
@@ -127,7 +127,7 @@ const VisiteVirtualGrid = () => {
       setVisiteCRM(data.map(mapRawToVisite));
       setError(null);
     } catch (err) {
-      setError("Errore nel caricamento dei contatti.");
+      setError("Errore nel caricamento delle visite.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -243,5 +243,5 @@ const filtersConfig: FilterConfig[] = [
     name: "nome",
     placeholder: "Cerca Ragione sociale...",
   },
-  { type: "date", label: "Data inizio", name: "startDate" },
+  { type: "date", label: "Data", name: "startDate" },
 ];
