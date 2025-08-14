@@ -135,7 +135,7 @@ const ClientiVirtualGrid = () => {
       setClientiCRM(data.map(mapRawToCliente));
       setError(null);
     } catch (err) {
-      setError("Errore nel caricamento dei contatti.");
+      setError("Errore nel caricamento dei clienti.");
       console.error(err);
     } finally {
       setLoading(false);

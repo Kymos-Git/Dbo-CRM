@@ -283,7 +283,7 @@ const id = () => {
 
   return (
     <div className="cd-page relative flex h-full w-full font-sans text-base justify-center items-center m-0 p-0 cursor-default visible bg-[var(--bg)] text-[var(--text)]">
-      <div className="cd-card w-[75%] max-h-[90vh] rounded-lg p-[5%] pt-[1%] my-0.5 shadow-md transition-shadow hover:shadow-lg flex flex-col justify-center overflow-auto md:w-[80%] md:h-[85%] cursor-default relative bg-[var(--bg)] border-[2px] border-[var(--bg-alt)]">
+      <div className="cd-card w-[75%] max-h-[90vh] rounded-lg p-[5%] pt-[1%] my-0.5 shadow-[0_4px_6px_var(--bg-alt)] transition-shadow hover:shadow-[0_2px_20px_var(--bg-alt)] flex flex-col justify-center overflow-auto md:w-[80%] md:h-[85%] cursor-default relative bg-[var(--bg)] border-[2px] border-[var(--bg-alt)]">
 
         <h3 className="cd-title text-xl mt-[3%] mb-2 font-semibold text-[var(--primary)]">{title}</h3>
         <div className="cd-fields flex flex-col gap-2 flex-grow text-[var(--text)]">

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 
-:root { 
+:root {
   --bg: #f0eded ;
   --bg-alt:#cbc9c9;
   --primary:#027bff;
@@ -102,13 +102,6 @@ html,.page {
     margin-right: 2vw;
   }
 }
-
-
-
-
-
-
-
 
 .css-b62m3t-container{
   min-height: 44px;

@@ -7,11 +7,10 @@
  */
 
 // import { useEffect, useRef, useState } from "react";
-// // import AIChatInput from "./chatinput";
-// import { sendToAi } from "@/app/services/api";
+//  import AIChatInput from "./chatinput";
+//// import { sendToAi } from "@/app/services/api";
 // import { useAuth } from "@/app/context/authContext";
-
-// Definizione del tipo Message per i messaggi di chat
+//// Definizione del tipo Message per i messaggi di chat
 // type Message = {
 //   id: number; // Identificativo univoco del messaggio
 //   text: string; // Testo del messaggio
@@ -64,7 +63,8 @@ export default function Homepage() {
     // setNextId(aiId + 1);
 
     // //  risposta AI 
-    // const aiMsg =await sendToAi(fetchWithAuth,msg);
+    //// const aiMsg =await sendToAi(fetchWithAuth,msg);npm 
+    // const aiMsg = "Risposta simulata AI";
     // setMessages((prev) => [
     //   ...prev,
     //   { id: aiId, text: aiMsg, sender: "ai" },

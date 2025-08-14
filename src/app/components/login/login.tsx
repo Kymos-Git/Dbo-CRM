@@ -28,7 +28,7 @@ export function Login() {
   const [loading, setLoading] = useState(false);
 
   // Stato per memorizzare dinamicamente la sorgente dell'immagine del logo in base al tema attuale
-  const [logoSrc, setLogoSrc] = useState("/kymos-nero.png");
+  const [logoSrc, setLogoSrc] = useState("/logo-nero.png");
 
   // Hook di Next.js per gestire la navigazione (redirect)
   const router = useRouter();
